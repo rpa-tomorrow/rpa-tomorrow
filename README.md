@@ -18,9 +18,6 @@ Python 3.8.5-1
 ```
 
 ## Build instructions
-// TODO
-```
-```
 
 ## Authors
 * Viktor From - vikfro-6@student.ltu.se - [viktorfrom](https://github.com/viktorfrom)
