@@ -5,11 +5,19 @@ Project designed and written in Python in conjunction with the D7017E Project in
 The purpose of the project is to implement a system where the user can write instrutions in clear text using machine learning and natural language processing, in order to instruct the computer what to do. 
 
 ## Requirements
-Python 3.8.5
+* Python 3.8.5
+* Anaconda
 
 ## Setup
+Create conda environment to handle dependencies.
+
+    conda env create -f substorm-nlp.yml
+    conda activate substorm-nlp
 
 ### Python
+Add user information to `lib/settings.py`.
+
+Example on how to use the automation module is in `demo.py`
 
 ### Linux
 Below are the absolute minimum packages you will need for Linux. Names might vary depending on your distribution, you might need to install it manually if you can't find it using your distribution's package manager.
