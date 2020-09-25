@@ -1,0 +1,7 @@
+Program where the user can write instrutions in clear text using machine learning 
+and natural language processing, in order to instruct the computer what to do.
+    
+Options:
+--send TEXT      Takes an input.
+--exit           Exit program.
+--help           Show this message.
