@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -140,6 +139,3 @@ cython_debug/
 
 # Vim
 .vim
-=======
-lib/__pycache__
->>>>>>> 176962d... Add simple CLI
