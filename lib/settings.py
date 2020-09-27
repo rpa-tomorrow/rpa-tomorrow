@@ -8,8 +8,19 @@ SETTINGS = {
                 "password": "password",
                 "ssl": True,
                 "host": "smtp.fastmail.com",
-                "port": 465
+                "port": 465,
             }
-        }
+        },
+        "John Doe": {
+            "email": {
+                "address": "johndoe@email.com",
+                "username": None,
+                "password": None,
+                "ssl": False,
+                "host": "localhost",
+                "port": 1025,
+            }
+        },
     }
 }
+
