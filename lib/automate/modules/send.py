@@ -26,7 +26,9 @@ class Send(Module):
         msg.set_content(content)
 
         ssl_type = f"SMTP{'_SSL' if settings['ssl'] else ''}"
-        smtp = getattr(smtplib, ssl_type)(host=settings["host"], port=settings["port"])
+        smtp = getattr(smtplib, ssl_type)(
+            host=settings["host"], port=settings["port"]
+        )
 
         # Dont try to authenticate if the smtp server used is local which is
         # assumed if the username or password is not specified
@@ -37,7 +39,7 @@ class Send(Module):
         smtp.quit()
 
         response = (
-            f"Sent mail:\n"
+            "Sent mail:\n"
             + f"From: {settings['address']}\n"
             + f"To: {msg['To']}\n"
             + f"Subject: {msg['Subject']}\n"

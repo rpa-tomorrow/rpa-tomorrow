@@ -33,8 +33,8 @@ class Automate:
     def run(self, module_name, to, when, body, sender):
         """
         Run automation on registered module.
-        :param module_name: Something close to a keyword of a automation module.
-                            This is handled via fuzzy search.
+        :param module_name: Something close to a keyword of a automation
+                            module. This is handled via fuzzy search.
         :type module_name: string
         :param to: Intended recipients. Should be fuzzy in the future.
         :type to: list[string]
@@ -42,11 +42,13 @@ class Automate:
         :type when: datetime.datetime
         :param body: A body text of the task, if relevant.
         :type body: string
-        :param sender: Who is sending this. Fuzzy match against SETTINGS[users].keys().
+        :param sender: Who is sending this. Fuzzy match against
+                       SETTINGS[users].keys().
         :type sender: string
         :return: Response from automation module.
         :rtype: string
         """
+
         def handle_response(success, response):
             if response:
                 print(response, end=": ", flush=True)
