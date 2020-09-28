@@ -1,34 +1,27 @@
 import spacy
 import re
-import sys
 
 from spacy.matcher import Matcher
 from lib.automate import Automate
 from lib import Error
+
 
 class NLP:
     def __init__(self):
         self.nlp = spacy.load("en_core_web_lg")
 
     def getBodyBetweenQuotations(self, doc):
-        matches=re.findall(r'\'(.+?)\'', doc)
+        matches = re.findall(r"\'(.+?)\'", doc)
         return ",".join(matches)
 
     def sendAutomate(self, verb, recipients, when, body, sender):
         automate = Automate()
         try:
-            response = automate.run(
-                verb,
-                recipients,
-                when,
-                body,
-                sender,
-            )
+            response = automate.run(verb, recipients, when, body, sender,)
             return response
         except Error as err:
             return err
 
-    
     def run(self, text):
         """
         Start NLP on the given text. Takes a few seconds to process if your 
@@ -43,10 +36,10 @@ class NLP:
         doc = self.nlp(text)
 
         # Match patterns VERBS, EMAIL
-        matcher = Matcher(self.nlp.vocab)    
-        mail_pattern = [{"POS":"VERB"}] 
+        matcher = Matcher(self.nlp.vocab)
+        mail_pattern = [{"POS": "VERB"}]
         to_pattern = [{"LIKE_EMAIL": True}]
-        
+
         matcher.add("MAIL_PATTERN", None, mail_pattern)
         mail_matches = matcher(doc)
         matcher.remove("MAIL_PATTERN")
@@ -62,9 +55,9 @@ class NLP:
             similarity = verb.similarity(send)
             if similarity > 0.8:
                 body = self.getBodyBetweenQuotations(text)
-                response = self.sendAutomate(verb.text, recipients, None, body, "John Doe") 
+                response = self.sendAutomate(
+                    verb.text, recipients, None, body, "John Doe"
+                )
                 return response
 
         print("I did not understand")
-
-
