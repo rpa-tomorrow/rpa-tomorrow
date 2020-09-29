@@ -7,7 +7,7 @@ from lib.settings import SETTINGS
 
 
 class Send(Module):
-    verbs = ["skicka", "maila", "mejla", "eposta", "e-posta"]
+    verbs = ["skicka", "maila", "mejla", "eposta", "e-posta", "send"]
 
     def __init__(self):
         super(Send, self).__init__()

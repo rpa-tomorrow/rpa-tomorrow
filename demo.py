@@ -2,16 +2,15 @@ import sys
 
 from lib import Error
 from lib.automate import Automate
+from lib.nlp import nlp
 
 automate = Automate()
+n = nlp.NLP()
+
+# Enable the SMTP server before running the following
 try:
-    response = automate.run(
-        "skikko",
-        ["aron@antarkt.is"],
-        None,
-        "test\n\ndet är ett test",
-        "Aron Widforss"
-    )
+    text = "send an email with the content 'hello world' to substorm@email.com"
+    response = n.run(text)
     print(response)
 except Error as err:
     print(err, file=sys.stdout)
