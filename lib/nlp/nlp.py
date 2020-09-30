@@ -16,11 +16,7 @@ class NLP:
 
     def sendAutomate(self, verb, recipients, when, body, sender):
         automate = Automate()
-        try:
-            response = automate.run(verb, recipients, when, body, sender,)
-            return response
-        except Error as err:
-            return err
+        return automate.run(verb, recipients, when, body, sender,)
 
     def run(self, text):
         """
@@ -60,4 +56,4 @@ class NLP:
                 )
                 return response
 
-        print("I did not understand")
+        return "I did not understand"
