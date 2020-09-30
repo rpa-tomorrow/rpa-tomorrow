@@ -18,6 +18,10 @@ Create conda environment to handle dependencies.
     conda env create -f substorm-nlp.yml
     conda activate substorm-nlp
 
+Download spaCy model.
+
+    python -m spacy download en_core_web_lg
+
 ### Dev dependencies
 
 If you are going to develop in this project some development dependencies will also be needed. These can be installed after the conda environment has been activated using
