@@ -7,7 +7,7 @@ from lib.settings import SETTINGS
 
 
 class Send(Module):
-    verbs = ["skicka", "maila", "mejla", "eposta", "e-posta", "send"]
+    verbs = ["send", "mail", "e-mail", "email"]
 
     def __init__(self):
         super(Send, self).__init__()
@@ -17,7 +17,7 @@ class Send(Module):
         settings = SETTINGS["users"][user]["email"]
         username = settings.get("username")
         password = settings.get("password")
-        content = body + f"\n\nVänligen,\n{user}"
+        content = body + f"\n\nRegards,\n{user}"
 
         msg = EmailMessage()
         msg["Subject"] = body.partition("\n")[0]
@@ -37,11 +37,11 @@ class Send(Module):
         smtp.quit()
 
         response = (
-            f"Skickade epost:\n"
-            + f"Från: {settings['address']}\n"
-            + f"Till: {msg['To']}\n"
-            + f"Ämne: {msg['Subject']}\n"
-            + f"Meddelande: {content}"
+            f"Sent mail:\n"
+            + f"From: {settings['address']}\n"
+            + f"To: {msg['To']}\n"
+            + f"Subject: {msg['Subject']}\n"
+            + f"Message: {content}"
         )
 
         return response, None
