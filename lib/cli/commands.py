@@ -10,6 +10,7 @@ sys.path.append(".")
 from lib import Error
 from lib.automate import Automate
 from lib.nlp import nlp
+import sys
 
 def commands(arr):
     """
@@ -22,7 +23,12 @@ def commands(arr):
     else:
         listToStr = ' '.join(map(str, arr)) 
         n = nlp.NLP()
-        n.run(listToStr)
+        try:
+            response = n.run(listToStr)
+            print(response + '\n')
+        except Exception:
+            print("Failed to execute action.\n", file=sys.stderr)
+
 
 def prompt():
     dirname = os.path.dirname(__file__)
