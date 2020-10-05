@@ -3,7 +3,6 @@ import re
 
 from spacy.matcher import Matcher
 from lib.automate import Automate
-from lib import Error
 
 
 class NLP:
@@ -20,7 +19,7 @@ class NLP:
 
     def run(self, text):
         """
-        Start NLP on the given text. Takes a few seconds to process if your 
+        Start NLP on the given text. Takes a few seconds to process if your
         computer is slow.
         :param text: The user NL input to process
         :type text: string
@@ -44,7 +43,9 @@ class NLP:
         to_matches = matcher(doc)
 
         verbs = [doc[start:end] for match_id, start, end in mail_matches]
-        recipients = [doc[start:end].text for match_id, start, end in to_matches]
+        recipients = [
+            doc[start:end].text for match_id, start, end in to_matches
+        ]
 
         # Looks for any synonym to "send"
         for verb in verbs:

@@ -5,12 +5,8 @@ The commands available in the CLI
 import sys
 import os
 
-sys.path.append(".")
+from lib.nlp import nlp  # noqa: E402
 
-from lib import Error
-from lib.automate import Automate
-from lib.nlp import nlp
-import sys
 
 def commands(arr):
     """
@@ -21,11 +17,11 @@ def commands(arr):
     elif arr[0] == "help" or arr[0] == "h":
         prompt()
     else:
-        listToStr = ' '.join(map(str, arr)) 
+        listToStr = " ".join(map(str, arr))
         n = nlp.NLP()
         try:
             response = n.run(listToStr)
-            print(response + '\n')
+            print(response + "\n")
         except Exception:
             print("Failed to execute action.\n", file=sys.stderr)
 
