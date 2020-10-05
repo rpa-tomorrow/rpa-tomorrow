@@ -5,6 +5,8 @@ The commands available in the CLI
 import sys
 import os
 
+sys.path.append(".")
+
 from lib.nlp import nlp  # noqa: E402
 
 
