@@ -1,3 +1,4 @@
 black==19.10b0
 flake8==3.8.3
 pytest==6.0.2
+caldav==0.7.1

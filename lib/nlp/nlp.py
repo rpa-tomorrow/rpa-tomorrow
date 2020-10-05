@@ -25,7 +25,7 @@ class NLP:
         :type text: string
         """
         # Currently only supports mail, only looks for synonyms of "send"
-        send = self.nlp("send")
+        send = self.nlp("set")
         send = send[0]
 
         doc = self.nlp(text)

@@ -9,7 +9,7 @@ n = nlp.NLP()
 
 # Enable the SMTP server before running the following
 try:
-    text = "send an email with the content 'hello world' to substorm@email.com"
+    text = "set meeting with Niklas at 20:00"
     response = n.run(text)
     print(response)
 except Error as err:
