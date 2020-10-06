@@ -3,6 +3,7 @@ import re
 
 from spacy.matcher import Matcher
 from lib.automate import Automate
+from datetime import datetime
 
 
 class NLP:
@@ -25,8 +26,7 @@ class NLP:
         :type text: string
         """
         # Currently only supports mail, only looks for synonyms of "send"
-        send = self.nlp("set")
-        send = send[0]
+        actions = [self.nlp("send")[0], self.nlp("set")[0]]
 
         doc = self.nlp(text)
 
@@ -47,14 +47,32 @@ class NLP:
             doc[start:end].text for match_id, start, end in to_matches
         ]
 
+        # Get all known names and time.
+        persons = []
+        date_time = datetime.now()
+        for ent in doc.ents:
+            print(ent.label_)
+            if ent.label_ == "PERSON":
+                persons.append(ent.text)
+            elif ent.label_ == "TIME":
+                time = datetime.strptime(ent.text, "%H:%M")
+                date_time = date_time.replace(hour=time.hour,
+                                              minute=time.minute,
+                                              second=0)
+            elif ent.label_ == "DATE":
+                date_time = datetime.strptime(ent.text, "%Y-%m-%d %H:%M")
+        if len(persons) < 1:
+            persons.append("John Doe")
+
         # Looks for any synonym to "send"
         for verb in verbs:
-            similarity = verb.similarity(send)
-            if similarity > 0.8:
-                body = self.getBodyBetweenQuotations(text)
-                response = self.sendAutomate(
-                    verb.text, recipients, None, body, "John Doe"
-                )
-                return response
+            for action in actions:
+                similarity = verb.similarity(action)
+                if similarity > 0.8:
+                    body = self.getBodyBetweenQuotations(text)
+                    response = self.sendAutomate(
+                        verb.text, recipients, date_time, body, persons[0]
+                    )
+                    return response
 
         return "I did not understand"

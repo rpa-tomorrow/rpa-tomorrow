@@ -1,9 +1,14 @@
+from datetime import datetime
+from datetime import timedelta
+
 from fuzzywuzzy import process as fuzzy
 
 from lib.automate.modules import Module
 from lib.settings import SETTINGS
 
 import caldav
+
+time_format = "%Y%m%dT%H%M%SZ"
 
 
 class Schedule(Module):
@@ -13,26 +18,36 @@ class Schedule(Module):
         super(Schedule, self).__init__()
 
     def run(self, to, when, body, sender):
-        url = "http://localhost:5232/"
+        user, _ = fuzzy.extractOne(sender, SETTINGS["users"].keys())
+        settings = SETTINGS["users"][user]["email"]
+        username = settings.get("username")
+        password = settings.get("password")
+        url = f'http://{settings["host"]}:{settings["port"]}/'
+
+        duration = 20  # TODO: Parse from body.
+        summary = "rpc-tomorrow meeting"  # TODO: Parse from body.
+
         client = caldav.DAVClient(url=url,
-                                  username="test",
-                                  password="test")
+                                  username=username,
+                                  password=password)
         my_principal = client.principal()
 
         my_new_calendar = my_principal.make_calendar(name="Test calendar")
 
-        my_new_calendar.save_event("""BEGIN:VCALENDAR
-        VERSION:2.0
-        PRODID:-//Example Corp.//CalDAV Client//EN
-        BEGIN:VEVENT
-        UID:20200516T060000Z-123401@example.com
-        DTSTAMP:20200516T060000Z
-        DTSTART:20200517T060000Z
-        DTEND:20200517T230000Z
-        RRULE:FREQ=YEARLY
-        SUMMARY:Do the needful
-        END:VEVENT
-        END:VCALENDAR
-        """)
+        start = when.strftime(time_format)
+        end = (when + timedelta(minutes=duration)).strftime(
+                time_format)
+        now = datetime.now().strftime(time_format)
+        my_event = my_new_calendar.save_event(f"""BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//rpa-tomorrow.//CalDAV Client//EN
+BEGIN:VEVENT
+UID:{now}-{settings["address"]}
+DTSTART:{start}
+DTEND:{end}
+SUMMARY:{summary}
+END:VEVENT
+END:VCALENDAR
+""")
 
-        return "", None
+        return my_event.data, None
