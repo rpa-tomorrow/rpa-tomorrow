@@ -62,8 +62,7 @@ class Automate:
         if module_name in self.verbs:
             instance = self.verbs[module_name]()
         else:
-            fuzzy_match, score = fuzzy.extractOne(module_name,
-                                                  self.get_verbs())
+            fuzzy_match, score = fuzzy.extractOne(module_name, self.get_verbs())
             if score > 30:
                 instance = self.verbs[fuzzy_match]()
             else:

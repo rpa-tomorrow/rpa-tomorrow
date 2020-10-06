@@ -44,8 +44,7 @@ class NLP:
         to_matches = matcher(doc)
 
         verbs = [doc[start:end] for match_id, start, end in mail_matches]
-        recipients = [doc[start:end].text for match_id, start, end in
-                      to_matches]
+        recipients = [doc[start:end].text for match_id, start, end in to_matches]
 
         # Get all known names and time.
         persons = []

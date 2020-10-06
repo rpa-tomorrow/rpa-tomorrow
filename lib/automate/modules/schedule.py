@@ -27,8 +27,7 @@ class Schedule(Module):
         duration = 20  # TODO: Parse from body.
         summary = "rpc-tomorrow meeting"  # TODO: Parse from body.
 
-        client = caldav.DAVClient(url=url, username=username,
-                                  password=password)
+        client = caldav.DAVClient(url=url, username=username, password=password)
         my_principal = client.principal()
 
         my_new_calendar = my_principal.make_calendar(name="Test calendar")
