@@ -47,13 +47,13 @@ in your terminal. A local SMTP debugging server is now running on `localhost:102
 [Radicale](https://radicale.org/3.0.html) can be used to set up a Local CalDav server. To install run the following command
 
 ```
-$ python3 -m pip install --upgrade radicale
+python3 -m pip install --upgrade radicale
 ```
 
 To start the server run
 
 ```
-$ python3 -m radicale --storage-filesystem-folder=~/.var/lib/radicale/collections
+python3 -m radicale --storage-filesystem-folder=~/.var/lib/radicale/collections
 ```
 
 Now the server should be up on <localhost:5232>
