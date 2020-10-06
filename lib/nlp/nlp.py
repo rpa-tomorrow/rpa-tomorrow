@@ -25,9 +25,10 @@ class NLP:
         :param text: The user NL input to process
         :type text: string
         """
-        # Currently only supports mail, only looks for synonyms of "send"
-        actions = [self.nlp("send")[0], self.nlp("set")[0]]
-
+        # Currently only supports mail and schedule.
+        actions = []
+        for v in Automate().get_verbs():
+            actions.append(self.nlp(v)[0])
         doc = self.nlp(text)
 
         # Match patterns VERBS, EMAIL
@@ -51,7 +52,6 @@ class NLP:
         persons = []
         date_time = datetime.now()
         for ent in doc.ents:
-            print(ent.label_)
             if ent.label_ == "PERSON":
                 persons.append(ent.text)
             elif ent.label_ == "TIME":
@@ -64,7 +64,7 @@ class NLP:
         if len(persons) < 1:
             persons.append("John Doe")
 
-        # Looks for any synonym to "send"
+        # Looks for any synonym to the verbs
         for verb in verbs:
             for action in actions:
                 similarity = verb.similarity(action)
