@@ -21,5 +21,15 @@ SETTINGS = {
                 "port": 1025,
             }
         },
+        "Niklas": {
+            "email": {
+                "address": "niklas@email.com",
+                "username": "niklas",
+                "password": "salkin",
+                "ssl": False,
+                "host": "localhost",
+                "port": 5232,
+            }
+        },
     }
 }

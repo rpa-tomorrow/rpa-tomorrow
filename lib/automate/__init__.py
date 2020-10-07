@@ -10,6 +10,7 @@ class Automate:
         """ Register new modules here """
         self.modules = [
             import_module("lib.automate.modules.send").Send,
+            import_module("lib.automate.modules.schedule").Schedule,
         ]
         self.verbs = {}
         for module in self.modules:

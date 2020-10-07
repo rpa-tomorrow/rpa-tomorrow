@@ -3,6 +3,7 @@ import re
 
 from spacy.matcher import Matcher
 from lib.automate import Automate
+from datetime import datetime
 
 
 class NLP:
@@ -24,10 +25,10 @@ class NLP:
         :param text: The user NL input to process
         :type text: string
         """
-        # Currently only supports mail, only looks for synonyms of "send"
-        send = self.nlp("send")
-        send = send[0]
-
+        # Currently only supports mail and schedule.
+        actions = []
+        for v in Automate().get_verbs():
+            actions.append(self.nlp(v)[0])
         doc = self.nlp(text)
 
         # Match patterns VERBS, EMAIL
@@ -47,14 +48,31 @@ class NLP:
             doc[start:end].text for match_id, start, end in to_matches
         ]
 
-        # Looks for any synonym to "send"
-        for verb in verbs:
-            similarity = verb.similarity(send)
-            if similarity > 0.8:
-                body = self.getBodyBetweenQuotations(text)
-                response = self.sendAutomate(
-                    verb.text, recipients, None, body, "John Doe"
+        # Get all known names and time.
+        persons = []
+        date_time = datetime.now()
+        for ent in doc.ents:
+            if ent.label_ == "PERSON":
+                persons.append(ent.text)
+            elif ent.label_ == "TIME":
+                time = datetime.strptime(ent.text, "%H:%M")
+                date_time = date_time.replace(
+                    hour=time.hour, minute=time.minute, second=0
                 )
-                return response
+            elif ent.label_ == "DATE":
+                date_time = datetime.strptime(ent.text, "%Y-%m-%d %H:%M")
+        if len(persons) < 1:
+            persons.append("John Doe")
+
+        # Looks for any synonym to the verbs
+        for verb in verbs:
+            for action in actions:
+                similarity = verb.similarity(action)
+                if similarity > 0.8:
+                    body = self.getBodyBetweenQuotations(text)
+                    response = self.sendAutomate(
+                        verb.text, recipients, date_time, body, persons[0]
+                    )
+                    return response
 
         return "I did not understand"
