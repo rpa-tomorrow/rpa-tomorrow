@@ -7,9 +7,9 @@ dependencies:
   - attrs=20.2.0=py_0
   - blas=1.0=mkl
   - brotlipy=0.7.0=py38h7b6447c_1000
-  - ca-certificates=2020.7.22=0
+  - ca-certificates=2020.6.20=hecda079_0
   - catalogue=1.0.0=py38_1
-  - certifi=2020.6.20=py38_0
+  - certifi=2020.6.20=py38h32f6830_0
   - cffi=1.14.3=py38he30daa8_0
   - chardet=3.0.4=py38_1003
   - cryptography=3.1.1=py38h1ba5d50_0
@@ -34,7 +34,7 @@ dependencies:
   - ncurses=6.2=he6710b0_1
   - numpy=1.19.1=py38hbc911f0_0
   - numpy-base=1.19.1=py38hfa32c7d_0
-  - openssl=1.1.1h=h7b6447c_0
+  - openssl=1.1.1h=h516909a_0
   - pip=20.2.2=py38_0
   - plac=0.9.6=py38_1
   - preshed=3.0.2=py38he6710b0_1
@@ -50,6 +50,7 @@ dependencies:
   - setuptools=49.6.0=py38_0
   - six=1.15.0=py_0
   - spacy=2.3.2=py38hfd86e86_0
+  - spacy-model-en_core_web_lg=2.3.1=pyh9f0ad1d_0
   - sqlite=3.33.0=h62c20be_0
   - srsly=1.0.2=py38he6710b0_0
   - thinc=7.4.1=py38hfd86e86_0
@@ -61,6 +62,4 @@ dependencies:
   - xz=5.2.5=h7b6447c_0
   - zipp=3.1.0=py_0
   - zlib=1.2.11=h7b6447c_3
-  - pip:
-    - en-core-web-lg==2.3.1
-prefix: /home/aron/anaconda3/envs/substorm-nlp
+prefix: /home/user/miniconda3/envs/substorm-nlp
