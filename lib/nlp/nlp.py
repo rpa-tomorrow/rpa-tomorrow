@@ -16,7 +16,7 @@ class NLP:
 
     def sendAutomate(self, verb, recipients, when, body, sender):
         automate = Automate()
-        return automate.run(verb, recipients, when, body, sender,)
+        return automate.run(verb, recipients, when, body, sender)
 
     def run(self, text):
         """

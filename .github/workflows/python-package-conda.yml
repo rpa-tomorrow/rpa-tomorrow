@@ -22,9 +22,6 @@ jobs:
         run: |
           # $CONDA is an environment variable pointing to the root of the miniconda directory
           $CONDA/bin/conda env update --file substorm-nlp.yml --name base
-          $CONDA/bin/conda install -q black
-          $CONDA/bin/conda install -q flake8
-          $CONDA/bin/conda install -q pytest
       - name: Format using black
         run: |
           $CONDA/bin/black --check . --diff --line-length=80
