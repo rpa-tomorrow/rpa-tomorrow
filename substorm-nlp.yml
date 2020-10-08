@@ -58,7 +58,6 @@ dependencies:
   - pyparsing=2.4.7=py_0
   - pyrsistent=0.17.3=py38h7b6447c_0
   - pysocks=1.7.1=py38_0
-  - pytest=6.1.0=py38_0
   - python=3.8.5=h7579374_1
   - python-levenshtein=0.12.0=py38h1e0a361_1001
   - python_abi=3.8=1_cp38
@@ -85,9 +84,12 @@ dependencies:
   - zlib=1.2.11=h7b6447c_3
   - pip:
     - caldav==0.7.1
+    - coverage==5.3
     - defusedxml==0.6.0
     - lxml==4.5.2
     - passlib==1.7.3
+    - pytest==6.1.1
+    - pytest-cov==2.10.1
     - python-dateutil==2.8.1
     - radicale==3.0.6
     - vobject==0.9.6.1

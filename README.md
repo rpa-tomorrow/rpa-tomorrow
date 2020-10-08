@@ -28,6 +28,18 @@ Add user information to `lib/settings.py`.
 
 Example on how to use the automation module is in `demo.py`
 
+### Testing
+
+The tests can be run with the following command
+
+```bash
+pytest
+```
+
+while inside the project directory.
+
+A coverage report will automatically be generated and and saved in `htmlcov` and it can be viewed at `htmlcov/index.html`
+
 #### Local SMTP server
 
 It can be nice to test the Send automation module (sends emails) using a local SMTP debugging server. This can be done by running
