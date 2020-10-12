@@ -22,7 +22,12 @@ class Send(Module):
         self.subject = body.partition("\n")[0]
         self.content = body + f"\n\nRegards,\n{user}"
 
-        reciever = ", ".join(to)
+        if len(to) == 1:
+            reciever = to[0]
+        elif len(to) == 0:
+            raise NoRecieverError("No reciever was entered")
+        else:
+            raise ToManyRecieversError("Can only handle one (1) reciever at this time")
 
         if not self.is_email(reciever):
             # filter out the contacts that does not need to be considered
@@ -103,4 +108,12 @@ class Send(Module):
 
 
 class NoContactFoundError(Error):
+    pass
+
+
+class ToManyRecieversError(Error):
+    pass
+
+
+class NoRecieverError(Error):
     pass
