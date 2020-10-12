@@ -80,12 +80,14 @@ class Send(Module):
         return response
 
     def followup(self, answer: str) -> (str, str):
-        """Follow up method for after the user enters a inprecise name that has matched on
+        """
+        Follow up method for after the user enters a inprecise name that has matched on
         multiple users. The user has then been prompted again and given the argument answer, this value should
-        be more exakt and map to a single user.
+        be more exact and map to a single user.
         This method then takes that answer, checks if it is an email address, if it is then the email is sent.
-        If the answer is not an email then it should be a name of a user thus
-        the email address to the inputted user is fetched and the email is sent."""
+        If the answer is not an email then it should be the name of a user thus the email address of
+        the inputed user is fetched and the email is sent.
+        """
         if not self.is_email(answer):
             receiver = self.get_email(fuzzy.extractOne(answer, SETTINGS["users"].keys())[0])
         else:
@@ -96,6 +98,10 @@ class Send(Module):
         return response, None
 
     def get_email(self, name: str) -> str:
+        """
+        Retrieves the email of a user from the contact book in the settings file
+        If no user is found, i.e. there are no key equal to the name given then an error is raised
+        """
         try:
             return SETTINGS["users"][name]["email"]["address"]
         except KeyError as error:
