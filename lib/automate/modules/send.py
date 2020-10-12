@@ -91,7 +91,10 @@ class Send(Module):
         return response, None
 
     def get_email(self, name):
-        return SETTINGS["users"][name]["email"]["address"]
+        try:
+            return SETTINGS["users"][name]["email"]["address"]
+        except KeyError as error:
+            raise NoContactFoundError("No contact with name " + name + " was found")
 
     def is_email(self, email: str) -> bool:
         """ Uses regex to check if a incoming string is an email"""
