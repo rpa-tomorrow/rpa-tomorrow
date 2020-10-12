@@ -23,39 +23,39 @@ class Send(Module):
         self.content = body + f"\n\nRegards,\n{user}"
 
         if len(to) == 1:
-            reciever = to[0]
+            receiver = to[0]
         elif len(to) == 0:
-            raise NoRecieverError("No reciever was entered")
+            raise NoReceiverError("No receiver was entered")
         else:
-            raise ToManyRecieversError("Can only handle one (1) reciever at this time")
+            raise ToManyReceiversError("Can only handle one (1) receiver at this time")
 
-        if not self.is_email(reciever):
+        if not self.is_email(receiver):
             # filter out the contacts that does not need to be considered
-            possible_recievers = fuzzy.extract(reciever, SETTINGS["users"].keys())
-            possible_recievers = list(filter(lambda x: x[1] > 75, possible_recievers))
+            possible_receivers = fuzzy.extract(receiver, SETTINGS["users"].keys())
+            possible_receivers = list(filter(lambda x: x[1] > 75, possible_receivers))
 
-            # if there are multiple possible recievers then return a string of these that will
+            # if there are multiple possible receivers then return a string of these that will
             # be displayed to the user.
             #
             # The user will then be able to enter a more precise name
             # that will be sent to the follow-up method
-            if len(possible_recievers) > 1:
-                names = "\n".join(list(map(lambda contact: contact[0], possible_recievers)))
+            if len(possible_receivers) > 1:
+                names = "\n".join(list(map(lambda contact: contact[0], possible_receivers)))
                 return None, "Found multiple contacts: \n" + names + "\nPlease enter the name"
-            elif len(possible_recievers) == 1:
-                reciever = self.get_email(possible_recievers[0][0])
+            elif len(possible_receivers) == 1:
+                receiver = self.get_email(possible_receivers[0][0])
             else:
-                raise NoContactFoundError("Could not find any contacts with name " + reciever)
+                raise NoContactFoundError("Could not find any contacts with name " + receiver)
 
-        response = self.send_email(self.settings, reciever, self.subject, self.content)
+        response = self.send_email(self.settings, receiver, self.subject, self.content)
 
         return response, None
 
-    def send_email(self, settings: dict, reciever: str, subject: str, content: str):
+    def send_email(self, settings: dict, receiver: str, subject: str, content: str):
         msg = EmailMessage()
         msg["Subject"] = subject
         msg["From"] = settings["address"]
-        msg["To"] = reciever
+        msg["To"] = receiver
         msg.set_content(content)
 
         ssl_type = f"SMTP{'_SSL' if settings['ssl'] else ''}"
@@ -87,11 +87,11 @@ class Send(Module):
         If the answer is not an email then it should be a name of a user thus
         the email address to the inputted user is fetched and the email is sent."""
         if not self.is_email(answer):
-            reciever = self.get_email(fuzzy.extractOne(answer, SETTINGS["users"].keys())[0])
+            receiver = self.get_email(fuzzy.extractOne(answer, SETTINGS["users"].keys())[0])
         else:
-            reciever = answer
+            receiver = answer
 
-        response = self.send_email(self.settings, reciever, self.subject, self.content)
+        response = self.send_email(self.settings, receiver, self.subject, self.content)
 
         return response, None
 
@@ -111,9 +111,9 @@ class NoContactFoundError(Error):
     pass
 
 
-class ToManyRecieversError(Error):
+class ToManyReceiversError(Error):
     pass
 
 
-class NoRecieverError(Error):
+class NoReceiverError(Error):
     pass
