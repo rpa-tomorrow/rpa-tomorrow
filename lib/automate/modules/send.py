@@ -46,7 +46,7 @@ class Send(Module):
 
         return response, None
 
-    def send_email(self, settings, reciever, subject, content):
+    def send_email(self, settings: dict, reciever: str, subject: str, content: str):
         msg = EmailMessage()
         msg["Subject"] = subject
         msg["From"] = settings["address"]
@@ -74,7 +74,7 @@ class Send(Module):
 
         return response
 
-    def followup(self, answer):
+    def followup(self, answer: str) -> (str, str):
         """Follow up method for after the user enters a inprecise name that has matched on
         multiple users. The user has then been prompted again and given the argument answer, this value should
         be more exakt and map to a single user.
@@ -90,7 +90,7 @@ class Send(Module):
 
         return response, None
 
-    def get_email(self, name):
+    def get_email(self, name: str) -> str:
         try:
             return SETTINGS["users"][name]["email"]["address"]
         except KeyError as error:
