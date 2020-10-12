@@ -24,7 +24,7 @@ jobs:
           $CONDA/bin/conda env update --file substorm-nlp.yml --name base
       - name: Format using black
         run: |
-          $CONDA/bin/black --check . --diff --line-length=80
+          $CONDA/bin/black --check . --diff --line-length=120
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
