@@ -29,7 +29,27 @@ SETTINGS = {
                 "ssl": False,
                 "host": "localhost",
                 "port": 5232,
-            }
+            },
         },
-    }
+        "John Wilsson": {
+            "email": {
+                "address": "john.wilsson@email.com",
+                "username": None,
+                "password": None,
+                "ssl": False,
+                "host": "localhost",
+                "port": 1025,
+            },
+        },
+        "John Andersson": {
+            "email": {
+                "address": "jAndersson@email.com",
+                "username": None,
+                "password": None,
+                "ssl": False,
+                "host": "localhost",
+                "port": 1025,
+            },
+        },
+    },
 }

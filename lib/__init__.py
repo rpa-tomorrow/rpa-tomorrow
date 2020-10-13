@@ -24,9 +24,7 @@ class TimeIsInPastError(Error):
 class OSNotSupportedError(Error):
     """Raised when a feature is not currently supported on the host OS"""
 
-    def __init__(
-        self, os, message="The feature is not supported on the current OS"
-    ):
+    def __init__(self, os, message="The feature is not supported on the current OS"):
         self.os = os
         self.message = message
         super().__init__(self.message)

@@ -52,14 +52,11 @@ class Reminder(Module):
         :param body: The text to be shown in the notification
         :type body: text
         """
-        when_delta = (
-            when - datetime.now()
-        ).total_seconds()  # convert to difference in seconds
+        when_delta = (when - datetime.now()).total_seconds()  # convert to difference in seconds
         if when_delta < 0.0:
             raise TimeIsInPastError(
                 when.strftime("%Y-%m-%d %H:%M:%S"),
-                "The specified time of the reminder is in the past and can not"
-                + " be scheduled",
+                "The specified time of the reminder is in the past and can not" + " be scheduled",
             )
 
         if sys.platform not in self.supported_os:
