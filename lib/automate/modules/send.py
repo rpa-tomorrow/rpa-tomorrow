@@ -41,7 +41,10 @@ class Send(Module):
             # that will be sent to the follow-up method
             if len(possible_receivers) > 1:
                 names = "\n".join(list(map(lambda contact: contact[0], possible_receivers)))
-                return None, "Found multiple contacts: \n" + names + "\nPlease enter the name"
+                return (
+                    None,
+                    "Found multiple contacts: \n" + names + "\nPlease enter the name",
+                )
             elif len(possible_receivers) == 1:
                 receiver = self.get_email(possible_receivers[0][0])
             else:

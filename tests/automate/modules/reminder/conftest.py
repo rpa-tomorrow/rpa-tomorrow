@@ -25,21 +25,12 @@ def run(monkeypatch):
 def notify(monkeypatch):
     called_with = []
 
-    def mock_subprocess_run(
-        *popenargs,
-        input=None,
-        capture_output=False,
-        timeout=None,
-        check=False,
-        **kwargs
-    ):
+    def mock_subprocess_run(*popenargs, input=None, capture_output=False, timeout=None, check=False, **kwargs):
         called_with.append(popenargs)
 
     def helper(os, body):
         reminder = Reminder()
-        monkeypatch.setattr(
-            "lib.automate.modules.reminder.run", mock_subprocess_run
-        )
+        monkeypatch.setattr("lib.automate.modules.reminder.run", mock_subprocess_run)
         return reminder.notify(os, body)
 
     yield helper, called_with
