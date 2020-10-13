@@ -15,12 +15,12 @@ class Send(Module):
         super(Send, self).__init__()
 
     def run(self, to, when, body, sender):
-        user, _ = fuzzy.extractOne(sender, SETTINGS["users"].keys())
-        self.settings = SETTINGS["users"][user]["email"]
+        self.user, _ = fuzzy.extractOne(sender, SETTINGS["users"].keys())
+        self.settings = SETTINGS["users"][self.user]["email"]
         self.username = self.settings.get("username")
         self.password = self.settings.get("password")
         self.subject = body.partition("\n")[0]
-        self.content = body + f"\n\nRegards,\n{user}"
+        self.content = body + f"\n\nRegards,\n{self.user}"
 
         if len(to) == 1:
             receiver = to[0]
@@ -31,7 +31,8 @@ class Send(Module):
 
         if not self.is_email(receiver):
             # filter out the contacts that does not need to be considered
-            possible_receivers = fuzzy.extract(receiver, SETTINGS["users"].keys())
+            possible_receivers = list(filter(lambda u: not u == self.user, SETTINGS["users"].keys()))
+            possible_receivers = fuzzy.extract(receiver, possible_receivers)
             possible_receivers = list(filter(lambda x: x[1] > 75, possible_receivers))
 
             # if there are multiple possible receivers then return a string of these that will
@@ -92,7 +93,8 @@ class Send(Module):
         the inputed user is fetched and the email is sent.
         """
         if not self.is_email(answer):
-            receiver = self.get_email(fuzzy.extractOne(answer, SETTINGS["users"].keys())[0])
+            possible_receivers = list(filter(lambda u: not u == self.user, SETTINGS["users"].keys()))
+            receiver = self.get_email(fuzzy.extractOne(answer, possible_receivers)[0])
         else:
             receiver = answer
 
