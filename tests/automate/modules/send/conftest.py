@@ -1,7 +1,6 @@
-import sys
 import pytest
 
-from lib.automate.modules.send import Send, SETTINGS
+from lib.automate.modules.send import Send
 
 
 TEST_SETTINGS = {

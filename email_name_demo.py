@@ -2,7 +2,6 @@ import sys
 
 from lib import Error
 from lib.automate import Automate
-from lib.nlp import nlp
 
 automate = Automate()
 

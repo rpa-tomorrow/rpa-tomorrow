@@ -109,12 +109,12 @@ class Send(Module):
         """
         try:
             return SETTINGS["users"][name]["email"]["address"]
-        except KeyError as error:
+        except KeyError:
             raise NoContactFoundError("No contact with name " + name + " was found")
 
     def is_email(self, email: str) -> bool:
         """ Uses regex to check if a incoming string is an email address"""
-        regex = "^([a-z0-9]+[\._-]?[a-z0-9]+)[@](\w+[.])+\w{2,3}$"
+        regex = "^([a-z0-9]+[\\._-]?[a-z0-9]+)[@](\\w+[.])+\\w{2,3}$"
         return re.search(regex, email)
 
 
