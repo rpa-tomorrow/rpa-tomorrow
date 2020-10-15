@@ -1,3 +1,6 @@
+from lib import Error
+
+
 class Module:
     verbs = []
 
@@ -9,3 +12,7 @@ class Module:
 
     def followup(self, answer):
         raise NotImplementedError("Method not implemented")
+
+
+class NoSenderError(Error):
+    pass

@@ -52,6 +52,19 @@ class Reminder(Module):
         :param body: The text to be shown in the notification
         :type body: text
         """
+        self.to = _to
+        self.when = when
+        self.body = body
+        self.sender = _sender
+        self.followup_type = None
+
+        if not isinstance(when, datetime):
+            self.followup_type = "when"
+            return None, "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
+        elif not body:
+            self.followup_type = "body"
+            return None, "Found no message body. What message should be sent"
+
         when_delta = (when - datetime.now()).total_seconds()  # convert to difference in seconds
         if when_delta < 0.0:
             raise TimeIsInPastError(
@@ -72,3 +85,20 @@ class Reminder(Module):
             f"Reminder scheduled for {when.strftime('%Y-%m-%d %H:%M:%S')}",
             None,
         )
+
+    def followup(self, answer: str) -> (str, str):
+        """
+        Follow up method after the module have had to ask a question to clarify some parameter, or just
+        want to check that it interpreted everything correctly.
+        """
+        if self.followup_type == "when":
+            try:
+                when = datetime.fromisoformat(answer)
+            except Exception:
+                when = None
+            return self.run(self.to, when, self.body, self.sender)
+
+        elif self.followup_type == "body":
+            return self.run(self.to, self.when, answer, self.sender)
+        else:
+            raise NotImplementedError("Did not find any valid followup question to answer.")
