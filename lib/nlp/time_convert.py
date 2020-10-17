@@ -1,9 +1,9 @@
 import spacy
 import time
-import re
 
 from datetime import datetime, timedelta
 from word2number import w2n
+
 
 def parse_time(when_list):
     """
@@ -21,10 +21,10 @@ def parse_time(when_list):
 
     if len(when_list) == 0:
         return None
-    
+
     if len(when_list) == 1:
         try:
-            datetime = parse_24h_time(when_list[0]) 
+            datetime = parse_24h_time(when_list[0])
         except:
             pass
         try:
@@ -33,7 +33,7 @@ def parse_time(when_list):
             pass
     else:
         try:
-            datetime = parse_unit_time(when_list[0], when_list[1]) 
+            datetime = parse_unit_time(when_list[0], when_list[1])
         except:
             pass
         try:
@@ -41,20 +41,22 @@ def parse_time(when_list):
             datetime = parse_12h_time(_time)
         except:
             pass
-    
+
     if datetime is not None:
-        return increment_24h_if_passed(datetime)
-    else:
-        return None
+        datetime = increment_24h_if_passed(datetime)
+
+    return datetime
+
 
 def increment_24h_if_passed(time):
-    when_delta = (time - datetime.now()).total_seconds() 
-    
+    when_delta = (time - datetime.now()).total_seconds()
+
     # Check if the time has already happened
     if when_delta < 0.0:
         time = time + timedelta(hours=24)
 
     return time
+
 
 def parse_word_time(word):
     """
@@ -65,14 +67,15 @@ def parse_word_time(word):
     number = w2n.word_to_num(word)
     time = time.replace(hour=number, minute=0, second=0)
 
-    when_delta = (time - datetime.now()).total_seconds() 
-    
+    when_delta = (time - datetime.now()).total_seconds()
+
     # Check if the time has already happened
     if when_delta < 0.0:
         td = timedelta(hours=12)
         time = time + td
 
     return time
+
 
 def parse_unit_time(word, unit):
     """
@@ -87,20 +90,21 @@ def parse_unit_time(word, unit):
     """
     number = 1
     time_multiplier = 1
-     
-    if words in ["a", "an"]:
+
+    if word in ["a", "an"]:
         number = 1
-    else: 
+    else:
         number = w2n.word_to_num(word)
 
-    time_multiplier = unit_to_sec(unit) 
+    time_multiplier = unit_to_sec(unit)
 
     offset = number * time_multiplier
     ret_time = time.time() + offset
 
     return datetime.fromtimestamp(ret_time)
 
-def parse_24h_time(time): 
+
+def parse_24h_time(time):
     """
     Parses a string to datetime in the following 24h formats
     13:00, 1.50 or 7
@@ -116,17 +120,19 @@ def parse_24h_time(time):
     ret_time = ret_time.replace(hour=t.hour, minute=t.minute, second=0)
     return ret_time
 
+
 def format_24h_time(time):
     t = None
     formats = ["%H:%M", "%H.%M", "%H"]
 
-    for _format in formats: 
+    for _format in formats:
         try:
             t = datetime.strptime(time, _format)
         except:
             pass
 
     return t
+
 
 def parse_12h_time(time):
     """
@@ -139,22 +145,24 @@ def parse_12h_time(time):
     :rtype datetime.datetime
     """
     ret_time = datetime.now()
-    t = format_12h_time(time) 
+    t = format_12h_time(time)
 
     ret_time = ret_time.replace(hour=t.hour, minute=t.minute, second=0)
     return ret_time
+
 
 def format_12h_time(time):
     t = None
     formats = ["%I:%M %p", "%I.%M %p", "%I %p"]
 
-    for _format in formats: 
+    for _format in formats:
         try:
             t = datetime.strptime(time, _format)
         except:
             pass
 
     return t
+
 
 def unit_to_sec(unit):
     """
@@ -171,19 +179,21 @@ def unit_to_sec(unit):
     doc = nlp(unit)
 
     lemma = doc[0].lemma_
-    
+
     if lemma in ["hour", "h"]:
         return 3600
     elif lemma in ["minute", "mins", "min", "m"]:
         return 60
-    elif lemma in ["second", "secs", "sec", "s"]: 
+    elif lemma in ["second", "secs", "sec", "s"]:
         return 1
     elif lemma in ["moment"]:
         return 90
-    elif lemma in ["day", "d",]:
+    elif lemma in [
+        "day",
+        "d",
+    ]:
         return 86400
     elif lemma in ["week", "w"]:
         return 604800
     else:
         raise Exception("Could not convert time type.")
- 
