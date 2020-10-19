@@ -79,6 +79,4 @@ END:VCALENDAR
                 when = None
             return self.run(self.to, when, self.body, self.sender)
         else:
-            raise NotImplementedError(
-                "Did not find any valid followup question to answer."
-            )
+            raise NotImplementedError("Did not find any valid followup question to answer.")

@@ -45,9 +45,7 @@ class Send(Module):
 
         if not self.is_email(receiver):
             # filter out the contacts that does not need to be considered
-            possible_receivers = list(
-                filter(lambda u: not u == self.user, SETTINGS["users"].keys())
-            )
+            possible_receivers = list(filter(lambda u: not u == self.user, SETTINGS["users"].keys()))
             possible_receivers = fuzzy.extract(receiver, possible_receivers)
             possible_receivers = list(filter(lambda x: x[1] > 75, possible_receivers))
 
@@ -57,9 +55,7 @@ class Send(Module):
             # The user will then be able to enter a more precise name
             # that will be sent to the follow-up method
             if len(possible_receivers) > 1:
-                names = "\n".join(
-                    list(map(lambda contact: contact[0], possible_receivers))
-                )
+                names = "\n".join(list(map(lambda contact: contact[0], possible_receivers)))
                 self.followup_type = "to2"
                 return (
                     None,
@@ -68,9 +64,7 @@ class Send(Module):
             elif len(possible_receivers) == 1:
                 receiver = self.get_email(possible_receivers[0][0])
             else:
-                raise NoContactFoundError(
-                    "Could not find any contacts with name " + receiver
-                )
+                raise NoContactFoundError("Could not find any contacts with name " + receiver)
 
         response = self.send_email(self.settings, receiver, self.subject, self.content)
 
@@ -119,27 +113,19 @@ class Send(Module):
             if not answer:
                 return self.run(None, self.when, self.body, self.sender)
             elif not self.is_email(answer):
-                possible_receivers = list(
-                    filter(lambda u: not u == self.user, SETTINGS["users"].keys())
-                )
-                receiver = self.get_email(
-                    fuzzy.extractOne(answer, possible_receivers)[0]
-                )
+                possible_receivers = list(filter(lambda u: not u == self.user, SETTINGS["users"].keys()))
+                receiver = self.get_email(fuzzy.extractOne(answer, possible_receivers)[0])
             else:
                 receiver = answer
 
-            response = self.send_email(
-                self.settings, receiver, self.subject, self.content
-            )
+            response = self.send_email(self.settings, receiver, self.subject, self.content)
 
             return response, None
 
         elif self.followup_type == "body":
             return self.run(self.to, self.when, answer, self.sender)
         else:
-            raise NotImplementedError(
-                "Did not find any valid followup question to answer."
-            )
+            raise NotImplementedError("Did not find any valid followup question to answer.")
 
     def get_email(self, name: str) -> str:
         """
