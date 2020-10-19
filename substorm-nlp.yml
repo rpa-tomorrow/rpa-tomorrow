@@ -78,7 +78,6 @@ dependencies:
   - pip:
     - caldav==0.7.1
     - coverage==5.3
-    - en-rpa-simple==0.0.1
     - iniconfig==1.0.1
     - lxml==4.5.2
     - more-itertools==8.5.0
