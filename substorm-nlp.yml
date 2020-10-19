@@ -11,7 +11,7 @@ dependencies:
   - brotlipy=0.7.0=py38h7b6447c_1000
   - ca-certificates=2020.6.20=hecda079_0
   - catalogue=1.0.0=py38_1
-  - certifi=2020.6.20=py38h32f6830_0
+  - certifi=2020.6.20=py38h924ce5b_2
   - cffi=1.14.3=py38he30daa8_0
   - chardet=3.0.4=py38_1003
   - click=7.1.2=py_0
@@ -60,6 +60,7 @@ dependencies:
   - setuptools=49.6.0=py38_0
   - six=1.15.0=py_0
   - spacy=2.3.2=py38hfd86e86_0
+  - spacy-model-en_core_web_sm=2.3.1=pyh9f0ad1d_0
   - sqlite=3.33.0=h62c20be_0
   - srsly=1.0.2=py38he6710b0_0
   - thinc=7.4.1=py38hfd86e86_0
