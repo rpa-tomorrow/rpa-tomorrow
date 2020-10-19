@@ -5,7 +5,7 @@ from lib.automate import Automate
 from lib.nlp import nlp
 
 automate = Automate()
-n = nlp.NLP()
+n = nlp.NLP("en_rpa_simple")
 
 # Enable the SMTP server before running the following
 try:

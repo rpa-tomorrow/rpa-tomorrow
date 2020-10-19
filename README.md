@@ -20,7 +20,11 @@ Create conda environment to handle dependencies.
 
 Download spaCy model.
 
-    python -m spacy download en_core_web_lg
+    python -m spacy download en_core_web_sm
+
+Download the current RPA Tomorrow model.
+
+    pip install https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple-0.0.1/en_rpa_simple-0.0.1.tar.gz
 
 ### Python
 
@@ -36,7 +40,7 @@ The tests can be run with the following command
 pytest
 ```
 
-while inside the project directory.
+while inside the project directory. You will need the `pytest-cov` package to run it.
 
 A coverage report will automatically be generated and and saved in `htmlcov` and it can be viewed at `htmlcov/index.html`
 

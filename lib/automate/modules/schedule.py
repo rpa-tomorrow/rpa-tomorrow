@@ -29,7 +29,10 @@ class Schedule(Module):
 
         if not isinstance(when, datetime):
             self.followup_type = "when"
-            return None, "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
+            return (
+                None,
+                "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format",
+            )
 
         user, _ = fuzzy.extractOne(sender, SETTINGS["users"].keys())
         settings = SETTINGS["users"][user]["email"]
