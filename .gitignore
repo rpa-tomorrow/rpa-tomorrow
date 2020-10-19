@@ -137,3 +137,9 @@ cython_debug/
 
 # Vim
 .vim
+
+# Secret Pickle (Google QAuth 2.0 Token)
+*.pickle
+
+# Google API Credentials
+credentials.json
