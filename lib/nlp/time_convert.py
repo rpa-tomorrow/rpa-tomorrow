@@ -23,27 +23,40 @@ def parse_time(when_list):
         return None
 
     if len(when_list) == 1:
-        try:
-            datetime = parse_24h_time(when_list[0])
-        except:
-            pass
-        try:
-            datetime = parse_word_time(when_list[0])
-        except:
-            pass
+        datetime = parse_single_word(when_list[0])
     else:
-        try:
-            datetime = parse_unit_time(when_list[0], when_list[1])
-        except:
-            pass
-        try:
-            _time = when_list[0] + " " + when_list[1]
-            datetime = parse_12h_time(_time)
-        except:
-            pass
-
+        datetime = parse_multiple_words(when_list)
     if datetime is not None:
         datetime = increment_24h_if_passed(datetime)
+
+    return datetime
+
+
+def parse_single_word(word):
+    datetime = None
+    try:
+        datetime = parse_24h_time(word)
+    except Exception:
+        pass
+    try:
+        datetime = parse_word_time(word)
+    except Exception:
+        pass
+
+    return datetime
+
+
+def parse_multiple_words(when):
+    datetime = None
+    try:
+        datetime = parse_unit_time(when[0], when[1])
+    except Exception:
+        pass
+    try:
+        _time = when[0] + " " + when[1]
+        datetime = parse_12h_time(_time)
+    except Exception:
+        pass
 
     return datetime
 
@@ -82,7 +95,6 @@ def parse_unit_time(word, unit):
     Parses a word and a unit to datetime. Works on the following formats
     <NUMBER> <UNIT>
     E.g. ["2", "hours"]
-    
     :param words The list of words to parse
     :type list
     :return A datetime
@@ -108,7 +120,6 @@ def parse_24h_time(time):
     """
     Parses a string to datetime in the following 24h formats
     13:00, 1.50 or 7
-    
     :param time String to parse
     :type string
     :return A datetime of the string
@@ -128,7 +139,7 @@ def format_24h_time(time):
     for _format in formats:
         try:
             t = datetime.strptime(time, _format)
-        except:
+        except Exception:
             pass
 
     return t
@@ -138,7 +149,6 @@ def parse_12h_time(time):
     """
     Parses a list of strings to datetime in the following 12h formats
     1:00 pm, 03.50 am or 7 pm
-    
     :param time String to parse
     :type string
     :return A datetime of the string
@@ -158,7 +168,7 @@ def format_12h_time(time):
     for _format in formats:
         try:
             t = datetime.strptime(time, _format)
-        except:
+        except Exception:
             pass
 
     return t
@@ -168,10 +178,8 @@ def unit_to_sec(unit):
     """
     Takes a time unit and tries to convert it into seconds.
     E.g. "hours" => 3600
-    
     :param unit The unit to convert to seconds
     :type string
-
     :return An integer representing the seconds of the time unit
     :rtype int
     """
