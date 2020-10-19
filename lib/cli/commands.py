@@ -9,7 +9,8 @@ sys.path.append(".")
 
 from lib.nlp import nlp  # noqa: E402
 
-MODEL_NAME="en_rpa_simple"
+MODEL_NAME = "en_rpa_simple"
+
 
 def commands(arr):
     """
