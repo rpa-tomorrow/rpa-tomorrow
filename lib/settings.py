@@ -23,12 +23,12 @@ SETTINGS = {
         },
         "Niklas": {
             "email": {
-                "address": "niklas@email.com",
+                "address": "inaule-6@student.ltu.se",
                 "username": "niklas",
                 "password": "salkin",
                 "ssl": False,
                 "host": "localhost",
-                "port": 5232,
+                "port": 1025,
             },
         },
         "John Wilsson": {

@@ -14,8 +14,8 @@ try:
     # Have to use automation module directly because the NLP model does not
     # support Schedule yet
     # response = n.run(text)
-    when = datetime.now() + timedelta(hours=5.0)  # timestamp at: now + 5 hrs
-    response = automate.run("schedule", "rpa@substorm.com", when, "meeting", "Niklas")
+    when = datetime.utcnow() + timedelta(hours=5.0)  # timestamp at: now + 5 hrs
+    response = automate.run("schedule", ["rpa@substorm.com"], when, "Schedule demo", "Niklas")
 
     print(response)
 except Error as err:

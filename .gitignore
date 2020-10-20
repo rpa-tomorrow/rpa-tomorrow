@@ -142,4 +142,4 @@ cython_debug/
 *.pickle
 
 # Google API Credentials
-credentials.json
+client_secret.json
