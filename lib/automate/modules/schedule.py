@@ -1,5 +1,5 @@
 from __future__ import print_function
-from lib.automate.modules import Module
+from lib.automate.modules import Module, NoSenderError
 from lib.settings import SETTINGS
 from fuzzywuzzy import process as fuzzy
 from datetime import datetime, timedelta
@@ -54,8 +54,8 @@ class Schedule(Module):
         # Define the event
         event = {
             "summary": summary,
-            "start": {"dateTime": start_time,},
-            "end": {"dateTime": end_time,},
+            "start": {"dateTime": start_time, },
+            "end": {"dateTime": end_time, },
             "attendees": self.parse_attendees(settings["address"], self.to),
         }
 
