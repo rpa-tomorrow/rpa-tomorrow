@@ -91,6 +91,16 @@ The CLI can be started as follows
 
 The CLI should now be running in your terminal. Type `help` for more instructions. Currently the CLI is only capable of sending predefined emails if a word similar to `skicka` is entered by the user. Note that you need to have a [local SMTP debugging server](https://github.com/rpa-tomorrow/substorm-nlp/tree/cli-call-automation#local-smtp-server) running for this to work.
 
+## Setup Google QAuth 2.0 client secret
+
+Follow this [Google guide](https://support.google.com/cloud/answer/6158849?hl=en) and create a Google Calander API.
+
+The scope of the credentials needs to set to `https://www.googleapis.com/auth/calendar.events.owned`
+
+After that download the credentials and put it in `substorm-nlp/` directory, also name it `client_secret.json`.
+
+Now the schedule module should work.
+
 ## Authors
 
 - Viktor From - vikfro-6@student.ltu.se - [viktorfrom](https://github.com/viktorfrom)
