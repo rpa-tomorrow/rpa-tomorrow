@@ -54,6 +54,7 @@ dependencies:
   - python=3.8.5=h7579374_1
   - python-levenshtein=0.12.0=py38h1e0a361_1001
   - python_abi=3.8=1_cp38
+  - pyyaml=5.3.1=py38h8df0ef7_1
   - readline=8.0=h7b6447c_0
   - regex=2020.7.14=py38h7b6447c_0
   - requests=2.24.0=py_0
@@ -73,19 +74,19 @@ dependencies:
   - wasabi=0.8.0=py_0
   - wheel=0.35.1=py_0
   - xz=5.2.5=h7b6447c_0
+  - yaml=0.2.5=h516909a_0
   - zipp=3.1.0=py_0
   - zlib=1.2.11=h7b6447c_3
   - pip:
     - caldav==0.7.1
     - coverage==5.3
-    - iniconfig==1.0.1
+    - en-rpa-simple==0.0.1
     - lxml==4.5.2
-    - more-itertools==8.5.0
     - packaging==20.4
-    - pluggy==0.13.1
-    - py==1.9.0
     - pyparsing==2.4.7
     - pytest==6.0.2
     - pytest-cov==2.10.1
+    - python-dateutil==2.8.1
     - vobject==0.9.6.1
     - word2number==1.1
+prefix: /home/user/miniconda3/envs/substorm-nlp
