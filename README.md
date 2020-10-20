@@ -54,22 +54,6 @@ python -m smtpd -n -c DebuggingServer localhost:1025
 
 in your terminal. A local SMTP debugging server is now running on `localhost:1025` and the predefined user `John Doe` in `lib/settings.py` can be used to send emails to this local server. If an email is sent using the module you should now be able to see it in the terminal.
 
-#### Local CalDav server
-
-[Radicale](https://radicale.org/3.0.html) can be used to set up a Local CalDav server. To install run the following command
-
-```
-python3 -m pip install --upgrade radicale
-```
-
-To start the server run
-
-```
-python3 -m radicale --storage-filesystem-folder=~/.var/lib/radicale/collections
-```
-
-Now the server should be up on <localhost:5232>
-
 ### Linux
 
 Below are the absolute minimum packages you will need for Linux. Names might vary depending on your distribution, you might need to install it manually if you can't find it using your distribution's package manager.
