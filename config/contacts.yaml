@@ -1,40 +1,15 @@
 Aron Widforss:
   email:
     address: aron@antarkt.is
-    username: aronwidforss@fastmail.com
-    password: password
-    ssl: true
-    host: smtp.fastmail.com
-    port: 465
 John Doe:
   email:
     address: johndoe@email.com
-    username:
-    password:
-    ssl: false
-    host: localhost
-    port: 1025
 Niklas:
   email:
     address: niklas@email.com
-    username: niklas
-    password: salkin
-    ssl: false
-    host: localhost
-    port: 5232
 John Wilsson:
   email:
     address: john.wilsson@email.com
-    username:
-    password:
-    ssl: false
-    host: localhost
-    port: 1025
 John Andersson:
   email:
     address: jAndersson@email.com
-    username:
-    password:
-    ssl: false
-    host: localhost
-    port: 1025
