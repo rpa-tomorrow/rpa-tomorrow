@@ -1,5 +1,5 @@
 import yaml
-from lib.cli.config import config_user_name
+from lib.cli.config import config_user_name, config_email_address, config_email_host
 
 SETTINGS = {}
 
@@ -14,9 +14,24 @@ def load_user():
     with open("config/user.yaml", "r") as stream:
         SETTINGS["user"] = yaml.safe_load(stream)
 
+    update = False
+
     if SETTINGS["user"]["name"] == "":
         SETTINGS["user"]["name"] = config_user_name()
+        update = True
+
+    email = SETTINGS["user"]["email"]
+    if email["address"] == "":
+        email["address"] = config_email_address()
+        update = True
+
+    if email["host"] == "":
+        email = config_email_host(email)
+        update = True
+
+    if update:
         update_settings("config/user", SETTINGS["user"])
+        print("User config updated")
 
 
 def load_local_contacts():
