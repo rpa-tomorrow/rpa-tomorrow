@@ -4,7 +4,7 @@ Project designed and written in Python in conjunction with the D7017E Project in
 
 ## Project description
 
-The purpose of the project is to implement a system where the user can write instrutions in clear text using machine learning and natural language processing, in order to instruct the computer what to do.
+The purpose of the project is to implement a system where the user can write instructions in clear text using machine learning and natural language processing, in order to instruct the computer what to do.
 
 ## Requirements
 
