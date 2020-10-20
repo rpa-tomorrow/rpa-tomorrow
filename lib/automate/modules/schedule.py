@@ -1,5 +1,7 @@
 from __future__ import print_function
-import datetime
+from lib.automate.modules import Module
+from lib.settings import SETTINGS
+from fuzzywuzzy import process as fuzzy
 from datetime import timedelta
 import pickle
 import os.path
@@ -7,13 +9,9 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
-# If modifying these scopes, delete the file token.pickle.
+# If modifying these scopes, delete the files *.pickle.
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 
-from fuzzywuzzy import process as fuzzy
-
-from lib.automate.modules import Module, NoSenderError
-from lib.settings import SETTINGS
 
 class Schedule(Module):
     verbs = ["book", "schedule", "meeting", "set"]
@@ -50,6 +48,10 @@ class Schedule(Module):
 
 
     def parse_attendees(self, to):
+        """
+        Parses the attendees of the event and creates a list of dicts containing
+        there emails.
+        """
         attendees = []
 
         for attende in to:
@@ -79,14 +81,12 @@ class Schedule(Module):
         settings = SETTINGS["users"][user]["email"]
         username = settings.get("username")
 
-        # Parse summary
-        summary = "rpc-tomorrow meeting"  # TODO: Parse from body.
+        summary = body
 
         # Parse Time
-        # TODO: Parse time form When
-        duration = 20  # TODO: Parse from body.
-        start_time = when.utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
-        end_time = (when + timedelta(minutes=duration)).utcnow().isoformat() + 'Z'  # 'Z' indicates UTC time
+        duration = 20  # TODO: Parse from input
+        start_time = when.isoformat() + 'Z'  # 'Z' indicates UTC time
+        end_time = (when + timedelta(minutes=duration)).isoformat() + 'Z'  # 'Z' indicates UTC time
 
         # Define the event
         event = {
