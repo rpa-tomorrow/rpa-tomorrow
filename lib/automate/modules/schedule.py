@@ -10,7 +10,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 # If modifying these scopes, delete the files *.pickle.
-SCOPES = ['https://www.googleapis.com/auth/calendar.events.owned']
+SCOPES = ["https://www.googleapis.com/auth/calendar.events.owned"]
 
 
 class Schedule(Module):
@@ -18,7 +18,6 @@ class Schedule(Module):
 
     def __init__(self):
         super(Schedule, self).__init__()
-
 
     def run(self, to, when, body, sender):
         self.to = to
@@ -49,30 +48,25 @@ class Schedule(Module):
 
         # Parse Time
         duration = 20  # TODO: Parse from input
-        start_time = self.when.isoformat() + 'Z'  # 'Z' indicates UTC time
-        end_time = (self.when + timedelta(minutes=duration)).isoformat() + 'Z'  # 'Z' indicates UTC time
+        start_time = self.when.isoformat() + "Z"  # 'Z' indicates UTC time
+        end_time = (self.when + timedelta(minutes=duration)).isoformat() + "Z"  # 'Z' indicates UTC time
 
         # Define the event
         event = {
-            'summary': summary,
-            'start': {
-                'dateTime': start_time,
-            },
-            'end': {
-                'dateTime': end_time,
-            },
-            'attendees': self.parse_attendees(settings["address"], self.to),
+            "summary": summary,
+            "start": {"dateTime": start_time,},
+            "end": {"dateTime": end_time,},
+            "attendees": self.parse_attendees(settings["address"], self.to),
         }
 
         # Get or create user credentials
         creds = self.credentials(username)
 
         # Create Event using Google calendar API
-        service = build('calendar', 'v3', credentials=creds)
-        event = service.events().insert(calendarId='primary', body=event).execute()
+        service = build("calendar", "v3", credentials=creds)
+        event = service.events().insert(calendarId="primary", body=event).execute()
 
-        return 'Event created, see link: %s' % (event.get('htmlLink')), None
-
+        return "Event created, see link: %s" % (event.get("htmlLink")), None
 
     def followup(self, answer):
         """
@@ -90,7 +84,6 @@ class Schedule(Module):
         else:
             raise NotImplementedError("Did not find any valid followup question to answer.")
 
-
     def credentials(self, username):
         """
         The file token.pickle stores the user's access and refresh tokens, and is
@@ -98,25 +91,23 @@ class Schedule(Module):
         time.
         """
         creds = None
-        pickle_filename = f'{username}_token.pickle'
+        pickle_filename = f"{username}_token.pickle"
 
         if os.path.exists(pickle_filename):
-            with open(pickle_filename, 'rb') as token:
+            with open(pickle_filename, "rb") as token:
                 creds = pickle.load(token)
         # If there are no (valid) credentials available, let the user log in.
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    'client_secret.json', SCOPES)
+                flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", SCOPES)
                 creds = flow.run_local_server(port=0)
             # Save the credentials for the next run
-            with open(pickle_filename, 'wb') as token:
+            with open(pickle_filename, "wb") as token:
                 pickle.dump(creds, token)
 
         return creds
-
 
     def parse_attendees(self, sender_address, to):
         """
@@ -124,9 +115,8 @@ class Schedule(Module):
         there emails.
         """
         attendees = []
-        attendees.append({'email': sender_address})
+        attendees.append({"email": sender_address})
         for attende in to:
-            attendees.append({'email': attende})
+            attendees.append({"email": attende})
 
         return attendees
-
