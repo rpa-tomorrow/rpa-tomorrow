@@ -77,7 +77,7 @@ The CLI should now be running in your terminal. Type `help` for more instruction
 
 ## Setup Google QAuth 2.0 client secret
 
-Follow this [Google guide](https://support.google.com/cloud/answer/6158849?hl=en) and create a Google Calander API.
+Follow this [Google guide](https://support.google.com/cloud/answer/6158849?hl=en) and create a Google Calendar API.
 
 The scope of the credentials needs to set to `https://www.googleapis.com/auth/calendar.events.owned`
 
