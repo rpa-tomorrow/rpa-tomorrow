@@ -1,8 +1,13 @@
 import sys
 import commands
+import config
+from lib.settings import SETTINGS, load_settings
 
 
 def cli():
+
+    load_settings()
+
     while True:
         txt = sys.stdin.readline().strip()
 

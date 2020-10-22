@@ -4,7 +4,9 @@ from lib import Error
 from lib.automate import Automate
 from lib.nlp import nlp
 from datetime import datetime, timedelta
+from lib.settings import SETTINGS, load_settings
 
+load_settings()
 automate = Automate()
 n = nlp.NLP("en_rpa_simple")
 

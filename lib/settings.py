@@ -1,66 +1,29 @@
-SETTINGS = {
-    # Add your user here
-    "user": {
-        "name": "John Doe",
-        "email": {
-            "address": "johndoe@email.com",
-            "username": None,
-            "password": None,
-            "ssl": False,
-            "host": "localhost",
-            "port": 1025,
-        },
-    },
-    "contacts": {
-        "Aron Widforss": {
-            "email": {
-                "address": "aron@antarkt.is",
-                "username": "aronwidforss@fastmail.com",
-                "password": "password",
-                "ssl": True,
-                "host": "smtp.fastmail.com",
-                "port": 465,
-            }
-        },
-        "John Doe": {
-            "email": {
-                "address": "johndoe@email.com",
-                "username": None,
-                "password": None,
-                "ssl": False,
-                "host": "localhost",
-                "port": 1025,
-            }
-        },
-        "Niklas": {
-            "email": {
-                "address": "inaule-6@student.ltu.se",
-                "username": "niklas",
-                "password": "salkin",
-                "ssl": False,
-                "host": "localhost",
-                "port": 1025,
-            },
-        },
-        "John Wilsson": {
-            "email": {
-                "address": "john.wilsson@email.com",
-                "username": None,
-                "password": None,
-                "ssl": False,
-                "host": "localhost",
-                "port": 1025,
-            },
-        },
-        "John Andersson": {
-            "email": {
-                "address": "jAndersson@email.com",
-                "username": None,
-                "password": None,
-                "ssl": False,
-                "host": "localhost",
-                "port": 1025,
-            },
-        },
-    },
-}
+import yaml
+from lib.cli.config import *
+
+SETTINGS = {}
+
+
+def load_settings():
+    load_user()
+
+    load_local_contacts()
+
+
+def load_user():
+    with open("config/user.yaml", "r") as stream:
+        SETTINGS["user"] = yaml.safe_load(stream)
+
+    if SETTINGS["user"]["name"] == "":
+        SETTINGS["user"]["name"] = config_user_name()
+        update_settings("config/user", SETTINGS["user"])
+
+
+def load_local_contacts():
+    with open("config/contacts.yaml", "r") as stream:
+        SETTINGS["contacts"] = yaml.safe_load(stream)
+
+
+def update_settings(file_path, data):
+    with open(file_path + ".yaml", "w", encoding="utf8") as outfile:
+        yaml.dump(data, outfile)

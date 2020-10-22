@@ -2,7 +2,9 @@ import sys
 
 from lib import Error
 from lib.automate import Automate
+from lib.settings import SETTINGS, load_settings
 
+load_settings()
 automate = Automate()
 
 # Enable the SMTP server before running the following
