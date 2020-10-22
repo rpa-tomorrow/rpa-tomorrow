@@ -10,7 +10,10 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
 # If modifying these scopes, delete the files *.pickle.
-SCOPES = ["https://www.googleapis.com/auth/calendar.events.owned"]
+SCOPES = [
+    "https://www.googleapis.com/auth/calendar.events.owned",
+    "https://www.googleapis.com/auth/calendar.readonly",
+]
 
 
 class Schedule(Module):
@@ -58,12 +61,28 @@ class Schedule(Module):
             "end": {"dateTime": end_time},
             "attendees": self.parse_attendees(settings["address"], self.to),
         }
+        self.event = event
 
         # Get or create user credentials
         creds = self.credentials(username)
 
         # Create Event using Google calendar API
         service = build("calendar", "v3", credentials=creds)
+        self.service = service
+
+        # Check if we are busy
+        freebusy = service.freebusy().query(body={
+            "items": [
+                {"id": "primary"}
+            ],
+            "timeMin": start_time,
+            "timeMax": end_time,
+        }).execute()
+
+        if len(freebusy["calendars"]["primary"]["busy"]):
+            self.followup_type = "self_busy"
+            return None, "You seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
+
         event = service.events().insert(calendarId="primary", body=event).execute()
 
         return "Event created, see link: %s" % (event.get("htmlLink")), None
@@ -81,6 +100,14 @@ class Schedule(Module):
             return self.run(self.to, when, self.body, self.sender)
         elif self.followup_type == "body":
             return self.run(self.to, self.when, answer, self.sender)
+        elif self.followup_type == "self_busy":
+            if answer == "" or answer.lower() == "y" or answer.lower() == "yes":
+                event = self.service.events().insert(calendarId="primary", body=self.event).execute()
+                return "Event created, see link: %s" % (event.get("htmlLink")), None
+            elif answer.lower() == "n" or answer.lower() == "no":
+                return "No event created", None
+            else:
+                return self.run(self.to, self.when, self.body, self.sender)
         else:
             raise NotImplementedError("Did not find any valid followup question to answer.")
 
