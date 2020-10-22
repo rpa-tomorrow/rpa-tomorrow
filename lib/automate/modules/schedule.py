@@ -71,15 +71,24 @@ class Schedule(Module):
         self.service = service
 
         # Check if we are busy
+        to_items = [{"id": email} for email in to]
         freebusy = (
             service.freebusy()
-            .query(body={"items": [{"id": "primary"}], "timeMin": start_time, "timeMax": end_time})
+            .query(body={"items": [{"id": "primary"}] + to_items, "timeMin": start_time, "timeMax": end_time})
             .execute()
         )
+        to_busy = list(map(lambda x: x[0], filter(lambda x: x[1]["busy"], list(freebusy["calendars"].items())[1:])))
 
-        if len(freebusy["calendars"]["primary"]["busy"]):
+        other = f"{', '.join(to_busy[:-1])} and {to_busy[-1]}" if len(to_busy) > 1 else "".join(to_busy)
+        if len(freebusy["calendars"]["primary"]["busy"]) and len(to_busy):
+            self.followup_type = "both_busy"
+            return None, f"You as well as {other} seem to be busy. Do you want to book the meeting anyway? [Y/n]"
+        elif len(freebusy["calendars"]["primary"]["busy"]):
             self.followup_type = "self_busy"
             return None, "You seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
+        elif len(to_busy):
+            self.followup_type = "to_busy"
+            return None, f"{other} seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
 
         event = service.events().insert(calendarId="primary", body=event).execute()
 
@@ -98,7 +107,7 @@ class Schedule(Module):
             return self.run(self.to, when, self.body, self.sender)
         elif self.followup_type == "body":
             return self.run(self.to, self.when, answer, self.sender)
-        elif self.followup_type == "self_busy":
+        elif self.followup_type == "self_busy" or self.followup_type == "both_busy" or self.followup_type == "to_busy":
             if answer == "" or answer.lower() == "y" or answer.lower() == "yes":
                 event = self.service.events().insert(calendarId="primary", body=self.event).execute()
                 return "Event created, see link: %s" % (event.get("htmlLink")), None
