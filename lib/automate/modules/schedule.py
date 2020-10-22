@@ -40,8 +40,7 @@ class Schedule(Module):
             self.followup_type = "body"
             return None, "Found no event summary. What is the event about"
 
-        user, _ = fuzzy.extractOne(self.sender, SETTINGS["users"].keys())
-        settings = SETTINGS["users"][user]["email"]
+        settings = sender["email"]
         username = settings.get("username")
 
         summary = self.body

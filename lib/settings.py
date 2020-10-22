@@ -1,6 +1,17 @@
 SETTINGS = {
     # Add your user here
-    "users": {
+    "user": {
+        "name": "John Doe",
+        "email": {
+            "address": "johndoe@email.com",
+            "username": None,
+            "password": None,
+            "ssl": False,
+            "host": "localhost",
+            "port": 1025,
+        },
+    },
+    "contacts": {
         "Aron Widforss": {
             "email": {
                 "address": "aron@antarkt.is",

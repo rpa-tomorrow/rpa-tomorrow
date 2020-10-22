@@ -14,9 +14,9 @@ class NLP:
         matches = re.findall(r"\'(.+?)\'", doc)
         return ",".join(matches)
 
-    def sendAutomate(self, verb, recipients, when, body, sender):
+    def sendAutomate(self, verb, recipients, when, body):
         automate = Automate()
-        return automate.run(verb, recipients, when, body, sender)
+        return automate.run(verb, recipients, when, body)
 
     def run(self, text):
         """
@@ -58,7 +58,7 @@ class NLP:
         for verb in verbs:
             if verb in actions:
                 text = " ".join(body)
-                response = self.sendAutomate(verb, to, time, text, "John Doe")
+                response = self.sendAutomate(verb, to, time, text)
                 return response
 
         return "I did not understand"

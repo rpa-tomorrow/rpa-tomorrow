@@ -14,7 +14,7 @@ Not using the NLP module since the time is not correctly parsed atm.
 try:
     when = datetime.now() + timedelta(seconds=5.0)  # timestamp at: now + 5s
     body = "This is a test."
-    response = automate.run("remind", None, when, body, None)
+    response = automate.run("remind", None, when, body)
     print(response)
 except Error as err:
     print(err, file=sys.stdout)

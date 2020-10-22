@@ -10,8 +10,7 @@ try:
     module_name = "send"
     to = ["John"]
     body = "Hello World!"
-    sender = "John Doe"
-    response = automate.run(module_name, to, None, body, sender)
+    response = automate.run(module_name, to, None, body)
     print(response)
 except Error as err:
     print(err, file=sys.stdout)

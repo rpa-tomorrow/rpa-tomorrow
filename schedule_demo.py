@@ -15,7 +15,7 @@ try:
     # support Schedule yet
     # response = n.run(text)
     when = datetime.utcnow() + timedelta(hours=5.0)  # timestamp at: now + 5 hrs
-    response = automate.run("schedule", ["rpa@substorm.com"], when, "Schedule demo", "Niklas")
+    response = automate.run("schedule", ["rpa@substorm.com"], when, "Schedule demo")
 
     print(response)
 except Error as err:
