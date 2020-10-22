@@ -9,8 +9,8 @@ class Automate:
     def __init__(self):
         """ Register new modules here """
         self.modules = [
-            import_module("lib.automate.modules.send").Send,
-            import_module("lib.automate.modules.schedule").Schedule,
+            #import_module("lib.automate.modules.send").Send,
+            #import_module("lib.automate.modules.schedule").Schedule,
             import_module("lib.automate.modules.reminder").Reminder,
         ]
         self.verbs = {}
@@ -32,19 +32,14 @@ class Automate:
         """
         return list(SETTINGS["users"].keys())
 
-    def run(self, module_name, to, when, body):
+    def run(self, module_name, text):
         """
         Run automation on registered module.
         :param module_name: Something close to a keyword of a automation
                             module. This is handled via fuzzy search.
         :type module_name: string
-        :param to: Intended recipients. Should be fuzzy in the future.
-        :type to: list[string]
-        :param when: When the command should be executed. Not currently used.
-        :type when: datetime.datetime
-        :param body: A body text of the task, if relevant.
-        :type body: string
-        :return: Response from automation module.
+        :param text: The text to interpret.
+        :type text: string
         :rtype: string
         """
         sender = SETTINGS["user"]
@@ -66,7 +61,7 @@ class Automate:
                 instance = self.verbs[fuzzy_match]()
             else:
                 raise AutomationNotFoundError("Automation module not found")
-        return handle_response(*instance.run(to, when, body, sender))
+        return handle_response(*instance.run(text, sender))
 
 
 class NoResponseError(Error):

@@ -1,11 +1,13 @@
 """
 The reminder automation module
 """
-from datetime import datetime
 import sys
+import lib.automate.modules.tools.time_convert as tc
+import spacy
+
+from datetime import datetime
 from threading import Timer
 from subprocess import run
-
 from lib import OSNotSupportedError, TimeIsInPastError
 from lib.automate.modules import Module
 
@@ -38,7 +40,7 @@ class Reminder(Module):
             # TODO: Add windows call here
             pass
 
-    def run(self, _to, when, body, _sender):
+    def run(self, text, sender):
         """
         Schedules a reminder which will show up in the users system at the
         specified time with the specified information. Raises an error if the
@@ -52,26 +54,25 @@ class Reminder(Module):
         :param body: The text to be shown in the notification
         :type body: text
         """
-        self.to = _to
-        self.when = when
-        self.body = body
-        self.sender = _sender
+        self.to, self.when, self.body = self.nlp(text)
+
+        self.sender = sender
         self.followup_type = None
 
-        if not isinstance(when, datetime):
+        if not isinstance(self.when, datetime):
             self.followup_type = "when"
             return (
                 None,
                 "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format",
             )
-        elif not body:
+        elif not self.body:
             self.followup_type = "body"
             return None, "Found no message body. What message should be sent"
 
-        when_delta = (when - datetime.now()).total_seconds()  # convert to difference in seconds
+        when_delta = (self.when - datetime.now()).total_seconds()  # convert to difference in seconds
         if when_delta < 0.0:
             raise TimeIsInPastError(
-                when.strftime("%Y-%m-%d %H:%M:%S"),
+                self.when.strftime("%Y-%m-%d %H:%M:%S"),
                 "The specified time of the reminder is in the past and can not" + " be scheduled",
             )
 
@@ -82,10 +83,10 @@ class Reminder(Module):
                 + " it is currently not supported by the program",
             )
 
-        t = Timer(when_delta, lambda: self.notify(sys.platform, body))
+        t = Timer(when_delta, lambda: self.notify(sys.platform, self.body))
         t.start()
         return (
-            f"Reminder scheduled for {when.strftime('%Y-%m-%d %H:%M:%S')}",
+            f"Reminder scheduled for {self.when.strftime('%Y-%m-%d %H:%M:%S')}",
             None,
         )
 
@@ -99,9 +100,38 @@ class Reminder(Module):
                 when = datetime.fromisoformat(answer)
             except Exception:
                 when = None
-            return self.run(self.to, when, self.body, self.sender)
+            return self.run(self.to, self.when, self.body, self.sender)
 
         elif self.followup_type == "body":
             return self.run(self.to, self.when, answer, self.sender)
         else:
             raise NotImplementedError("Did not find any valid followup question to answer.")
+
+    def nlp(self, text):
+        """
+        """
+        nlp = spacy.load("en_rpa_simple_reminder")
+        doc = nlp(text)
+
+        to = []
+        when = []
+        body = []
+
+        for token in doc:
+            if token.dep_ == "TO":
+                to.append(token.text)
+            elif token.dep_ == "WHEN":
+                when.append(token.text)
+            elif token.dep_ == "BODY":
+                body.append(token.text)
+
+        time = datetime.now()
+        if len(when) == 0:
+            time = time + timedelta(seconds=5)
+        else:
+            time = tc.parse_time(when)
+
+        _body = " ".join(body)
+
+        return (to, time, _body) 
+
