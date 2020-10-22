@@ -1,7 +1,6 @@
 import sys
 import commands
-import config
-from lib.settings import SETTINGS, load_settings
+from lib.settings import load_settings
 
 
 def cli():

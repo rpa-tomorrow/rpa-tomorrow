@@ -10,4 +10,3 @@ def config_user_name():
 
 def config_email():
     pass
-

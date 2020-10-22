@@ -1,5 +1,5 @@
 import yaml
-from lib.cli.config import *
+from lib.cli.config import config_user_name
 
 SETTINGS = {}
 
