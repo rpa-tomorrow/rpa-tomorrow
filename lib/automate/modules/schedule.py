@@ -71,13 +71,11 @@ class Schedule(Module):
         self.service = service
 
         # Check if we are busy
-        freebusy = service.freebusy().query(body={
-            "items": [
-                {"id": "primary"}
-            ],
-            "timeMin": start_time,
-            "timeMax": end_time,
-        }).execute()
+        freebusy = (
+            service.freebusy()
+            .query(body={"items": [{"id": "primary"}], "timeMin": start_time, "timeMax": end_time})
+            .execute()
+        )
 
         if len(freebusy["calendars"]["primary"]["busy"]):
             self.followup_type = "self_busy"
