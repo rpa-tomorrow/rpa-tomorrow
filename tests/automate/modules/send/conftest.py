@@ -4,7 +4,7 @@ from lib.automate.modules.send import Send
 
 
 TEST_SETTINGS = {
-    "users": {
+    "contacts": {
         "First Last": {
             "email": {
                 "address": "first.last@email.com",
