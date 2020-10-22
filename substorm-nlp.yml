@@ -119,6 +119,5 @@ dependencies:
   - zipp=3.1.0=py_0
   - zlib=1.2.11=h7b6447c_3
   - pip:
-    - caldav==0.7.1
-    - en-rpa-simple==0.0.1
+      - caldav==0.7.1
 prefix: /home/user/miniconda3/envs/substorm-nlp
