@@ -1,7 +1,5 @@
 from __future__ import print_function
 from lib.automate.modules import Module, NoSenderError
-from lib.settings import SETTINGS
-from fuzzywuzzy import process as fuzzy
 from datetime import datetime, timedelta
 import pickle
 import os.path
