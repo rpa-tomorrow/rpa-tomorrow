@@ -18,18 +18,17 @@ class Send(Module):
         self.to = to
         self.when = when
         self.body = body
-        self.sender = sender
 
         if not sender:
             raise NoSenderError("No sender found!")
 
         self.followup_type = None
-        self.user, _ = fuzzy.extractOne(sender, SETTINGS["users"].keys())
-        self.settings = SETTINGS["users"][self.user]["email"]
+        self.sender = sender
+        self.settings = sender["email"]
         self.username = self.settings.get("username")
         self.password = self.settings.get("password")
         self.subject = body.partition("\n")[0]
-        self.content = body + f"\n\nRegards,\n{self.user}"
+        self.content = body + f"\n\nRegards,\n{sender['name']}"
 
         if not to or len(to) == 0:
             self.followup_type = "to1"
@@ -45,8 +44,7 @@ class Send(Module):
 
         if not self.is_email(receiver):
             # filter out the contacts that does not need to be considered
-            possible_receivers = list(filter(lambda u: not u == self.user, SETTINGS["users"].keys()))
-            possible_receivers = fuzzy.extract(receiver, possible_receivers)
+            possible_receivers = fuzzy.extract(receiver, SETTINGS["contacts"].keys())
             possible_receivers = list(filter(lambda x: x[1] > 75, possible_receivers))
 
             # if there are multiple possible receivers then return a string of these that will
@@ -113,7 +111,7 @@ class Send(Module):
             if not answer:
                 return self.run(None, self.when, self.body, self.sender)
             elif not self.is_email(answer):
-                possible_receivers = list(filter(lambda u: not u == self.user, SETTINGS["users"].keys()))
+                possible_receivers = SETTINGS["contacts"].keys()
                 receiver = self.get_email(fuzzy.extractOne(answer, possible_receivers)[0])
             else:
                 receiver = answer
@@ -133,7 +131,7 @@ class Send(Module):
         If no user is found, i.e. there are no key equal to the name given then an error is raised
         """
         try:
-            return SETTINGS["users"][name]["email"]["address"]
+            return SETTINGS["contacts"][name]["email"]["address"]
         except KeyError:
             raise NoContactFoundError("No contact with name " + name + " was found")
 

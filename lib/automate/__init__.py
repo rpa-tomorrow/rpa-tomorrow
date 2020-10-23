@@ -32,7 +32,7 @@ class Automate:
         """
         return list(SETTINGS["users"].keys())
 
-    def run(self, module_name, to, when, body, sender):
+    def run(self, module_name, to, when, body):
         """
         Run automation on registered module.
         :param module_name: Something close to a keyword of a automation
@@ -44,12 +44,10 @@ class Automate:
         :type when: datetime.datetime
         :param body: A body text of the task, if relevant.
         :type body: string
-        :param sender: Who is sending this. Fuzzy match against
-                       SETTINGS[users].keys().
-        :type sender: string
         :return: Response from automation module.
         :rtype: string
         """
+        sender = SETTINGS["user"]
 
         def handle_response(success, response):
             if response:

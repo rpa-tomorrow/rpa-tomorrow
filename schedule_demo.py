@@ -4,7 +4,9 @@ from lib import Error
 from lib.automate import Automate
 from lib.nlp import nlp
 from datetime import datetime, timedelta
+from lib.settings import load_settings
 
+load_settings()
 automate = Automate()
 n = nlp.NLP("en_rpa_simple")
 
@@ -15,7 +17,7 @@ try:
     # support Schedule yet
     # response = n.run(text)
     when = datetime.utcnow() + timedelta(hours=5.0)  # timestamp at: now + 5 hrs
-    response = automate.run("schedule", ["rpa@substorm.com"], when, "Schedule demo", "Niklas")
+    response = automate.run("schedule", ["rpa@substorm.com"], when, "Schedule demo")
 
     print(response)
 except Error as err:
