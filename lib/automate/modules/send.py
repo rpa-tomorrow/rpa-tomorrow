@@ -1,12 +1,14 @@
-from fuzzywuzzy import process as fuzzy
-from email.message import EmailMessage
 import smtplib
 import re
+import spacy
+import lib.automate.modules.tools.time_convert as tc
 
+from fuzzywuzzy import process as fuzzy
+from email.message import EmailMessage
 from lib.automate.modules import Module, NoSenderError
 from lib import Error
 from lib.settings import SETTINGS
-
+from datetime import datetime, timedelta
 
 class Send(Module):
     verbs = ["send", "mail", "e-mail", "email"]
@@ -14,9 +16,13 @@ class Send(Module):
     def __init__(self):
         super(Send, self).__init__()
 
-    def run(self, to, when, body, sender):
-        self.to = to
-        self.when = when
+    def run(self, text, sender):
+        to, when, body = self.nlp(text)
+        return self.execute_task(to, when, body, sender)
+    
+    def execute_task(self, to, when, body, sender):
+        self.to = to 
+        self.when = when 
         self.body = body
         self.sender = sender
 
@@ -98,6 +104,7 @@ class Send(Module):
 
         return response
 
+
     def followup(self, answer: str) -> (str, str):
         """
         Follow up method after the module have had to ask a question to clarify some parameter, or just
@@ -105,13 +112,13 @@ class Send(Module):
         """
         if self.followup_type == "to1":
             if not answer:
-                return self.run(None, self.when, self.body, self.sender)
+                return self.execute_task(None, self.when, self.body, self.sender)
             else:
-                return self.run([answer], self.when, self.body, self.sender)
+                return self.execute_task([answer], self.when, self.body, self.sender)
 
         elif self.followup_type == "to2":
             if not answer:
-                return self.run(None, self.when, self.body, self.sender)
+                return self.execute_task(None, self.when, self.body, self.sender)
             elif not self.is_email(answer):
                 possible_receivers = list(filter(lambda u: not u == self.user, SETTINGS["users"].keys()))
                 receiver = self.get_email(fuzzy.extractOne(answer, possible_receivers)[0])
@@ -123,9 +130,10 @@ class Send(Module):
             return response, None
 
         elif self.followup_type == "body":
-            return self.run(self.to, self.when, answer, self.sender)
+            return self.execute_task(self.to, self.when, answer, self.sender)
         else:
             raise NotImplementedError("Did not find any valid followup question to answer.")
+
 
     def get_email(self, name: str) -> str:
         """
@@ -142,6 +150,34 @@ class Send(Module):
         regex = "^([a-z0-9]+[\\._-]?[a-z0-9]+)[@](\\w+[.])+\\w{2,3}$"
         return re.search(regex, email)
 
+    def nlp(self, text):
+        """
+        Lets the reminder model work on the given text.  
+        """
+        nlp = spacy.load("en_rpa_simple_email")
+        doc = nlp(text)
+
+        to = []
+        when = []
+        body = []
+
+        for token in doc:
+            if token.dep_ == "TO":
+                to.append(token.text)
+            elif token.dep_ == "WHEN":
+                when.append(token.text)
+            elif token.dep_ == "BODY":
+                body.append(token.text)
+
+        time = datetime.now()
+        if len(when) == 0:
+            time = time + timedelta(seconds=5)
+        else:
+            time = tc.parse_time(when)
+
+        _body = " ".join(body)
+
+        return (to, time, _body) 
 
 class NoContactFoundError(Error):
     pass

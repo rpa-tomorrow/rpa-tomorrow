@@ -7,11 +7,9 @@ automate = Automate()
 
 # Enable the SMTP server before running the following
 try:
-    module_name = "send"
-    to = ["John"]
-    body = "Hello World!"
+    text = "send Hello World! to John"
     sender = "John Doe"
-    response = automate.run(module_name, to, None, body, sender)
+    response = automate.run(module_name, text, sender)
     print(response)
 except Error as err:
     print(err, file=sys.stdout)

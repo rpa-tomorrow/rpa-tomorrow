@@ -9,7 +9,7 @@ class Automate:
     def __init__(self):
         """ Register new modules here """
         self.modules = [
-            #import_module("lib.automate.modules.send").Send,
+            import_module("lib.automate.modules.send").Send,
             #import_module("lib.automate.modules.schedule").Schedule,
             import_module("lib.automate.modules.reminder").Reminder,
         ]
