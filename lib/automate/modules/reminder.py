@@ -60,7 +60,10 @@ class Reminder(Module):
 
         if not isinstance(when, datetime):
             self.followup_type = "when"
-            return None, "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
+            return (
+                None,
+                "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format",
+            )
         elif not body:
             self.followup_type = "body"
             return None, "Found no message body. What message should be sent"

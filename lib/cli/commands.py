@@ -9,6 +9,8 @@ sys.path.append(".")
 
 from lib.nlp import nlp  # noqa: E402
 
+MODEL_NAME = "en_rpa_simple"
+
 
 def commands(arr):
     """
@@ -20,7 +22,7 @@ def commands(arr):
         prompt()
     else:
         listToStr = " ".join(map(str, arr))
-        n = nlp.NLP()
+        n = nlp.NLP(MODEL_NAME)
         try:
             response = n.run(listToStr)
             print(response + "\n")
