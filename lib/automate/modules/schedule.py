@@ -1,8 +1,12 @@
 from __future__ import print_function
-from lib.automate.modules import Module, NoSenderError
-from datetime import datetime, timedelta
+import caldav
+import lib.automate.modules.tools.time_convert as tc
 import pickle
 import os.path
+
+from fuzzywuzzy import process as fuzzy
+from lib.automate.modules import Module, NoSenderError
+from datetime import datetime, timedelta
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -13,14 +17,17 @@ SCOPES = [
     "https://www.googleapis.com/auth/calendar.readonly",
 ]
 
-
 class Schedule(Module):
     verbs = ["book", "schedule", "meeting"]
 
     def __init__(self):
         super(Schedule, self).__init__()
+    
+    def run(self, text, sender):
+        to, when, body = self.nlp(text)
+        return self.execute_task(to, when, body, sender)
 
-    def run(self, to, when, body, sender):
+    def execute_task(self, to, when, body, sender):
         self.to = to
         self.when = when
         self.body = body
