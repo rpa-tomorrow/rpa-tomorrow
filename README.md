@@ -13,18 +13,10 @@ The purpose of the project is to implement a system where the user can write ins
 
 ## Setup
 
-Create conda environment to handle dependencies.
-
-    conda env create -f substorm-nlp.yml
-    conda activate substorm-nlp
-
-Download spaCy model.
-
-    python -m spacy download en_core_web_sm
-
-Download the current RPA Tomorrow model.
-
-    pip install https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple-0.0.1/en_rpa_simple-0.0.1.tar.gz
+Create and activate conda environment.
+```
+source substorm.sh
+```
 
 ### Python
 
@@ -36,7 +28,7 @@ Example on how to use the automation module is in `demo.py`
 
 The tests can be run with the following command
 
-```bash
+```
 pytest
 ```
 
@@ -53,6 +45,22 @@ python -m smtpd -n -c DebuggingServer localhost:1025
 ```
 
 in your terminal. A local SMTP debugging server is now running on `localhost:1025` and the predefined user `John Doe` in `lib/settings.py` can be used to send emails to this local server. If an email is sent using the module you should now be able to see it in the terminal.
+
+#### Local CalDav server
+
+[Radicale](https://radicale.org/3.0.html) can be used to set up a Local CalDav server. To install run the following command
+
+```
+python3 -m pip install --upgrade radicale
+```
+
+To start the server run
+
+```
+python3 -m radicale --storage-filesystem-folder=~/.var/lib/radicale/collections
+```
+
+Now the server should be up on <localhost:5232>
 
 ### Linux
 
@@ -74,16 +82,6 @@ The CLI can be started as follows
 - Run `python lib/cli/cli.py`
 
 The CLI should now be running in your terminal. Type `help` for more instructions. Currently the CLI is only capable of sending predefined emails if a word similar to `skicka` is entered by the user. Note that you need to have a [local SMTP debugging server](https://github.com/rpa-tomorrow/substorm-nlp/tree/cli-call-automation#local-smtp-server) running for this to work.
-
-## Setup Google QAuth 2.0 client secret
-
-Follow this [Google guide](https://support.google.com/cloud/answer/6158849?hl=en) and create a Google Calendar API.
-
-The scope of the credentials needs to set to `https://www.googleapis.com/auth/calendar.events.owned`
-
-After that download the credentials and put it in `substorm-nlp/` directory, also name it `client_secret.json`.
-
-Now the schedule module should work.
 
 ## Authors
 
