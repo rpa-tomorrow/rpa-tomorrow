@@ -54,7 +54,9 @@ class NLP:
                 persons.append(ent.text)
             elif ent.label_ == "TIME":
                 time = datetime.strptime(ent.text, "%H:%M")
-                date_time = date_time.replace(hour=time.hour, minute=time.minute, second=0)
+                date_time = date_time.replace(
+                    hour=time.hour, minute=time.minute, second=0
+                )
             elif ent.label_ == "DATE":
                 date_time = datetime.strptime(ent.text, "%Y-%m-%d %H:%M")
         if len(persons) < 1:
@@ -66,7 +68,9 @@ class NLP:
                 similarity = verb.similarity(action)
                 if similarity > 0.8:
                     body = self.getBodyBetweenQuotations(text)
-                    response = self.sendAutomate(verb.text, recipients, date_time, body, persons[0])
+                    response = self.sendAutomate(
+                        verb.text, recipients, date_time, body, persons[0]
+                    )
                     return response
 
         return "I did not understand"

@@ -68,11 +68,14 @@ class Reminder(Module):
             self.followup_type = "body"
             return None, "Found no message body. What message should be sent"
 
-        when_delta = (when - datetime.now()).total_seconds()  # convert to difference in seconds
+        when_delta = (
+            when - datetime.now()
+        ).total_seconds()  # convert to difference in seconds
         if when_delta < 0.0:
             raise TimeIsInPastError(
                 when.strftime("%Y-%m-%d %H:%M:%S"),
-                "The specified time of the reminder is in the past and can not" + " be scheduled",
+                "The specified time of the reminder is in the past and can not"
+                + " be scheduled",
             )
 
         if sys.platform not in self.supported_os:
@@ -104,4 +107,6 @@ class Reminder(Module):
         elif self.followup_type == "body":
             return self.run(self.to, self.when, answer, self.sender)
         else:
-            raise NotImplementedError("Did not find any valid followup question to answer.")
+            raise NotImplementedError(
+                "Did not find any valid followup question to answer."
+            )

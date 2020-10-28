@@ -53,7 +53,9 @@ class Send(Module):
             # The user will then be able to enter a more precise name
             # that will be sent to the follow-up method
             if len(possible_receivers) > 1:
-                names = "\n".join(list(map(lambda contact: contact[0], possible_receivers)))
+                names = "\n".join(
+                    list(map(lambda contact: contact[0], possible_receivers))
+                )
                 self.followup_type = "to2"
                 return (
                     None,
@@ -62,7 +64,9 @@ class Send(Module):
             elif len(possible_receivers) == 1:
                 receiver = self.get_email(possible_receivers[0][0])
             else:
-                raise NoContactFoundError("Could not find any contacts with name " + receiver)
+                raise NoContactFoundError(
+                    "Could not find any contacts with name " + receiver
+                )
 
         response = self.send_email(self.settings, receiver, self.subject, self.content)
 
@@ -112,18 +116,24 @@ class Send(Module):
                 return self.run(None, self.when, self.body, self.sender)
             elif not self.is_email(answer):
                 possible_receivers = SETTINGS["contacts"].keys()
-                receiver = self.get_email(fuzzy.extractOne(answer, possible_receivers)[0])
+                receiver = self.get_email(
+                    fuzzy.extractOne(answer, possible_receivers)[0]
+                )
             else:
                 receiver = answer
 
-            response = self.send_email(self.settings, receiver, self.subject, self.content)
+            response = self.send_email(
+                self.settings, receiver, self.subject, self.content
+            )
 
             return response, None
 
         elif self.followup_type == "body":
             return self.run(self.to, self.when, answer, self.sender)
         else:
-            raise NotImplementedError("Did not find any valid followup question to answer.")
+            raise NotImplementedError(
+                "Did not find any valid followup question to answer."
+            )
 
     def get_email(self, name: str) -> str:
         """
