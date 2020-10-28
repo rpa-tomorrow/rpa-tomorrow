@@ -3,6 +3,7 @@ import caldav
 import lib.automate.modules.tools.time_convert as tc
 import pickle
 import os.path
+import spacy
 
 from fuzzywuzzy import process as fuzzy
 from lib.automate.modules import Module, NoSenderError
@@ -17,12 +18,13 @@ SCOPES = [
     "https://www.googleapis.com/auth/calendar.readonly",
 ]
 
+
 class Schedule(Module):
     verbs = ["book", "schedule", "meeting"]
 
     def __init__(self):
         super(Schedule, self).__init__()
-    
+
     def run(self, text, sender):
         to, when, body = self.nlp(text)
         return self.execute_task(to, when, body, sender)
@@ -158,3 +160,29 @@ class Schedule(Module):
             attendees.append({"email": attende})
 
         return attendees
+
+    def nlp(self, text):
+        nlp = spacy.load("en_rpa_simple_calendar")
+        doc = nlp(text)
+
+        to = []
+        when = []
+        body = []
+
+        for token in doc:
+            if token.dep_ == "TO":
+                to.append(token.text)
+            elif token.dep_ == "WHEN":
+                when.append(token.text)
+            elif token.dep_ == "BODY":
+                body.append(token.text)
+
+        time = datetime.now()
+        if len(when) == 0:
+            time = time + timedelta(seconds=5)
+        else:
+            time = tc.parse_time(when)
+
+        _body = " ".join(body)
+
+        return (to, time, _body)

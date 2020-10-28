@@ -10,6 +10,7 @@ from lib import Error
 from lib.settings import SETTINGS
 from datetime import datetime, timedelta
 
+
 class Send(Module):
     verbs = ["send", "mail", "e-mail", "email"]
 
@@ -19,10 +20,10 @@ class Send(Module):
     def run(self, text, sender):
         to, when, body = self.nlp(text)
         return self.execute_task(to, when, body, sender)
-    
+
     def execute_task(self, to, when, body, sender):
-        self.to = to 
-        self.when = when 
+        self.to = to
+        self.when = when
         self.body = body
 
         if not sender:
@@ -102,7 +103,6 @@ class Send(Module):
 
         return response
 
-
     def followup(self, answer: str) -> (str, str):
         """
         Follow up method after the module have had to ask a question to clarify some parameter, or just
@@ -131,7 +131,6 @@ class Send(Module):
             return self.execute_task(self.to, self.when, answer, self.sender)
         else:
             raise NotImplementedError("Did not find any valid followup question to answer.")
-
 
     def get_email(self, name: str) -> str:
         """
@@ -175,7 +174,8 @@ class Send(Module):
 
         _body = " ".join(body)
 
-        return (to, time, _body) 
+        return (to, time, _body)
+
 
 class NoContactFoundError(Error):
     pass

@@ -139,5 +139,4 @@ class Reminder(Module):
 
         _body = " ".join(body)
 
-        return (to, time, _body) 
-
+        return (to, time, _body)
