@@ -1,5 +1,4 @@
 import smtplib
-import re
 import spacy
 import lib.automate.modules.tools.time_convert as tc
 import logging
@@ -10,6 +9,7 @@ from lib.automate.modules import Module, NoSenderError
 from lib import Error
 from lib.settings import SETTINGS
 from datetime import datetime, timedelta
+from lib.utils.email import is_email
 
 
 # Module logger
@@ -55,7 +55,7 @@ class Send(Module):
             self.followup_type = "body"
             return "Found no message body. What message should be sent"
 
-        if not self.is_email(receiver):
+        if not is_email(receiver):
             # filter out the contacts that does not need to be considered
             possible_receivers = fuzzy.extract(receiver, SETTINGS["contacts"].keys())
             possible_receivers = list(filter(lambda x: x[1] > 87, possible_receivers))
@@ -137,11 +137,6 @@ class Send(Module):
             return SETTINGS["contacts"][name]["email"]["address"]
         except KeyError:
             raise NoContactFoundError("No contact with name " + name + " was found")
-
-    def is_email(self, email: str) -> bool:
-        """ Uses regex to check if a incoming string is an email address"""
-        regex = "^([a-z0-9]+[\\._-]?[a-z0-9]+)[@](\\w+[.])+\\w{2,3}$"
-        return re.search(regex, email)
 
     def nlp(self, text):
         """
