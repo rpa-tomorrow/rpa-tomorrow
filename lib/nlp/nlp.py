@@ -1,22 +1,16 @@
 import spacy
-import re
-import lib.nlp.time_convert as tc
 
 from lib.automate import Automate
-from datetime import datetime, timedelta
 
 
 class NLP:
     def __init__(self, model):
         self.nlp = spacy.load(model)
+        self.sim_model = spacy.load("en_core_web_md")
 
-    def getBodyBetweenQuotations(self, doc):
-        matches = re.findall(r"\'(.+?)\'", doc)
-        return ",".join(matches)
-
-    def sendAutomate(self, verb, recipients, when, body):
+    def send_automate(self, verb, text):
         automate = Automate()
-        return automate.run(verb, recipients, when, body)
+        return automate.run(verb, text)
 
     def run(self, text):
         """
@@ -31,34 +25,20 @@ class NLP:
             actions.append(v)
 
         verbs = []
-        nouns = []
-        to = []
-        when = []
-        body = []
         doc = self.nlp(text)
 
         for token in doc:
             if token.dep_ == "ROOT":
                 verbs.append(token.text)
-            elif token.dep_ == "NOUN":
-                nouns.append(token.text)
-            elif token.dep_ == "TO":
-                to.append(token.text)
-            elif token.dep_ == "WHEN":
-                when.append(token.text)
-            elif token.dep_ == "BODY":
-                body.append(token.text)
 
-        time = datetime.now()
-        if len(when) == 0:
-            time = time + timedelta(seconds=5)
-        else:
-            time = tc.parse_time(when)
-
-        for verb in verbs:
-            if verb in actions:
-                text = " ".join(body)
-                response = self.sendAutomate(verb, to, time, text)
+        doc_verb = self.sim_model(verbs[0])
+        for action in actions:
+            doc_action = self.sim_model(action)
+            similarity = doc_action.similarity(doc_verb)
+            if similarity > 0.6:
+                response = self.send_automate(
+                    doc_verb.text, text
+                )
                 return response
 
         return "I did not understand"
