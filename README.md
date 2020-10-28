@@ -13,18 +13,10 @@ The purpose of the project is to implement a system where the user can write ins
 
 ## Setup
 
-Create conda environment to handle dependencies.
-
-    conda env create -f substorm-nlp.yml
-    conda activate substorm-nlp
-
-Download spaCy model.
-
-    python -m spacy download en_core_web_sm
-
-Download the current RPA Tomorrow model.
-
-    pip install https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple-0.0.1/en_rpa_simple-0.0.1.tar.gz
+Create and activate conda environment.
+```
+source substorm.sh
+```
 
 ### Python
 
@@ -36,7 +28,7 @@ Example on how to use the automation module is in `demo.py`
 
 The tests can be run with the following command
 
-```bash
+```
 pytest
 ```
 
