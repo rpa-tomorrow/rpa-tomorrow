@@ -110,9 +110,9 @@ class Schedule(Module):
                 when = datetime.fromisoformat(answer)
             except Exception:
                 when = None
-            return self.run(self.to, when, self.body, self.sender)
+            return self.execute_task(self.to, when, self.body, self.sender)
         elif self.followup_type == "body":
-            return self.run(self.to, self.when, answer, self.sender)
+            return self.execute_task(self.to, self.when, answer, self.sender)
         elif self.followup_type == "self_busy" or self.followup_type == "both_busy" or self.followup_type == "to_busy":
             if answer == "" or answer.lower() == "y" or answer.lower() == "yes":
                 event = self.service.events().insert(calendarId="primary", body=self.event).execute()
@@ -120,7 +120,7 @@ class Schedule(Module):
             elif answer.lower() == "n" or answer.lower() == "no":
                 return "No event created", None
             else:
-                return self.run(self.to, self.when, self.body, self.sender)
+                return self.execute_task(self.to, self.when, self.body, self.sender)
         else:
             raise NotImplementedError("Did not find any valid followup question to answer.")
 
