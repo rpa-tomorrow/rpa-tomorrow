@@ -1,11 +1,9 @@
 from __future__ import print_function
-import caldav
 import lib.automate.modules.tools.time_convert as tc
 import pickle
 import os.path
 import spacy
 
-from fuzzywuzzy import process as fuzzy
 from lib.automate.modules import Module, NoSenderError
 from datetime import datetime, timedelta
 from googleapiclient.discovery import build

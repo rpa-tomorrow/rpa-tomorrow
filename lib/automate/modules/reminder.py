@@ -5,7 +5,7 @@ import sys
 import lib.automate.modules.tools.time_convert as tc
 import spacy
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from threading import Timer
 from subprocess import run
 from lib import OSNotSupportedError, TimeIsInPastError
@@ -105,7 +105,7 @@ class Reminder(Module):
                 when = datetime.fromisoformat(answer)
             except Exception:
                 when = None
-            return self.execute_task(self.to, self.when, self.body, self.sender)
+            return self.execute_task(self.to, when, self.body, self.sender)
 
         elif self.followup_type == "body":
             return self.execute_task(self.to, self.when, answer, self.sender)
@@ -114,7 +114,7 @@ class Reminder(Module):
 
     def nlp(self, text):
         """
-        Lets the reminder model work on the given text.  
+        Lets the reminder model work on the given text.
         """
         nlp = spacy.load("en_rpa_simple_reminder")
         doc = nlp(text)

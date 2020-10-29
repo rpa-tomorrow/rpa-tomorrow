@@ -149,7 +149,7 @@ class Send(Module):
 
     def nlp(self, text):
         """
-        Lets the reminder model work on the given text.  
+        Lets the reminder model work on the given text.
         """
         nlp = spacy.load("en_rpa_simple")
         doc = nlp(text)
