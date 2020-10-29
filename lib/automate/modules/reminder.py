@@ -1,11 +1,13 @@
 """
 The reminder automation module
 """
-from datetime import datetime
 import sys
+import lib.automate.modules.tools.time_convert as tc
+import spacy
+
+from datetime import datetime, timedelta
 from threading import Timer
 from subprocess import run
-
 from lib import OSNotSupportedError, TimeIsInPastError
 from lib.automate.modules import Module
 
@@ -38,7 +40,11 @@ class Reminder(Module):
             # TODO: Add windows call here
             pass
 
-    def run(self, _to, when, body, _sender):
+    def run(self, text, sender):
+        to, when, body = self.nlp(text)
+        return self.execute_task(to, when, body, sender)
+
+    def execute_task(self, _to, when, body, _sender):
         """
         Schedules a reminder which will show up in the users system at the
         specified time with the specified information. Raises an error if the
@@ -46,11 +52,11 @@ class Reminder(Module):
         reminder is in the past.
 
         :param _to: Unused
-        :param _sender: Unused
         :param when: The time to schedule the notification for
         :type when: datetime.datetime
         :param body: The text to be shown in the notification
         :type body: text
+        :param _sender: Unused
         """
         self.to = _to
         self.when = when
@@ -99,9 +105,38 @@ class Reminder(Module):
                 when = datetime.fromisoformat(answer)
             except Exception:
                 when = None
-            return self.run(self.to, when, self.body, self.sender)
+            return self.execute_task(self.to, when, self.body, self.sender)
 
         elif self.followup_type == "body":
-            return self.run(self.to, self.when, answer, self.sender)
+            return self.execute_task(self.to, self.when, answer, self.sender)
         else:
             raise NotImplementedError("Did not find any valid followup question to answer.")
+
+    def nlp(self, text):
+        """
+        Lets the reminder model work on the given text.
+        """
+        nlp = spacy.load("en_rpa_simple_reminder")
+        doc = nlp(text)
+
+        to = []
+        when = []
+        body = []
+
+        for token in doc:
+            if token.dep_ == "TO":
+                to.append(token.text)
+            elif token.dep_ == "WHEN":
+                when.append(token.text)
+            elif token.dep_ == "BODY":
+                body.append(token.text)
+
+        time = datetime.now()
+        if len(when) == 0:
+            time = time + timedelta(seconds=5)
+        else:
+            time = tc.parse_time(when)
+
+        _body = " ".join(body)
+
+        return (to, time, _body)
