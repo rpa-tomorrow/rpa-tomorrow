@@ -151,7 +151,7 @@ class Send(Module):
         """
         Lets the reminder model work on the given text.  
         """
-        nlp = spacy.load("en_rpa_simple_email")
+        nlp = spacy.load("en_rpa_simple")
         doc = nlp(text)
 
         to = []
