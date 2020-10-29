@@ -1,7 +1,7 @@
 email:
   address: johndoe@email.com
   host: localhost
-  password: None
+  password: 
   port: 1025
   ssl: false
   username: None
