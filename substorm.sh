@@ -2,8 +2,6 @@
 MULTILINE1=$(conda env list \
 	   | grep -F substorm-nlp)
 
-echo "test = " +$MULTILINE1
-
 if [ MULTILINE1 = ""]; then
    echo "no conda env found, creating env..."
    conda env create -f substorm-nlp.yml
