@@ -1,11 +1,13 @@
 from fuzzywuzzy import process as fuzzy
+
+from lib.automate.google import Google, ContactBookInterruptedByUserError
 from lib.settings import SETTINGS, load_local_contacts
 from lib.utils.email import is_email
 
 MIN_SCORE = 75  # the minimum score needed to consider the fuzzy match
 
 
-def get_emails(names):
+def get_emails(names, sender=None):
     """
     Returns a dictionary containing three key-value pairs given a string list
     containing names or emails. The key-value pairs reflects the results of
@@ -25,6 +27,7 @@ def get_emails(names):
     emails = []
     uncertain_contacts = []
     unknown_contacts = []
+    google = None
 
     for name in names:
         # Assume valid recipient if input is already an email
@@ -47,7 +50,21 @@ def get_emails(names):
             name, _ = matches[0]
             emails.append(SETTINGS["contacts"][name]["email"]["address"])
         else:
-            unknown_contacts.append(name)
+            if sender:
+                if not google:
+                    settings = sender["email"]
+                    username = settings.get("username")
+                    google = Google(username).people()
+                try:
+                    possible_receivers = list(set(google.search([name])))
+                except ContactBookInterruptedByUserError:
+                    possible_receivers = []
+                if len(possible_receivers) == 0:
+                    unknown_contacts.append(name)
+                else:
+                    emails.append(possible_receivers[0])
+            else:
+                unknown_contacts.append(name)
 
     return {
         "emails": emails,

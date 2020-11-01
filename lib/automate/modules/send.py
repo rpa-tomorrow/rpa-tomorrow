@@ -3,13 +3,14 @@ import spacy
 import lib.utils.tools.time_convert as tc
 import logging
 
-from fuzzywuzzy import process as fuzzy
 from email.message import EmailMessage
+
 from lib.automate.modules import Module, NoSenderError
 from lib import Error
 from lib.settings import SETTINGS
 from datetime import datetime, timedelta
-from lib.utils.email import is_email
+
+from lib.utils.contacts import get_emails
 
 
 # Module logger
@@ -48,35 +49,27 @@ class Send(Module):
         if not to or len(to) == 0:
             self.followup_type = "to1"
             return "Found no receiver. Please enter the name of the receiver"
-        elif len(to) == 1:
-            receiver = to[0]
-            self.receiver = receiver
-        else:
+        elif len(to) > 1:
             raise ToManyReceiversError("Can only handle one (1) receiver at this time")
 
         if not body:
             self.followup_type = "body"
             return "Found no message body. What message should be sent"
 
-        if not is_email(receiver):
-            # filter out the contacts that does not need to be considered
-            possible_receivers = fuzzy.extract(receiver, SETTINGS["contacts"].keys())
-            possible_receivers = list(filter(lambda x: x[1] > 87, possible_receivers))
-
-            # if there are multiple possible receivers then return a string of these that will
-            # be displayed to the user.
-            #
-            # The user will then be able to enter a more precise name
-            # that will be sent to the follow-up method
-            if len(possible_receivers) > 1:
-                names = "\n".join(list(map(lambda contact: contact[0], possible_receivers)))
-                self.followup_type = "to2"
-                return "Found multiple contacts: \n" + names + "\nPlease enter the name"
-            elif len(possible_receivers) == 1:
-                receiver = self.get_email(possible_receivers[0][0])
-                self.receiver = receiver
-            else:
-                raise NoContactFoundError("Could not find any contacts with name " + receiver)
+        parsed_recipients = get_emails(self.to, sender)
+        recipients = parsed_recipients["emails"]
+        self.receiver = recipients
+        for (name, candidates) in parsed_recipients["uncertain"]:
+            self.uncertain_attendee = (name, candidates)
+            self.followup_type = "to_uncertain"
+            followup_str = f"Found multiple contacts with the name {name}\n"
+            for i in range(len(candidates)):
+                c_name, c_email = candidates[i]
+                followup_str += f"[{i+1}] {c_name} - {c_email}\n"
+            followup_str += f"Please choose one (1-{len(candidates)})"
+            return followup_str
+        for name in parsed_recipients["unknown"]:
+            raise NoContactFoundError("Could not find any contacts with name " + name)
 
     def execute(self):
         return self.send_email(self.settings, self.receiver, self.subject, self.content)
@@ -120,14 +113,19 @@ class Send(Module):
             else:
                 return self.prepare_processed([answer], self.when, self.body, self.sender)
 
-        elif self.followup_type == "to2":
-            if not answer:
-                return self.prepare_processed(None, self.when, self.body, self.sender)
-            else:
-                return self.prepare_processed([answer], self.when, self.body, self.sender)
-
         elif self.followup_type == "body":
             return self.prepare_processed(self.to, self.when, answer, self.sender)
+
+        elif self.followup_type == "to_uncertain":
+            try:
+                choice = int(answer) - 1
+            except Exception:
+                return self.prepare_processed(self.to, self.when, self.body, self.sender)
+            name, candidates = self.uncertain_attendee
+            if choice >= 0 and choice < len(candidates):
+                self.to.remove(name)  # update to so recursive call continues resolving new attendees
+                self.to.append(candidates[choice][1])  # add email of chosen attendee
+            return self.prepare_processed(self.to, self.when, self.body, self.sender)
         else:
             raise NotImplementedError("Did not find any valid followup question to answer.")
 
