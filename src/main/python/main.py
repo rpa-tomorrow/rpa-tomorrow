@@ -6,6 +6,7 @@ from PyQt5.QtCore import Qt
 from process_block_demo import ProcessEditorView
 from chatbot_demo import ChatbotView
 
+import qdarkstyle
 import sys
 
 PROCESS_EDITOR_VIEW = 0
@@ -19,6 +20,7 @@ class MainWindow(QMainWindow):
 
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
+
 
         # Main frame, almost everything goes here
         self.main_layout = QStackedLayout()
@@ -35,7 +37,7 @@ class MainWindow(QMainWindow):
         bottom_layout = QHBoxLayout()
         bottom_layout.setContentsMargins(8, 0, 8, 0)
         bottom = QWidget()
-        bottom.setStyleSheet("background-color: lightgray")
+        # bottom.setStyleSheet("background-color: lightgray")
         bottom.setMaximumHeight(24)
         bottom.setMinimumHeight(24)
         self.info_label = QLabel("Done!")
@@ -79,6 +81,7 @@ def exit_program():
 if __name__ == '__main__':
     appctxt = ApplicationContext()
     window = MainWindow()
+    window.setStyleSheet(qdarkstyle.load_stylesheet(qt_api='pyqt5'))
     window.resize(1200, 800)
     window.show()
     exit_code = appctxt.app.exec_()
