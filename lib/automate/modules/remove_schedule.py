@@ -66,9 +66,13 @@ class RemoveSchedule(Module):
 
     def followup(self, answer):
         """ """
+        print(answer)
         if self.followup_type == "self_busy":
-            self.service.events().delete(calendarId="primary", eventId=self.event["id"]).execute()
-            return f"'{self.event['summary']}' was removed from your calendar", None
+            if answer.lower() in ["y", "yes"]:
+                self.service.events().delete(calendarId="primary", eventId=self.event["id"]).execute()
+                return f"'{self.event['summary']}' was removed from your calendar", None
+            else:
+                return "Event not removed", None
         else:
             raise NotImplementedError("")
 
