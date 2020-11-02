@@ -7,12 +7,8 @@ import os
 
 sys.path.append(".")
 
-from lib.nlp import nlp  # noqa: E402
 
-MODEL_NAME = "en_rpa_simple"
-
-
-def commands(arr):
+def commands(arr, nlp):
     """
     Commands supported by the CLI
     """
@@ -22,12 +18,11 @@ def commands(arr):
         prompt()
     else:
         listToStr = " ".join(map(str, arr))
-        n = nlp.NLP(MODEL_NAME)
         try:
-            response = n.run(listToStr)
+            response = nlp.run(listToStr)
             print(response + "\n")
-        except Exception:
-            print("Failed to execute action.\n", file=sys.stderr)
+        except Exception as e:
+            print("Failed to execute action.\n", e, file=sys.stderr)
 
 
 def prompt():

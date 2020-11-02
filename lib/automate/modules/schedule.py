@@ -1,8 +1,11 @@
 from __future__ import print_function
-from lib.automate.modules import Module, NoSenderError
-from datetime import datetime, timedelta
+import lib.automate.modules.tools.time_convert as tc
 import pickle
 import os.path
+import spacy
+
+from lib.automate.modules import Module, NoSenderError
+from datetime import datetime, timedelta
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -20,7 +23,11 @@ class Schedule(Module):
     def __init__(self):
         super(Schedule, self).__init__()
 
-    def run(self, to, when, body, sender):
+    def run(self, text, sender):
+        to, when, body = self.nlp(text)
+        return self.execute_task(to, when, body, sender)
+
+    def execute_task(self, to, when, body, sender):
         self.to = to
         self.when = when
         self.body = body
@@ -101,9 +108,9 @@ class Schedule(Module):
                 when = datetime.fromisoformat(answer)
             except Exception:
                 when = None
-            return self.run(self.to, when, self.body, self.sender)
+            return self.execute_task(self.to, when, self.body, self.sender)
         elif self.followup_type == "body":
-            return self.run(self.to, self.when, answer, self.sender)
+            return self.execute_task(self.to, self.when, answer, self.sender)
         elif self.followup_type == "self_busy" or self.followup_type == "both_busy" or self.followup_type == "to_busy":
             if answer == "" or answer.lower() == "y" or answer.lower() == "yes":
                 event = self.service.events().insert(calendarId="primary", body=self.event).execute()
@@ -111,7 +118,7 @@ class Schedule(Module):
             elif answer.lower() == "n" or answer.lower() == "no":
                 return "No event created", None
             else:
-                return self.run(self.to, self.when, self.body, self.sender)
+                return self.execute_task(self.to, self.when, self.body, self.sender)
         else:
             raise NotImplementedError("Did not find any valid followup question to answer.")
 
@@ -151,3 +158,29 @@ class Schedule(Module):
             attendees.append({"email": attende})
 
         return attendees
+
+    def nlp(self, text):
+        nlp = spacy.load("en_rpa_simple_calendar")
+        doc = nlp(text)
+
+        to = []
+        when = []
+        body = []
+
+        for token in doc:
+            if token.dep_ == "TO":
+                to.append(token.text)
+            elif token.dep_ == "WHEN":
+                when.append(token.text)
+            elif token.dep_ == "BODY":
+                body.append(token.text)
+
+        time = datetime.now()
+        if len(when) == 0:
+            time = time + timedelta(seconds=5)
+        else:
+            time = tc.parse_time(when)
+
+        _body = " ".join(body)
+
+        return (to, time, _body)
