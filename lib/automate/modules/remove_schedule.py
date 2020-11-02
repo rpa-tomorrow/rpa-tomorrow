@@ -30,9 +30,6 @@ class RemoveSchedule(Module):
         self.followup_type = None
         self.event = None
 
-        # Parse Time
-        time = self.when.isoformat()
-
         # Get or create user credentials
         settings = sender["email"]
         username = settings.get("username")
@@ -46,13 +43,15 @@ class RemoveSchedule(Module):
             self.get_event_by_summary(body)
 
         # if no event could be found using the summary try to do it with the user inputed time
-        if (not self.event) and time:
-            self.get_event_by_timestamp(time)
+        if (not self.event) and self.when:
+            self.get_event_by_timestamp(self.when)
 
+        # if an event could be found then ask the user if it should be removed
         if self.event:
             start_time = self.event["start"]["dateTime"]
             start_time = datetime.fromisoformat(start_time)
             formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
+
             self.followup_type = "self_busy"
             return (
                 None,
@@ -64,6 +63,7 @@ class RemoveSchedule(Module):
     def followup(self, answer):
         """ """
         if self.followup_type == "self_busy":
+            # if the user answers "yes" on the followup question then remove the event from the calendar
             if answer.lower() in ["y", "yes"]:
                 self.service.events().delete(calendarId="primary", eventId=self.event["id"]).execute()
                 return f"'{self.event['summary']}' was removed from your calendar", None
@@ -97,7 +97,7 @@ class RemoveSchedule(Module):
 
         return creds
 
-    def get_event_by_timestamp(self, time):
+    def get_event_by_timestamp(self, time: datetime):
         """ 
         takes a ISO formated time and fetches an event from the calendar where the given time is between 
         the start and end time of the event, the method only looks for events happening in the future
@@ -105,9 +105,12 @@ class RemoveSchedule(Module):
         NOTE: as of now this does not handle multiple events occuring at the same time 
         """
         now = datetime.now()
-        time = datetime.fromisoformat(time).astimezone(now.tzinfo)
+        # ensure that the given time uses the same timezone as the computer
+        time = time.astimezone(now.tzinfo)
+
         events = self.service.events().list(calendarId="primary", timeMin=(now.isoformat() + "Z")).execute()["items"]
 
+        # find the wanted event
         for e in events:
             event_start = next(v for k, v in e["start"].items() if "date" in k)
             event_start = datetime.fromisoformat(event_start).astimezone(now.tzinfo)
@@ -123,7 +126,7 @@ class RemoveSchedule(Module):
         if self.event == None:
             raise NoEventFoundError("Could not find anything scheduled at the given time")
 
-    def get_event_by_summary(self, summary):
+    def get_event_by_summary(self, summary: str):
         """ 
         try to find a event based on the event summary
         the method only looks for events in the future
