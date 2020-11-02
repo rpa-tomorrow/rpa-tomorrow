@@ -51,10 +51,12 @@ class RemoveSchedule(Module):
 
         if self.event:
             start_time = self.event["start"]["dateTime"]
+            start_time = datetime.fromisoformat(start_time)
+            formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
             self.followup_type = "self_busy"
             return (
                 None,
-                f"You have the event '{self.event['summary']}' scheduled at {start_time}. Do you want to remove it? [Y/n]",
+                f"You have the event '{self.event['summary']}' scheduled at {formated_time}. Do you want to remove it? [Y/n]",
             )
         else:
             return
