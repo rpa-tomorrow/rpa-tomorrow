@@ -2,6 +2,7 @@ import smtplib
 import re
 import spacy
 import lib.automate.modules.tools.time_convert as tc
+import logging
 
 from fuzzywuzzy import process as fuzzy
 from email.message import EmailMessage
@@ -9,6 +10,10 @@ from lib.automate.modules import Module, NoSenderError
 from lib import Error
 from lib.settings import SETTINGS
 from datetime import datetime, timedelta
+
+
+# Module logger
+log = logging.getLogger(__name__)
 
 
 class Send(Module):
@@ -165,6 +170,7 @@ class Send(Module):
                 when.append(token.text)
             elif token.dep_ == "BODY":
                 body.append(token.text)
+            log.debug("%s %s", token.text, token.dep_)
 
         time = datetime.now()
         if len(when) == 0:

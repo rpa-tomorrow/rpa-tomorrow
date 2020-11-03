@@ -4,12 +4,17 @@ The reminder automation module
 import sys
 import lib.automate.modules.tools.time_convert as tc
 import spacy
+import logging
 
 from datetime import datetime, timedelta
 from threading import Timer
 from subprocess import run
 from lib import OSNotSupportedError, TimeIsInPastError
 from lib.automate.modules import Module
+
+
+# Module logger
+log = logging.getLogger(__name__)
 
 
 class Reminder(Module):
@@ -130,6 +135,7 @@ class Reminder(Module):
                 when.append(token.text)
             elif token.dep_ == "BODY":
                 body.append(token.text)
+            log.debug("%s %s", token.text, token.dep_)
 
         time = datetime.now()
         if len(when) == 0:
