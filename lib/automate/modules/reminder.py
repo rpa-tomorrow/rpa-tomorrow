@@ -45,11 +45,11 @@ class Reminder(Module):
             # TODO: Add windows call here
             pass
 
-    def run(self, text, sender):
+    def prepare(self, text, sender):
         to, when, body = self.nlp(text)
-        return self.execute_task(to, when, body, sender)
+        return self.prepare_processed(to, when, body, sender)
 
-    def execute_task(self, _to, when, body, _sender):
+    def prepare_processed(self, _to, when, body, _sender):
         """
         Schedules a reminder which will show up in the users system at the
         specified time with the specified information. Raises an error if the
@@ -71,19 +71,19 @@ class Reminder(Module):
 
         if not isinstance(when, datetime):
             self.followup_type = "when"
-            return (
-                None,
-                "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format",
-            )
+            return "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
         elif not body:
             self.followup_type = "body"
-            return None, "Found no message body. What message should be sent"
+            return "Found no message body. What message should be sent"
 
-        when_delta = (when - datetime.now()).total_seconds()  # convert to difference in seconds
+        when_delta = (
+            when - datetime.now()
+        ).total_seconds()  # convert to difference in seconds
         if when_delta < 0.0:
             raise TimeIsInPastError(
                 when.strftime("%Y-%m-%d %H:%M:%S"),
-                "The specified time of the reminder is in the past and can not" + " be scheduled",
+                "The specified time of the reminder is in the past and can not"
+                + " be scheduled",
             )
 
         if sys.platform not in self.supported_os:
@@ -94,11 +94,11 @@ class Reminder(Module):
             )
 
         t = Timer(when_delta, lambda: self.notify(sys.platform, body))
-        t.start()
-        return (
-            f"Reminder scheduled for {when.strftime('%Y-%m-%d %H:%M:%S')}",
-            None,
-        )
+        self.timer = t
+
+    def execute(self):
+        self.timer.start()
+        return f"Reminder scheduled for {self.when.strftime('%Y-%m-%d %H:%M:%S')}"
 
     def followup(self, answer: str) -> (str, str):
         """
@@ -110,12 +110,14 @@ class Reminder(Module):
                 when = datetime.fromisoformat(answer)
             except Exception:
                 when = None
-            return self.execute_task(self.to, when, self.body, self.sender)
+            return self.prepare_processed(self.to, when, self.body, self.sender)
 
         elif self.followup_type == "body":
-            return self.execute_task(self.to, self.when, answer, self.sender)
+            return self.prepare_processed(self.to, self.when, answer, self.sender)
         else:
-            raise NotImplementedError("Did not find any valid followup question to answer.")
+            raise NotImplementedError(
+                "Did not find any valid followup question to answer."
+            )
 
     def nlp(self, text):
         """

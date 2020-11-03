@@ -5,6 +5,7 @@ import os.path
 import spacy
 import logging
 
+from lib import Error
 from lib.automate.modules import Module, NoSenderError
 from datetime import datetime, timedelta
 from googleapiclient.discovery import build
@@ -28,11 +29,11 @@ class Schedule(Module):
     def __init__(self):
         super(Schedule, self).__init__()
 
-    def run(self, text, sender):
+    def prepare(self, text, sender):
         to, when, body = self.nlp(text)
-        return self.execute_task(to, when, body, sender)
+        return self.prepare_processed(to, when, body, sender)
 
-    def execute_task(self, to, when, body, sender):
+    def prepare_processed(self, to, when, body, sender):
         self.to = to
         self.when = when
         self.body = body
@@ -44,14 +45,11 @@ class Schedule(Module):
 
         if not isinstance(when, datetime):
             self.followup_type = "when"
-            return (
-                None,
-                "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format",
-            )
+            return "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
 
         if not body:
             self.followup_type = "body"
-            return None, "Found no event summary. What is the event about"
+            return "Found no event summary. What is the event about"
 
         settings = sender["email"]
         username = settings.get("username")
@@ -61,7 +59,9 @@ class Schedule(Module):
         # Parse Time
         duration = 20  # TODO: Parse from input
         start_time = self.when.isoformat() + "Z"  # 'Z' indicates UTC time
-        end_time = (self.when + timedelta(minutes=duration)).isoformat() + "Z"  # 'Z' indicates UTC time
+        end_time = (
+            self.when + timedelta(minutes=duration)
+        ).isoformat() + "Z"  # 'Z' indicates UTC time
 
         # Define the event
         event = {
@@ -83,25 +83,44 @@ class Schedule(Module):
         to_items = [{"id": email} for email in to]
         freebusy = (
             service.freebusy()
-            .query(body={"items": [{"id": "primary"}] + to_items, "timeMin": start_time, "timeMax": end_time})
+            .query(
+                body={
+                    "items": [{"id": "primary"}] + to_items,
+                    "timeMin": start_time,
+                    "timeMax": end_time,
+                }
+            )
             .execute()
         )
-        to_busy = list(map(lambda x: x[0], filter(lambda x: x[1]["busy"], list(freebusy["calendars"].items())[1:])))
+        to_busy = list(
+            map(
+                lambda x: x[0],
+                filter(lambda x: x[1]["busy"], list(freebusy["calendars"].items())[1:]),
+            )
+        )
 
-        other = f"{', '.join(to_busy[:-1])} and {to_busy[-1]}" if len(to_busy) > 1 else "".join(to_busy)
+        other = (
+            f"{', '.join(to_busy[:-1])} and {to_busy[-1]}"
+            if len(to_busy) > 1
+            else "".join(to_busy)
+        )
         if len(freebusy["calendars"]["primary"]["busy"]) and len(to_busy):
             self.followup_type = "both_busy"
-            return None, f"You as well as {other} seem to be busy. Do you want to book the meeting anyway? [Y/n]"
+            return f"You as well as {other} seem to be busy. Do you want to book the meeting anyway? [Y/n]"
         elif len(freebusy["calendars"]["primary"]["busy"]):
             self.followup_type = "self_busy"
-            return None, "You seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
+            return "You seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
         elif len(to_busy):
             self.followup_type = "to_busy"
-            return None, f"{other} seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
+            return f"{other} seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
 
-        event = service.events().insert(calendarId="primary", body=event).execute()
-
-        return "Event created, see link: %s" % (event.get("htmlLink")), None
+    def execute(self):
+        event = (
+            self.service.events()
+            .insert(calendarId="primary", body=self.event)
+            .execute()
+        )
+        return "Event created, see link: %s" % (event.get("htmlLink"))
 
     def followup(self, answer):
         """
@@ -113,19 +132,26 @@ class Schedule(Module):
                 when = datetime.fromisoformat(answer)
             except Exception:
                 when = None
-            return self.execute_task(self.to, when, self.body, self.sender)
+            return self.prepare_processed(self.to, when, self.body, self.sender)
         elif self.followup_type == "body":
-            return self.execute_task(self.to, self.when, answer, self.sender)
-        elif self.followup_type == "self_busy" or self.followup_type == "both_busy" or self.followup_type == "to_busy":
+            return self.prepare_processed(self.to, self.when, answer, self.sender)
+        elif (
+            self.followup_type == "self_busy"
+            or self.followup_type == "both_busy"
+            or self.followup_type == "to_busy"
+        ):
             if answer == "" or answer.lower() == "y" or answer.lower() == "yes":
-                event = self.service.events().insert(calendarId="primary", body=self.event).execute()
-                return "Event created, see link: %s" % (event.get("htmlLink")), None
+                return None
             elif answer.lower() == "n" or answer.lower() == "no":
-                return "No event created", None
+                raise ActionInterruptedByUserError("Interrupted due to busy attendees.")
             else:
-                return self.execute_task(self.to, self.when, self.body, self.sender)
+                return self.prepare_processed(
+                    self.to, self.when, self.body, self.sender
+                )
         else:
-            raise NotImplementedError("Did not find any valid followup question to answer.")
+            raise NotImplementedError(
+                "Did not find any valid followup question to answer."
+            )
 
     def credentials(self, username):
         """
@@ -133,6 +159,8 @@ class Schedule(Module):
         created automatically when the authorization flow completes for the first
         time.
         """
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.abspath(__file__)) + "/../../..")
         creds = None
         pickle_filename = f"{username}_token.pickle"
 
@@ -144,12 +172,15 @@ class Schedule(Module):
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", SCOPES)
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    "client_secret.json", SCOPES
+                )
                 creds = flow.run_local_server(port=0)
             # Save the credentials for the next run
             with open(pickle_filename, "wb") as token:
                 pickle.dump(creds, token)
 
+        os.chdir(old_dir)
         return creds
 
     def parse_attendees(self, sender_address, to):
@@ -165,6 +196,7 @@ class Schedule(Module):
         return attendees
 
     def nlp(self, text):
+
         nlp = spacy.load("en_rpa_simple_calendar")
         doc = nlp(text)
 
@@ -190,3 +222,7 @@ class Schedule(Module):
         _body = " ".join(body)
 
         return (to, time, _body)
+
+
+class ActionInterruptedByUserError(Error):
+    pass
