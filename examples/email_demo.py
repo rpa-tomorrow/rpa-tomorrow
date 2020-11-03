@@ -3,10 +3,10 @@ import sys
 sys.path.append(".")
 sys.path.append("..")
 
-from lib import Error
-from lib.automate import Automate
-from lib.nlp import nlp
-from lib.settings import load_settings
+from lib import Error  # noqa: E402
+from lib.automate import Automate  # noqa: E402
+from lib.nlp import nlp  # noqa: E402
+from lib.settings import load_settings  # noqa: E402
 
 load_settings()
 
