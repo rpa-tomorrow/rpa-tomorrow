@@ -1,4 +1,6 @@
 import sys
+sys.path.append(".")
+sys.path.append("..")
 
 from lib import Error
 from lib.automate import Automate
