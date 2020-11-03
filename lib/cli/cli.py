@@ -18,7 +18,7 @@ def setup_logger(level):
     ch.setLevel(level)
 
     # create formatter
-    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
+    formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
     # add formatter to ch
     ch.setFormatter(formatter)
@@ -27,9 +27,7 @@ def setup_logger(level):
     logger.addHandler(ch)
 
 
-@plac.annotations(
-    debug=("Enable debug output", "flag", "d"),
-)
+@plac.annotations(debug=("Enable debug output", "flag", "d"))
 def cli(debug):
     if debug:
         setup_logger(logging.DEBUG)
