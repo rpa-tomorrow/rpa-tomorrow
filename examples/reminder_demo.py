@@ -3,9 +3,6 @@ import sys
 sys.path.append(".")
 sys.path.append("..")
 
-sys.path.append(".")
-sys.path.append("..")
-
 from lib import Error  # noqa: E402
 from lib.automate import Automate  # noqa: E402
 from lib.settings import load_settings  # noqa: E402
