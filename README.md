@@ -64,6 +64,7 @@ The CLI can be started as follows
 
 - `cd` into the project folder
 - Run `python lib/cli/cli.py`
+- You can check available CLI options with `--help`
 
 The CLI should now be running in your terminal. Type `help` for more instructions. Currently the CLI is only capable of sending predefined emails if a word similar to `skicka` is entered by the user. Note that you need to have a [local SMTP debugging server](https://github.com/rpa-tomorrow/substorm-nlp/tree/cli-call-automation#local-smtp-server) running for this to work.
 
