@@ -12,6 +12,7 @@ source ~/anaconda3/etc/profile.d/conda.sh
 conda activate substorm-nlp
 
 python -m spacy download en_core_web_sm
+python -m spacy download en_core_web_md
 
 MULTILINE2=$(pip list | grep -F en-rpa-simple)
 
