@@ -21,7 +21,7 @@ class TestRunReminder:
         """
         valid_time = datetime.datetime.now() + datetime.timedelta(seconds=1.0)
 
-        res, _ = run(valid_time, "body")
+        res = run(valid_time, "body")
         assert "Reminder scheduled for" in res
 
     def test_when_in_past(self, run):

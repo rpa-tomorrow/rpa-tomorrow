@@ -59,9 +59,7 @@ class Schedule(Module):
         # Parse Time
         duration = 20  # TODO: Parse from input
         start_time = self.when.isoformat() + "Z"  # 'Z' indicates UTC time
-        end_time = (
-            self.when + timedelta(minutes=duration)
-        ).isoformat() + "Z"  # 'Z' indicates UTC time
+        end_time = (self.when + timedelta(minutes=duration)).isoformat() + "Z"  # 'Z' indicates UTC time
 
         # Define the event
         event = {
@@ -83,27 +81,12 @@ class Schedule(Module):
         to_items = [{"id": email} for email in to]
         freebusy = (
             service.freebusy()
-            .query(
-                body={
-                    "items": [{"id": "primary"}] + to_items,
-                    "timeMin": start_time,
-                    "timeMax": end_time,
-                }
-            )
+            .query(body={"items": [{"id": "primary"}] + to_items, "timeMin": start_time, "timeMax": end_time})
             .execute()
         )
-        to_busy = list(
-            map(
-                lambda x: x[0],
-                filter(lambda x: x[1]["busy"], list(freebusy["calendars"].items())[1:]),
-            )
-        )
+        to_busy = list(map(lambda x: x[0], filter(lambda x: x[1]["busy"], list(freebusy["calendars"].items())[1:]),))
 
-        other = (
-            f"{', '.join(to_busy[:-1])} and {to_busy[-1]}"
-            if len(to_busy) > 1
-            else "".join(to_busy)
-        )
+        other = f"{', '.join(to_busy[:-1])} and {to_busy[-1]}" if len(to_busy) > 1 else "".join(to_busy)
         if len(freebusy["calendars"]["primary"]["busy"]) and len(to_busy):
             self.followup_type = "both_busy"
             return f"You as well as {other} seem to be busy. Do you want to book the meeting anyway? [Y/n]"
@@ -115,11 +98,7 @@ class Schedule(Module):
             return f"{other} seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
 
     def execute(self):
-        event = (
-            self.service.events()
-            .insert(calendarId="primary", body=self.event)
-            .execute()
-        )
+        event = self.service.events().insert(calendarId="primary", body=self.event).execute()
         return "Event created, see link: %s" % (event.get("htmlLink"))
 
     def followup(self, answer):
@@ -135,23 +114,15 @@ class Schedule(Module):
             return self.prepare_processed(self.to, when, self.body, self.sender)
         elif self.followup_type == "body":
             return self.prepare_processed(self.to, self.when, answer, self.sender)
-        elif (
-            self.followup_type == "self_busy"
-            or self.followup_type == "both_busy"
-            or self.followup_type == "to_busy"
-        ):
+        elif self.followup_type == "self_busy" or self.followup_type == "both_busy" or self.followup_type == "to_busy":
             if answer == "" or answer.lower() == "y" or answer.lower() == "yes":
                 return None
             elif answer.lower() == "n" or answer.lower() == "no":
                 raise ActionInterruptedByUserError("Interrupted due to busy attendees.")
             else:
-                return self.prepare_processed(
-                    self.to, self.when, self.body, self.sender
-                )
+                return self.prepare_processed(self.to, self.when, self.body, self.sender)
         else:
-            raise NotImplementedError(
-                "Did not find any valid followup question to answer."
-            )
+            raise NotImplementedError("Did not find any valid followup question to answer.")
 
     def credentials(self, username):
         """
@@ -172,9 +143,7 @@ class Schedule(Module):
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    "client_secret.json", SCOPES
-                )
+                flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", SCOPES)
                 creds = flow.run_local_server(port=0)
             # Save the credentials for the next run
             with open(pickle_filename, "wb") as token:

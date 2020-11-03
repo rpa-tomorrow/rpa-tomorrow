@@ -66,18 +66,14 @@ class Send(Module):
             # The user will then be able to enter a more precise name
             # that will be sent to the follow-up method
             if len(possible_receivers) > 1:
-                names = "\n".join(
-                    list(map(lambda contact: contact[0], possible_receivers))
-                )
+                names = "\n".join(list(map(lambda contact: contact[0], possible_receivers)))
                 self.followup_type = "to2"
                 return "Found multiple contacts: \n" + names + "\nPlease enter the name"
             elif len(possible_receivers) == 1:
                 receiver = self.get_email(possible_receivers[0][0])
                 self.receiver = receiver
             else:
-                raise NoContactFoundError(
-                    "Could not find any contacts with name " + receiver
-                )
+                raise NoContactFoundError("Could not find any contacts with name " + receiver)
 
     def execute(self):
         return self.send_email(self.settings, self.receiver, self.subject, self.content)
@@ -119,24 +115,18 @@ class Send(Module):
             if not answer:
                 return self.prepare_processed(None, self.when, self.body, self.sender)
             else:
-                return self.prepare_processed(
-                    [answer], self.when, self.body, self.sender
-                )
+                return self.prepare_processed([answer], self.when, self.body, self.sender)
 
         elif self.followup_type == "to2":
             if not answer:
                 return self.prepare_processed(None, self.when, self.body, self.sender)
             else:
-                return self.prepare_processed(
-                    [answer], self.when, self.body, self.sender
-                )
+                return self.prepare_processed([answer], self.when, self.body, self.sender)
 
         elif self.followup_type == "body":
             return self.prepare_processed(self.to, self.when, answer, self.sender)
         else:
-            raise NotImplementedError(
-                "Did not find any valid followup question to answer."
-            )
+            raise NotImplementedError("Did not find any valid followup question to answer.")
 
     def get_email(self, name: str) -> str:
         """
