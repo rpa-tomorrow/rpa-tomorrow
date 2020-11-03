@@ -3,12 +3,17 @@ import lib.automate.modules.tools.time_convert as tc
 import pickle
 import os.path
 import spacy
+import logging
 
 from lib.automate.modules import Module, NoSenderError
 from datetime import datetime, timedelta
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+
+
+# Module logger
+log = logging.getLogger(__name__)
 
 # If modifying these scopes, delete the files *.pickle.
 SCOPES = [
@@ -174,6 +179,7 @@ class Schedule(Module):
                 when.append(token.text)
             elif token.dep_ == "BODY":
                 body.append(token.text)
+            log.debug("%s %s", token.text, token.dep_)
 
         time = datetime.now()
         if len(when) == 0:
