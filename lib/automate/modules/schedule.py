@@ -76,7 +76,7 @@ class Schedule(Module):
         creds = self.credentials(username)
 
         # Create Event using Google calendar API
-        service = build("calendar", "v3", credentials=creds)
+        service = build("calendar", "v3", credentials=creds, cache_discovery=False)
         self.service = service
 
         # Check if we are busy
