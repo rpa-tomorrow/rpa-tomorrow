@@ -14,6 +14,7 @@ class TestIsEmail:
         assert is_email("studnt-5@ltu.se")
         assert is_email("10-first@email.com")
         assert is_email("10first@email.co.uk")
+        assert is_email("jAndersson@email.com")
 
         assert not is_email("First Last")
         assert not is_email("Last")

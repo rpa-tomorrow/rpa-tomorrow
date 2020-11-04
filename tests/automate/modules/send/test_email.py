@@ -3,7 +3,7 @@ Tests regarding the handling of email address in the Send automation module
 """
 
 import pytest
-from lib.automate.modules.send import Send, NoContactFoundError
+from lib.automate.modules.send import NoContactFoundError
 
 
 class TestEmailAddress:
