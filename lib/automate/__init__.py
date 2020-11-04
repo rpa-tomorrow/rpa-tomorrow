@@ -32,7 +32,7 @@ class Automate:
         """
         return list(SETTINGS["users"].keys())
 
-    def run(self, module_name, text):
+    def prepare(self, module_name, text):
         """
         Run automation on registered module.
         :param module_name: Something close to a keyword of a automation
@@ -44,14 +44,12 @@ class Automate:
         """
         sender = SETTINGS["user"]
 
-        def handle_response(success, response):
+        def handle_response(response):
             if response:
                 print(response, end=": ", flush=True)
-                return handle_response(*instance.followup(input()))
-            elif success:
-                return success
+                return handle_response(instance.followup(input()))
             else:
-                raise NoResponseError("No response from automation module")
+                return instance
 
         if module_name in self.verbs:
             instance = self.verbs[module_name]()
@@ -61,7 +59,8 @@ class Automate:
                 instance = self.verbs[fuzzy_match]()
             else:
                 raise AutomationNotFoundError("Automation module not found")
-        return handle_response(*instance.run(text, sender))
+        followup = instance.prepare(text, sender)
+        return handle_response(followup)
 
 
 class NoResponseError(Error):

@@ -22,11 +22,11 @@ class Send(Module):
     def __init__(self):
         super(Send, self).__init__()
 
-    def run(self, text, sender):
+    def prepare(self, text, sender):
         to, when, body = self.nlp(text)
-        return self.execute_task(to, when, body, sender)
+        return self.prepare_processed(to, when, body, sender)
 
-    def execute_task(self, to, when, body, sender):
+    def prepare_processed(self, to, when, body, sender):
         self.to = to
         self.when = when
         self.body = body
@@ -44,20 +44,21 @@ class Send(Module):
 
         if not to or len(to) == 0:
             self.followup_type = "to1"
-            return None, "Found no receiver. Please enter the name of the receiver"
+            return "Found no receiver. Please enter the name of the receiver"
         elif len(to) == 1:
             receiver = to[0]
+            self.receiver = receiver
         else:
             raise ToManyReceiversError("Can only handle one (1) receiver at this time")
 
         if not body:
             self.followup_type = "body"
-            return None, "Found no message body. What message should be sent"
+            return "Found no message body. What message should be sent"
 
         if not self.is_email(receiver):
             # filter out the contacts that does not need to be considered
             possible_receivers = fuzzy.extract(receiver, SETTINGS["contacts"].keys())
-            possible_receivers = list(filter(lambda x: x[1] > 75, possible_receivers))
+            possible_receivers = list(filter(lambda x: x[1] > 87, possible_receivers))
 
             # if there are multiple possible receivers then return a string of these that will
             # be displayed to the user.
@@ -67,18 +68,15 @@ class Send(Module):
             if len(possible_receivers) > 1:
                 names = "\n".join(list(map(lambda contact: contact[0], possible_receivers)))
                 self.followup_type = "to2"
-                return (
-                    None,
-                    "Found multiple contacts: \n" + names + "\nPlease enter the name",
-                )
+                return "Found multiple contacts: \n" + names + "\nPlease enter the name"
             elif len(possible_receivers) == 1:
                 receiver = self.get_email(possible_receivers[0][0])
+                self.receiver = receiver
             else:
                 raise NoContactFoundError("Could not find any contacts with name " + receiver)
 
-        response = self.send_email(self.settings, receiver, self.subject, self.content)
-
-        return response, None
+    def execute(self):
+        return self.send_email(self.settings, self.receiver, self.subject, self.content)
 
     def send_email(self, settings: dict, receiver: str, subject: str, content: str):
         msg = EmailMessage()
@@ -115,25 +113,18 @@ class Send(Module):
         """
         if self.followup_type == "to1":
             if not answer:
-                return self.execute_task(None, self.when, self.body, self.sender)
+                return self.prepare_processed(None, self.when, self.body, self.sender)
             else:
-                return self.execute_task([answer], self.when, self.body, self.sender)
+                return self.prepare_processed([answer], self.when, self.body, self.sender)
 
         elif self.followup_type == "to2":
             if not answer:
-                return self.execute_task(None, self.when, self.body, self.sender)
-            elif not self.is_email(answer):
-                possible_receivers = SETTINGS["contacts"].keys()
-                receiver = self.get_email(fuzzy.extractOne(answer, possible_receivers)[0])
+                return self.prepare_processed(None, self.when, self.body, self.sender)
             else:
-                receiver = answer
-
-            response = self.send_email(self.settings, receiver, self.subject, self.content)
-
-            return response, None
+                return self.prepare_processed([answer], self.when, self.body, self.sender)
 
         elif self.followup_type == "body":
-            return self.execute_task(self.to, self.when, answer, self.sender)
+            return self.prepare_processed(self.to, self.when, answer, self.sender)
         else:
             raise NotImplementedError("Did not find any valid followup question to answer.")
 

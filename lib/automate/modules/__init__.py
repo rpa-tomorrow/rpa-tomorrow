@@ -7,7 +7,7 @@ class Module:
     def __init__(self):
         pass
 
-    def run(self, text, sender):
+    def prepare(self, text, sender):
         raise NotImplementedError("Method not implemented")
 
     def followup(self, answer):

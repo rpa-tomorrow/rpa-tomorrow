@@ -1,3 +1,4 @@
+import os
 import yaml
 from lib.cli.config import config_user_name, config_email_address, config_email_host
 
@@ -14,7 +15,9 @@ def load_user():
     """ Load user information from the config file
         if there are user settings missing then the user
         is prompted to input these """
-    with open("config/user.yaml", "r") as stream:
+    old_dir = os.getcwd()
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    with open("../config/user.yaml", "r") as stream:
         SETTINGS["user"] = yaml.safe_load(stream)
 
     # Flag for checking if there is a need to update the config by writing to a file
@@ -36,12 +39,16 @@ def load_user():
     if update:
         update_settings("config/user", SETTINGS["user"])
         print("User config updated")
+    os.chdir(old_dir)
 
 
 def load_local_contacts():
     """ Loads the local contact book from the config file """
-    with open("config/contacts.yaml", "r") as stream:
+    old_dir = os.getcwd()
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    with open("../config/contacts.yaml", "r") as stream:
         SETTINGS["contacts"] = yaml.safe_load(stream)
+    os.chdir(old_dir)
 
 
 def update_settings(file_path: str, data: dict):
