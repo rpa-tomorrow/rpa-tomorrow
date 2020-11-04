@@ -134,7 +134,7 @@ class Schedule(Module):
         time.
         """
         creds = None
-        pickle_filename = f"{username}_token.pickle"
+        pickle_filename = f"pickle_jar/{username}_token.pickle"
 
         if os.path.exists(pickle_filename):
             with open(pickle_filename, "rb") as token:
