@@ -46,6 +46,9 @@ class RemoveSchedule(Module):
         if (not self.event) and self.when:
             self.get_event_by_timestamp(self.when)
 
+        if (not self.event) and self.to:
+            self.get_event_by_participants(self.to)
+
         # if an event could be found then ask the user if it should be removed
         if self.event:
             start_time = self.event["start"]["dateTime"]
@@ -136,6 +139,24 @@ class RemoveSchedule(Module):
         event = fuzzy.extractOne(summary, events, score_cutoff=50)
         if event:
             self.event = event[0]
+
+    def get_event_by_participants(self, participants):
+        """
+        Try to find an event based on the participants of the event
+        """
+        now = datetime.now()
+        events = self.service.events().list(calendarId="primary", timeMin=(now.isoformat() + "Z")).execute()["items"]
+
+        events = list(filter(lambda e: "attendees" in e.keys(), events))
+        filtered_events = []
+        for e in events:
+            for attendee in e["attendees"]:
+                if attendee["email"] in participants:
+                    filtered_events.append(e)
+                    break
+
+        # TODO: if there are more than one event found let the user choose
+        self.event = filtered_events[0]
 
 
 class NoEventFoundError(Error):

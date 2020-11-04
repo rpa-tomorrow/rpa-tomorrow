@@ -18,7 +18,7 @@ try:
     # response = n.run(text)
     when = datetime.now() + timedelta(hours=5.0)  # timestamp at: now + 5 hrs
     # when = datetime.fromisoformat("2020-11-02T15:40:00")
-    response = automate.run("unschedule", ["rpa@substorm.com"], when, None)
+    response = automate.run("unschedule", ["rpa@substorm.com"], None, None)
 
     print(response)
 except Error as err:
