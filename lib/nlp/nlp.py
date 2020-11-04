@@ -10,9 +10,9 @@ class NLP:
 
     def send_automate(self, verb, text):
         automate = Automate()
-        return automate.run(verb, text)
+        return automate.prepare(verb, text)
 
-    def run(self, text):
+    def prepare(self, text):
         """
         Start NLP on the given text. Takes a few seconds to process if your
         computer is slow.
@@ -39,4 +39,9 @@ class NLP:
                 response = self.send_automate(doc_verb.text, text)
                 return response
 
+    def run(self, text):
+        action = self.prepare(text)
+        if action:
+            response = action.execute()
+            return response
         return "I did not understand"

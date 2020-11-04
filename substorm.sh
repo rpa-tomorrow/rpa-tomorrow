@@ -1,6 +1,8 @@
 #!/bin/bash
+MULTILINE1=$(conda env list | grep -F substorm-nlp)
 
-if [ ! -d ~/.conda/envs/substorm-nlp ]; then
+if [ "$MULTILINE1" = "" ]
+then
    echo "no conda env found, creating env..."
    conda env create -f substorm-nlp.yml
 fi
@@ -10,14 +12,14 @@ source ~/anaconda3/etc/profile.d/conda.sh
 conda activate substorm-nlp
 
 python -m spacy download en_core_web_sm
+python -m spacy download en_core_web_md
 
-MULTILINE=$(pip list \
-	   | grep -F en-rpa-simple)
+MULTILINE2=$(pip list | grep -F en-rpa-simple)
 
 echo "installed rpa-models..."
-echo "${MULTILINE}"
+echo "${MULTILINE2}"
 
-if [ MULTILINE = "" ]
+if [ "$MULTILINE2" = "" ]
 then
 	echo "missing rpa-models, installing required packages..."
 	pip install -r requirements.txt

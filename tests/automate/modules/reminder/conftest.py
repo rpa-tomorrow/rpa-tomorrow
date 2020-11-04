@@ -16,7 +16,8 @@ def run(monkeypatch):
         reminder = Reminder()
         # mock the timer used to schedule the reminder
         monkeypatch.setattr("threading.Timer.start", mock_timer_start)
-        return reminder.execute_task(None, when, body, None)
+        reminder.prepare_processed(None, when, body, None)
+        return reminder.execute()
 
     yield helper
 

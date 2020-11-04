@@ -32,6 +32,10 @@ def config_email_host(email_config: dict) -> dict:
         email_config["password"] = sys.stdin.readline().strip()
 
         print("Does the Email service use SSL? (y/n): ")
-        email_config["ssl"] = sys.stdin.readline().strip().lower() in ["true", "y", "yes"]
+        email_config["ssl"] = sys.stdin.readline().strip().lower() in [
+            "true",
+            "y",
+            "yes",
+        ]
 
     return email_config
