@@ -107,12 +107,7 @@ class Schedule(Module):
             .query(body={"items": [{"id": "primary"}] + to_items, "timeMin": start_time, "timeMax": end_time})
             .execute()
         )
-        to_busy = list(
-            map(
-                lambda x: x[0],
-                filter(lambda x: x[1]["busy"], list(freebusy["calendars"].items())[1:]),
-            )
-        )
+        to_busy = list(map(lambda x: x[0], filter(lambda x: x[1]["busy"], list(freebusy["calendars"].items())[1:]),))
 
         other = f"{', '.join(to_busy[:-1])} and {to_busy[-1]}" if len(to_busy) > 1 else "".join(to_busy)
         if len(freebusy["calendars"]["primary"]["busy"]) and len(to_busy):

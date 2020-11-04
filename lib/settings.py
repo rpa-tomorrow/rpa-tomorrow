@@ -12,9 +12,9 @@ def load_settings():
 
 
 def load_user():
-    """ Load user information from the config file
-        if there are user settings missing then the user
-        is prompted to input these """
+    """Load user information from the config file
+    if there are user settings missing then the user
+    is prompted to input these"""
     old_dir = os.getcwd()
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     with open("../config/user.yaml", "r") as stream:

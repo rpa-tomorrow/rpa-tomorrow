@@ -12,9 +12,9 @@ def get_emails(names):
     trying to resolve the names with known contacts. If one of the names is a
     valid email it will be added to the resulting email list directly.
 
-    Returns dictrionary with the following key-value pairs:
-        - emails: the emails of the names wich could be found and resolved
-        - uncertain: list of touples containing the name and a list of
+    Returns a dictionary with the following key-value pairs:
+        - emails: the emails of the names which could be found and resolved
+        - uncertain: list of tuples containing the name and a list of
                      the candidates which share the same name. Should be used
                      in a follow-up to resolve the correct contact.
         - unknown: a list of names which could not be resolved from the known
