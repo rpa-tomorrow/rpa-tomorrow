@@ -58,8 +58,8 @@ class Schedule(Module):
 
         # Parse Time
         duration = 20  # TODO: Parse from input
-        start_time = self.when.isoformat() + "Z"  # 'Z' indicates UTC time
-        end_time = (self.when + timedelta(minutes=duration)).isoformat() + "Z"  # 'Z' indicates UTC time
+        start_time = tc.local_to_utc_time(self.when).isoformat()
+        end_time = (tc.local_to_utc_time(self.when) + timedelta(minutes=duration)).isoformat()
 
         # Define the event
         event = {
