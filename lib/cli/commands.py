@@ -7,6 +7,8 @@ import os
 
 sys.path.append(".")
 
+from lib.settings import set_language
+
 
 def commands(arr, nlp):
     """
@@ -16,6 +18,8 @@ def commands(arr, nlp):
         sys.exit()
     elif arr[0] == "help" or arr[0] == "h":
         prompt()
+    elif arr[0] == "language" or arr[0] == "lang":
+        set_language()
     else:
         listToStr = " ".join(map(str, arr))
         try:
