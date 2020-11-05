@@ -6,3 +6,4 @@ email:
   ssl: false
   username: None
 name: John Doe
+model_language: english

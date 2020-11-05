@@ -59,7 +59,7 @@ class Automate:
                 instance = self.verbs[fuzzy_match]()
             else:
                 raise AutomationNotFoundError("Automation module not found")
-        followup = instance.prepare(text, sender)
+        followup = instance.prepare(SETTINGS["nlp_models"], text, sender)
         return handle_response(followup)
 
 

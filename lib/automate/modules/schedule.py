@@ -30,7 +30,8 @@ class Schedule(Module):
     def __init__(self):
         super(Schedule, self).__init__()
 
-    def prepare(self, text, sender):
+    def prepare(self, nlp_models, text, sender):
+        self.nlp_model_name = nlp_models["schedule"]
         to, when, body = self.nlp(text)
         return self.prepare_processed(to, when, body, sender)
 
@@ -195,7 +196,7 @@ class Schedule(Module):
 
     def nlp(self, text):
 
-        nlp = spacy.load("en_rpa_simple_calendar")
+        nlp = spacy.load(self.nlp_model_name)
         doc = nlp(text)
 
         to = []

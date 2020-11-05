@@ -15,6 +15,14 @@ def load_user():
     """Load user information from the config file
     if there are user settings missing then the user
     is prompted to input these"""
+    def load_nlp_models_config(language):
+        """ Loads the language specific nlp model names from the config file """
+        old_dir = os.getcwd()
+        os.chdir(os.path.dirname(os.path.abspath(__file__)))
+        with open("../config/nlp_models.yaml", "r") as stream:
+            SETTINGS["nlp_models"] = yaml.safe_load(stream)[language]
+        os.chdir(old_dir)
+
     old_dir = os.getcwd()
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     with open("../config/user.yaml", "r") as stream:
@@ -36,10 +44,17 @@ def load_user():
         email_config = config_email_host(email_config)
         update = True
 
+    if SETTINGS["user"]["model_language"] == "":
+        # email_config["model_language"] = config_model_language() TODO
+        SETTINGS["user"]["model_language"] = "english"
+        update = True
+
     if update:
         update_settings("config/user", SETTINGS["user"])
         print("User config updated")
     os.chdir(old_dir)
+
+    load_nlp_models_config(SETTINGS["user"]["model_language"])
 
 
 def load_local_contacts():

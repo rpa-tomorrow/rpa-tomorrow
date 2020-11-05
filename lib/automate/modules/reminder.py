@@ -45,7 +45,8 @@ class Reminder(Module):
             # TODO: Add windows call here
             pass
 
-    def prepare(self, text, sender):
+    def prepare(self, nlp_models, text, sender):
+        self.nlp_model_name = nlp_models["reminder"]
         to, when, body = self.nlp(text)
         return self.prepare_processed(to, when, body, sender)
 
@@ -118,7 +119,7 @@ class Reminder(Module):
         """
         Lets the reminder model work on the given text.
         """
-        nlp = spacy.load("en_rpa_simple_reminder")
+        nlp = spacy.load(self.nlp_model_name)
         doc = nlp(text)
 
         to = []

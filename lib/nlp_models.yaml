@@ -1,0 +1,15 @@
+english:
+  spacy:
+    name: en_core_web_md
+  basic:
+    name: en_rpa_simple
+    tar: https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple-0.0.1/en_rpa_simple-0.0.1.tar.gz
+  reminder:
+    name: en_rpa_simple_reminder
+    tar: https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple_reminder-0.0.1/en_rpa_simple_reminder-0.0.1.tar.gz 
+  schedule:
+    name: en_rpa_simple_calendar
+    tar: https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple_calendar-0.0.1/en_rpa_simple_calendar-0.0.1.tar.gz
+  email:
+    name: en_rpa_simple_email
+    tar: https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple_email-0.0.1/en_rpa_simple_email-0.0.1.tar.gz 
