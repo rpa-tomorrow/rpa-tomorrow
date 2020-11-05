@@ -4,13 +4,15 @@ from lib.automate import Automate
 
 
 class NLP:
-    def __init__(self, model):
+    def __init__(self, model, spacy_model_name):
         self.nlp = spacy.load(model)
-        self.sim_model = spacy.load("en_core_web_md")
+        self.sim_model = spacy.load(spacy_model_name)
+        self.automate = Automate()
+
 
     def send_automate(self, verb, text):
-        automate = Automate()
-        return automate.prepare(verb, text)
+        return self.automate.prepare(verb, text)
+
 
     def prepare(self, text):
         """
@@ -21,7 +23,7 @@ class NLP:
         """
         # Currently only supports mail and schedule.
         actions = []
-        for v in Automate().get_verbs():
+        for v in self.automate.get_verbs():
             actions.append(v)
 
         verbs = []
@@ -38,6 +40,7 @@ class NLP:
             if similarity > 0.6:
                 response = self.send_automate(doc_verb.text, text)
                 return response
+
 
     def run(self, text):
         action = self.prepare(text)

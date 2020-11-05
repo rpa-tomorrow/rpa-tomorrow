@@ -21,9 +21,11 @@ class Send(Module):
 
     def __init__(self):
         super(Send, self).__init__()
+        self.nlp_model = None
 
     def prepare(self, nlp_models, text, sender):
-        self.nlp_model_name = nlp_models["email"]
+        if self.nlp_model is None:
+            self.nlp_model = spacy.load(nlp_models["email"])
         to, when, body = self.nlp(text)
         return self.prepare_processed(to, when, body, sender)
 
@@ -143,8 +145,7 @@ class Send(Module):
         """
         Lets the reminder model work on the given text.
         """
-        nlp = spacy.load(self.nlp_model_name)
-        doc = nlp(text)
+        doc = self.nlp_model(text)
 
         to = []
         when = []

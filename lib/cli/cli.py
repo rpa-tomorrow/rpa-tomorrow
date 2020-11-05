@@ -34,7 +34,7 @@ def cli(debug):
 
     load_settings()
     print("Loading...")
-    n = nlp.NLP(SETTINGS["nlp_models"]["basic"])
+    n = nlp.NLP(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
     print("Ready!")
 
     while True:

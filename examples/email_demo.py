@@ -11,7 +11,7 @@ from lib.settings import load_settings  # noqa: E402
 load_settings()
 
 automate = Automate()
-n = nlp.NLP("en_rpa_simple")
+n = nlp.NLP("en_rpa_simple", "en_core_web_md")
 
 # Enable the SMTP server before running the following
 try:
