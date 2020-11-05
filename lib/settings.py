@@ -36,7 +36,7 @@ def load_user():
         email_config = config_email_host(email_config)
         update = True
 
-    if SETTINGS["user"]["model_language"] == None:
+    if SETTINGS["user"]["model_language"] is None:
         languages = []
         with open("../config/nlp_models.yaml", "r") as stream:
             languages = list(yaml.safe_load(stream).keys())
@@ -89,4 +89,3 @@ def set_language():
     os.chdir(old_dir)
 
     load_nlp_models_config(SETTINGS["user"]["model_language"])
-

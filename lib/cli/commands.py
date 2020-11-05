@@ -7,7 +7,7 @@ import os
 
 sys.path.append(".")
 
-from lib.settings import set_language
+from lib.settings import set_language  # noqa: E402
 
 
 def commands(arr, nlp):

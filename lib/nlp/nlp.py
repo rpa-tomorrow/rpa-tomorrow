@@ -9,10 +9,8 @@ class NLP:
         self.sim_model = spacy.load(spacy_model_name)
         self.automate = Automate()
 
-
     def send_automate(self, verb, text):
         return self.automate.prepare(verb, text)
-
 
     def prepare(self, text):
         """
@@ -40,7 +38,6 @@ class NLP:
             if similarity > 0.6:
                 response = self.send_automate(doc_verb.text, text)
                 return response
-
 
     def run(self, text):
         action = self.prepare(text)

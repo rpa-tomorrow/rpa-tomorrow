@@ -40,6 +40,7 @@ def config_email_host(email_config: dict) -> dict:
 
     return email_config
 
+
 def config_model_language(languages: [str]) -> str:
     """ Prompt the user about choosing language for the NLP models"""
     length = len(languages)
@@ -53,8 +54,7 @@ def config_model_language(languages: [str]) -> str:
         choice = int(awnser) - 1
         if choice >= 0 and choice < length:
             return languages[choice]
-    except:
+    except ValueError:
         print("Input needs to be a integer")
 
     return config_model_language(languages)
-
