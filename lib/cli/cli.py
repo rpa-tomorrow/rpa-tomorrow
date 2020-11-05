@@ -27,12 +27,24 @@ def setup_logger(level):
     logger.addHandler(ch)
 
 
-@plac.annotations(debug=("Enable debug output", "flag", "d"))
-def cli(debug):
-    if debug:
-        setup_logger(logging.DEBUG)
-    else:
+@plac.annotations(
+    debug=("Set the debug logging level which will be output", "option", "d", str),
+    verbose=("Enable verbose output", "flag", "v"),
+)
+def cli(debug, verbose):
+    try:
+        if debug is not None:
+            setup_logger(debug)
+
+        if debug is not None and verbose:
+            logging.warning("Verbose and debug output are both enabled. Ignoring verbose flag!")
+        elif verbose:
+            setup_logger(logging.INFO)
+        else:
+            setup_logger(logging.WARNING)
+    except ValueError:
         setup_logger(logging.WARNING)
+        logging.warning("Could not parse debug flag. Using default log settings.")
 
     load_settings()
     print("Loading...")
