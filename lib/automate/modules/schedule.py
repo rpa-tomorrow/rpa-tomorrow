@@ -31,9 +31,9 @@ class Schedule(Module):
         super(Schedule, self).__init__()
         self.nlp_model = None
 
-    def prepare(self, nlp_models, text, sender):
+    def prepare(self, nlp_model_names, text, sender):
         if self.nlp_model is None:
-            self.nlp_model = spacy.load(nlp_models["schedule"])
+            self.nlp_model = spacy.load(nlp_model_names["schedule"])
         to, when, body = self.nlp(text)
         return self.prepare_processed(to, when, body, sender)
 

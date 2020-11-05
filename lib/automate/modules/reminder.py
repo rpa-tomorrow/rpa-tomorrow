@@ -46,9 +46,9 @@ class Reminder(Module):
             # TODO: Add windows call here
             pass
 
-    def prepare(self, nlp_models, text, sender):
+    def prepare(self, nlp_model_names, text, sender):
         if self.nlp_model is None:
-            self.nlp_model = spacy.load(nlp_models["reminder"])
+            self.nlp_model = spacy.load(nlp_model_names["reminder"])
         to, when, body = self.nlp(text)
         return self.prepare_processed(to, when, body, sender)
 
