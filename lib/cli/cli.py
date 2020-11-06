@@ -33,18 +33,18 @@ def setup_logger(level):
 )
 def cli(debug, verbose):
     try:
+        if debug is not None and verbose:
+            print("WARNING: Verbose and debug output are both enabled. Ignoring verbose flag!")
+
         if debug is not None:
             setup_logger(debug)
-
-        if debug is not None and verbose:
-            logging.warning("Verbose and debug output are both enabled. Ignoring verbose flag!")
         elif verbose:
             setup_logger(logging.INFO)
         else:
             setup_logger(logging.WARNING)
     except ValueError:
         setup_logger(logging.WARNING)
-        logging.warning("Could not parse debug flag. Using default log settings.")
+        print("WARNING: Could not parse debug flag. Using default log settings.")
 
     load_settings()
     print("Loading...")
