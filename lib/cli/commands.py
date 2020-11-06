@@ -6,6 +6,10 @@ import sys
 import os
 from config import config_model_language
 
+sys.path.append(".")
+
+from lib.nlp.model_installer import Model_Installer  # noqa: E402
+
 
 def commands(arr, nlp):
     """
@@ -17,6 +21,9 @@ def commands(arr, nlp):
         prompt()
     elif arr[0] == "language" or arr[0] == "lang":
         config_model_language()
+    elif arr[0] == "install":
+        model_installer = Model_Installer()
+        model_installer.install("english")
     else:
         listToStr = " ".join(map(str, arr))
         try:
