@@ -4,6 +4,13 @@ import yaml
 SETTINGS = {}
 
 
+def load_settings():
+    """ Load settings from the config files located in /config"""
+    load_user()
+    load_nlp_models_config(SETTINGS["user"]["model_language"])
+    load_local_contacts()
+
+
 def load_user():
     """Load user information from the config file"""
     old_dir = os.getcwd()
