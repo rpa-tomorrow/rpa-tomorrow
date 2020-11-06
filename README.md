@@ -13,30 +13,26 @@ The purpose of the project is to implement a system where the user can write ins
 
 ## Setup
 
-Create and activate conda environment.
+To create and activate the projects conda environment the setup script can be used with the following command
+
 ```
 source substorm.sh
 ```
 
-### Python
+This will also install all of the required models from the [model releases repository](https://github.com/rpa-tomorrow/model-releases).
+Please note that no newly released models will be installed if this script has already been used before. For this to work the conda environment needs to be removed entirely before running the setup script again.
 
-Add user information to `lib/settings.py`.
+### Manually installing a model
 
-Example on how to use the automation module is in `demo.py`
-
-### Testing
-
-The tests can be run with the following command
+With the conda environment activated a model can be installed by using `pip`
 
 ```bash
-pytest
+pip install https://github.com/rpa-tomorrow/model-releases/releases/download/<TAG>.tar.gz
 ```
 
-while inside the project directory. You will need the `pytest-cov` package to run it.
+where `<TAG>` is the [tag](https://github.com/rpa-tomorrow/model-releases/tags) of the model to install.
 
-A coverage report will automatically be generated and and saved in `htmlcov` and it can be viewed at `htmlcov/index.html`
-
-#### Local SMTP server
+### Local SMTP server
 
 It can be nice to test the Send automation module (sends emails) using a local SMTP debugging server. This can be done by running
 
@@ -44,19 +40,52 @@ It can be nice to test the Send automation module (sends emails) using a local S
 python -m smtpd -n -c DebuggingServer localhost:1025
 ```
 
-in your terminal. A local SMTP debugging server is now running on `localhost:1025` and the predefined user `John Doe` in `lib/settings.py` can be used to send emails to this local server. If an email is sent using the module you should now be able to see it in the terminal.
+in your terminal. A local SMTP debugging server is now running on `localhost:1025` and the predefined user `John Doe` in [config/user.yaml](config/user.yaml) can be used to send emails to this local server. If an email is sent using the module you should now be able to see it in the terminal.
 
-### Linux
+### Google QAuth 2.0 client secret
 
-Below are the absolute minimum packages you will need for Linux. Names might vary depending on your distribution, you might need to install it manually if you can't find it using your distribution's package manager.
+Since the [schedule module](lib/automate/modules/schedule.py), responsible for scheduling meetings, uses the Google Calendar API some setup is required
+for this module to work.
+Follow this [Google guide](https://support.google.com/cloud/answer/6158849?hl=en) and create a Google Calendar API.
 
-```
-Python 3.8.5-1
-```
+The scope of the credentials needs to set to `https://www.googleapis.com/auth/calendar.events.owned`
 
-## Build instructions
+After that download the credentials and put it in `substorm-nlp/` directory, also name it `client_secret.json`.
+
+Now the schedule module should work and any created meetings should show up in the calendar of the account you created the credentials for.
 
 ## Usage
+
+### User input
+
+Since the program is intended to be able to parse and understand clear text as input, to perform various tasks, there is no specific
+syntax for the input. However, the program is only able to perform three specific use cases at the moment, these are:
+
+- Sending emails
+- Creating reminders
+- Scheduling meetings
+
+Because of this the input has to contain a verb connected to one of these use cases in order for the program to understand and invoke a module for execution. Below are the verbs connected to each module, which can be used in the input.
+
+- Send email [send, mail, e-mail, email]
+- Reminder [remind, reminder, notify]
+- Schedule meeting [book, schedule, meeting]
+
+As long as a module can be invoked after parsing the input you will be prompted about any missing information in the input such as when to schedule the reminder, what should be sent in the email etc.
+
+#### Example input
+
+```bash
+remind me to eat in 30 seconds
+```
+
+```
+send an email to Niklas
+```
+
+```
+schedule a meeting with John at 13:00
+```
 
 ### CLI
 
@@ -64,19 +93,21 @@ The CLI can be started as follows
 
 - `cd` into the project folder
 - Run `python lib/cli/cli.py`
-- You can check available CLI options with `--help`
+- You can check available CLI options with the `--help` flag
 
-The CLI should now be running in your terminal. Type `help` for more instructions. Currently the CLI is only capable of sending predefined emails if a word similar to `skicka` is entered by the user. Note that you need to have a [local SMTP debugging server](https://github.com/rpa-tomorrow/substorm-nlp/tree/cli-call-automation#local-smtp-server) running for this to work.
+The CLI should now be running in your terminal. Type `help` for more instructions. See [User input](#user-input) if the program is struggling to understand the input.
 
-## Setup Google QAuth 2.0 client secret
+## Testing
 
-Follow this [Google guide](https://support.google.com/cloud/answer/6158849?hl=en) and create a Google Calendar API.
+The tests can be run with the following command
 
-The scope of the credentials needs to set to `https://www.googleapis.com/auth/calendar.events.owned`
+```bash
+pytest
+```
 
-After that download the credentials and put it in `substorm-nlp/` directory, also name it `client_secret.json`.
+while inside the project directory. You will need the `pytest-cov` package to run it, this will already be installed if the conda environment is activated when issuing the above command.
 
-Now the schedule module should work.
+A coverage report will automatically be generated and saved in `htmlcov/` and it can be viewed at `htmlcov/index.html`
 
 ## Authors
 
@@ -85,7 +116,7 @@ Now the schedule module should work.
 - Gustav Hansson - gushan-6@student.ltu.se - [97gushan](https://github.com/97gushan)
 - Niklas Lundberg - inaule-6@student.ltu.se - [Blinningjr](https://github.com/Blinningjr)
 - Alexander Mennborg - aleman-6@student.ltu.se - [Aleman778](https://github.com/Aleman778)
-- Hugo Wangler - hugwan-6@student.ltu.se - [banunkers](https://github.com/banunkers)
+- Hugo Wangler - hugwan-6@student.ltu.se - [hugowangler](https://github.com/hugowangler)
 - Aron Widforss - arowid-6@student.ltu.se - [widforss](https://github.com/widforss)
 
 ## License
