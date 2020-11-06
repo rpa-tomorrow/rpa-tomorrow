@@ -1,6 +1,6 @@
 import smtplib
 import spacy
-import lib.automate.modules.tools.time_convert as tc
+import lib.utils.tools.time_convert as tc
 import logging
 
 from fuzzywuzzy import process as fuzzy

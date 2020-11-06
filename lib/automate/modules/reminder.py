@@ -2,7 +2,7 @@
 The reminder automation module
 """
 import sys
-import lib.automate.modules.tools.time_convert as tc
+import lib.utils.tools.time_convert as tc
 import spacy
 import logging
 
