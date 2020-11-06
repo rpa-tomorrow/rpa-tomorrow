@@ -112,3 +112,23 @@ def config_model_language() -> str:
         print("Input needs to be a integer")
 
     return config_model_language(languages)
+
+
+def choose_model_version(versions: [str]) -> str:
+    """ Prompt the user about choosing model version for the NLP models"""
+    length = len(versions)
+    prompt_msg = "Choose which version to use\n"
+    for i in range(length):
+        prompt_msg += f"[{i+1}] {versions[i]}\n"
+    prompt_msg += f"Please choose one (1-{length})"
+    print(prompt_msg)
+    awnser = sys.stdin.readline().strip()
+    try:
+        choice = int(awnser) - 1
+        if choice >= 0 and choice < length:
+            return versions[choice]
+    except ValueError:
+        print("Input needs to be a integer")
+
+    return config_model_language(versions)
+

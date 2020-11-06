@@ -16,6 +16,17 @@ class Model_Installer:
             self.lang_models = yaml.safe_load(stream)
         os.chdir(old_dir)
 
+
+    def get_languages(self) -> [str]:
+        return list(self.lang_models.keys())
+
+
+    def get_versions(self, language: str) -> [str]:
+        versions = [v["version"] for v in self.lang_models[language]]
+        versions.insert(0, "latest")
+        return versions
+
+
     def install(self, language: str, version="latest"):
         def is_v1_larger(version1: str, version2: str) -> bool:
             v1 = version1.split('.')

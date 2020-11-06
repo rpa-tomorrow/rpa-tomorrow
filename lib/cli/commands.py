@@ -4,7 +4,7 @@ The commands available in the CLI
 
 import sys
 import os
-from config import config_model_language
+from config import config_model_language, choose_model_version
 
 sys.path.append(".")
 
@@ -23,7 +23,9 @@ def commands(arr, nlp):
         config_model_language()
     elif arr[0] == "install":
         model_installer = Model_Installer()
-        model_installer.install("english")
+        language = config_model_language(model_installer.get_languages())
+        version = choose_model_version(model_installer.get_versions(language))
+        model_installer.install(language, version)
     else:
         listToStr = " ".join(map(str, arr))
         try:
