@@ -1,6 +1,6 @@
 import os
 import yaml
-from lib.cli.config import config_user_name, config_email_address, config_email_host
+from lib.cli.config import config_user_name, config_email_address, config_email_host, config_model_language
 
 SETTINGS = {}
 
@@ -36,10 +36,19 @@ def load_user():
         email_config = config_email_host(email_config)
         update = True
 
+    if SETTINGS["user"]["model_language"] is None:
+        languages = []
+        with open("../config/nlp_models.yaml", "r") as stream:
+            languages = list(yaml.safe_load(stream).keys())
+        SETTINGS["user"]["model_language"] = config_model_language(languages)
+        update = True
+
     if update:
-        update_settings("config/user", SETTINGS["user"])
+        update_settings("../config/user", SETTINGS["user"])
         print("User config updated")
     os.chdir(old_dir)
+
+    load_nlp_models_config(SETTINGS["user"]["model_language"])
 
 
 def load_local_contacts():
@@ -55,3 +64,28 @@ def update_settings(file_path: str, data: dict):
     """Writes to a yaml config file"""
     with open(file_path + ".yaml", "w", encoding="utf8") as outfile:
         yaml.dump(data, outfile)
+
+
+def load_nlp_models_config(language):
+    """ Loads the language specific nlp model names from the config file """
+    old_dir = os.getcwd()
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    with open("../config/nlp_models.yaml", "r") as stream:
+        SETTINGS["nlp_models"] = yaml.safe_load(stream)[language]
+    os.chdir(old_dir)
+
+
+def set_language():
+    old_dir = os.getcwd()
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+    languages = []
+    with open("../config/nlp_models.yaml", "r") as stream:
+        languages = list(yaml.safe_load(stream).keys())
+    SETTINGS["user"]["model_language"] = config_model_language(languages)
+
+    update_settings("../config/user", SETTINGS["user"])
+    print("User config updated")
+    os.chdir(old_dir)
+
+    load_nlp_models_config(SETTINGS["user"]["model_language"])

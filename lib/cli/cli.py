@@ -2,10 +2,8 @@ import plac
 import sys
 import commands
 import logging
-from lib.settings import load_settings
+from lib.settings import load_settings, SETTINGS
 from lib.nlp import nlp  # noqa: E402
-
-MODEL_NAME = "en_rpa_simple"
 
 
 def setup_logger(level):
@@ -36,7 +34,7 @@ def cli(debug):
 
     load_settings()
     print("Loading...")
-    n = nlp.NLP(MODEL_NAME)
+    n = nlp.NLP(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
     print("Ready!")
 
     while True:

@@ -7,7 +7,7 @@ class Module:
     def __init__(self):
         pass
 
-    def prepare(self, text, sender):
+    def prepare(self, nlp_model_names, text, sender):
         raise NotImplementedError("Method not implemented")
 
     def followup(self, answer):

@@ -39,3 +39,22 @@ def config_email_host(email_config: dict) -> dict:
         ]
 
     return email_config
+
+
+def config_model_language(languages: [str]) -> str:
+    """ Prompt the user about choosing language for the NLP models"""
+    length = len(languages)
+    prompt_msg = "Choose which language to use\n"
+    for i in range(length):
+        prompt_msg += f"[{i+1}] {languages[i]}\n"
+    prompt_msg += f"Please choose one (1-{length})"
+    print(prompt_msg)
+    awnser = sys.stdin.readline().strip()
+    try:
+        choice = int(awnser) - 1
+        if choice >= 0 and choice < length:
+            return languages[choice]
+    except ValueError:
+        print("Input needs to be a integer")
+
+    return config_model_language(languages)
