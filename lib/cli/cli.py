@@ -2,7 +2,8 @@ import plac
 import sys
 import commands
 import logging
-from lib.settings import load_settings, SETTINGS
+from config import load_settings_from_cli
+from lib.settings import SETTINGS
 from lib.nlp import nlp  # noqa: E402
 
 
@@ -32,7 +33,7 @@ def cli(debug):
     else:
         setup_logger(logging.WARNING)
 
-    load_settings()
+    load_settings_from_cli()
     print("Loading...")
     n = nlp.NLP(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
     print("Ready!")

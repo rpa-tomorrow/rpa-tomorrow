@@ -4,10 +4,7 @@ The commands available in the CLI
 
 import sys
 import os
-
-sys.path.append(".")
-
-from lib.settings import set_language  # noqa: E402
+from config import config_model_language
 
 
 def commands(arr, nlp):
@@ -19,7 +16,7 @@ def commands(arr, nlp):
     elif arr[0] == "help" or arr[0] == "h":
         prompt()
     elif arr[0] == "language" or arr[0] == "lang":
-        set_language()
+        config_model_language()
     else:
         listToStr = " ".join(map(str, arr))
         try:
