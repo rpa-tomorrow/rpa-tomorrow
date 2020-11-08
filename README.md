@@ -27,7 +27,7 @@ Please note that no newly released models will be installed if this script has a
 With the conda environment activated a model can be installed by using `pip`
 
 ```bash
-pip install https://github.com/rpa-tomorrow/model-releases/releases/download/<TAG>.tar.gz
+pip install https://github.com/rpa-tomorrow/model-releases/releases/download/<TAG>/<TAG>.tar.gz
 ```
 
 where `<TAG>` is the [tag](https://github.com/rpa-tomorrow/model-releases/tags) of the model to install.
@@ -75,7 +75,7 @@ As long as a module can be invoked after parsing the input you will be prompted 
 
 #### Example input
 
-```bash
+```
 remind me to eat in 30 seconds
 ```
 
@@ -115,7 +115,7 @@ A coverage report will automatically be generated and saved in `htmlcov/` and it
 - Mark Hakansson - marhak-6@student.ltu.se - [markhakansson](https://github.com/markhakansson)
 - Gustav Hansson - gushan-6@student.ltu.se - [97gushan](https://github.com/97gushan)
 - Niklas Lundberg - inaule-6@student.ltu.se - [Blinningjr](https://github.com/Blinningjr)
-- Alexander Mennborg - aleman-6@student.ltu.se - [Aleman778](https://github.com/Aleman778)
+- Alexander Mennborg - alemen-6@student.ltu.se - [Aleman778](https://github.com/Aleman778)
 - Hugo Wangler - hugwan-6@student.ltu.se - [hugowangler](https://github.com/hugowangler)
 - Aron Widforss - arowid-6@student.ltu.se - [widforss](https://github.com/widforss)
 
