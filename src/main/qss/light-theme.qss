@@ -1,0 +1,33 @@
+
+ProcessViewer {
+    background-color: white;
+} 
+
+BottomInfoBar {
+    background-color: lightgray;
+}
+
+ProcessTextEdit {
+    background-color: white;
+}
+
+SideMenuBar {
+    background-color: dodgerblue;
+}
+
+MenuBarButton {
+    background-color: dodgerblue;
+    color: white;
+}
+
+MenuBarButton:hover {
+    background-color: #1774cf;
+}
+
+MenuBarButton:pressed {
+    background-color: #2879c9;
+}
+
+MenuBarButton:checked {
+    background-color: #2879c9;
+}

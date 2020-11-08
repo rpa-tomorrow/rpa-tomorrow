@@ -13,6 +13,7 @@ class Automate:
             import_module("lib.automate.modules.schedule").Schedule,
             import_module("lib.automate.modules.reminder").Reminder,
         ]
+        self.response_callback = None;
         self.verbs = {}
         for module in self.modules:
             for verb in module.verbs:
@@ -60,7 +61,10 @@ class Automate:
             else:
                 raise AutomationNotFoundError("Automation module not found")
         followup = instance.prepare(text, sender)
-        return handle_response(followup)
+        if (self.response_callback != None):
+            return self.response_callback(instance, followup)
+        else:
+            return handle_response(followup)
 
 
 class NoResponseError(Error):

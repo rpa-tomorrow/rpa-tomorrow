@@ -1,0 +1,30 @@
+
+* {
+    font-family: Roboto, Segoe UI, Arial;
+    font-size: 12pt;
+}
+
+QLabel#viewTitle {
+    font-size: 24pt;
+}
+
+QToolButton {
+    font-family: FontAwesome;
+    font-size: 12pt;
+    border-style: none;
+}
+
+MenuBarButton {
+    font-size: 32px;
+    border-radius: 6px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+ProcessTextEdit {
+    border-style: none;
+    padding-left: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    padding-right: 8px
+}

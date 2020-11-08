@@ -1,64 +1,117 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt, QEvent, QPoint, pyqtSlot
+
 from lib.automate.modules.send import Send
+from lib.automate.modules.schedule import Schedule
+from lib.automate.modules.reminder import Reminder
 
-class ProcessEditorView(QWidget):
-    def __init__(self, *args, **kwargs):
-        super(ProcessEditorView, self).__init__(*args, **kwargs)
-        layout = QGridLayout()
-        layout.setContentsMargins(4, 4, 4, 4)
+from lib.nlp.nlp import NLP
 
-        self.sidebar = QFrame()
-        sidebar_layout = QVBoxLayout()
-        sidebar_layout.setContentsMargins(0, 0, 0, 0)
-        sidebar_layout.addWidget(QLabel("Outline"))
-        self.sidebar.setMinimumWidth(240)
-        # self.sidebar.setStyleSheet("background-color: white")
-        self.sidebar.setLayout(sidebar_layout)
+from threading import Thread
 
-        self.text_editor = QTextEdit("")
-        self.text_editor.setPlaceholderText("Enter process query here")
-        self.text_editor.setStyleSheet("border-style: none;")
-        self.text_editor.setFont(QFont("Segoe UI", 10))
-        self.text_editor.setMaximumHeight(180)
-        self.text_editor.installEventFilter(self)
+import sys
 
-        self.submit_button = QPushButton("Submit");
-        self.submit_button.clicked.connect(self.submit_input_text)
+def display_error_message(message, title="Error"):
+    msg = QMessageBox()
+    msg.setIcon(QMessageBox.Critical)
+    msg.setText(message)
+    msg.setWindowTitle(title)
+    msg.resize(360, 280)
+    msg.exec_()
 
+
+def handle_response(task, followup):
+    display_error_message(str(followup) + ".")
+    
+
+class DesignView(QWidget):
+    def __init__(self, main_window, *args, **kwargs):
+        super(DesignView, self).__init__(*args, **kwargs)
+        layout = QVBoxLayout()
+        layout.setSpacing(8);
+
+        # self.nlp = NLP("en_rpa_simple") # TODO(alexander): model should not be hardcoded
+        # self.nlp.response_callback = handle_response
+        self.nlp = None # NOTE(alexander): loading nlp module takes sooooo... long time
+
+        self.main_window = main_window
+        self.title = QLabel("Design")
+        self.title.setObjectName("viewTitle")
+        self.title.setMaximumHeight(48)
+        layout.addWidget(self.title)
+
+        self.process_text_edit = ProcessTextEdit("")
+        self.process_text_edit.setMaximumHeight(180)
         self.process_viewer = ProcessViewer()
 
-        layout.addWidget(self.sidebar, 0, 0, 3, 1)
-        layout.addWidget(self.text_editor, 0, 1)
-        layout.addWidget(self.submit_button, 1, 1)
-        layout.addWidget(self.process_viewer, 2, 1)
+        layout.addWidget(self.process_text_edit)
+        layout.addWidget(self.process_viewer)
         self.setLayout(layout)
-
-        # test_block = SendEmailBlock("test", ["Alexander"], "", "Hello World", self.process_viewer)
-        # self.process_viewer.append_block(test_block)
+        self.process_text_edit.installEventFilter(self)
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress and obj is self.text_editor:
-            if event.key() == Qt.Key_Return and self.text_editor.hasFocus():
+        if event.type() == QEvent.KeyPress and obj is self.process_text_edit:
+            if event.key() == Qt.Key_Return and self.process_text_edit.hasFocus():
                 self.submit_input_text()
+                return True
         return super().eventFilter(obj, event)
 
     def submit_input_text(self):
-        query = self.text_editor.toPlainText()
-        self.text_editor.clear()
+        self.process_text_edit.save_cursor_pos()
+        if not self.nlp:
+            self.main_window.set_info_message("Loading model en_rpa_simple...")
+            self.nlp = NLP("en_rpa_simple") # TODO(alexander): model should not be hardcoded
+            self.nlp.response_callback = handle_response
+            self.main_window.set_info_message("Done!")
 
-        to, time, body = Send().nlp(query)
-        email_block = SendEmailBlock(query, to, time, body, self.process_viewer)
-        self.process_viewer.append_block(email_block)
+        query = self.process_text_edit.toPlainText()
+        block = None
+        
+        try:
+            task, _ = self.nlp.prepare(query)
+            if isinstance(task, Send):
+                block = SendBlock(query, task.to, task.when, task.body, self.process_viewer)
+            elif isinstance(task, Schedule):
+                block = ScheduleBlock(query, task.to, task.when, task.body, task.sender, self.process_viewer)
+            else:
+                self.process_text_edit.restore_cursor_pos()
+                display_error_message("Failed to register automation block.")
+                return
+        except:
+            self.process_text_edit.restore_cursor_pos()
+            display_error_message(str(sys.exc_info()[1]) + ".")
+            return
+        
+        self.process_text_edit.set_cursor_pos(0)
+        self.process_text_edit.clear()
+        self.process_viewer.append_block(block)
 
-class ProcessViewer(QWidget):
+class ProcessTextEdit(QTextEdit):
+    def __init__(self, *args, **kwargs):
+        super(ProcessTextEdit, self).__init__(*args, **kwargs)
+        self.setPlaceholderText("Enter process query here")
+        self.cursor_pos = 0
+
+    def save_cursor_pos(self):
+        self.cursor_pos = self.textCursor().position()
+
+    def restore_cursor_pos(self):
+        self.set_cursor_pos(self.cursor_pos)
+        
+    def set_cursor_pos(self, pos):
+        cursor = self.textCursor()
+        cursor.setPosition(pos)
+        self.setTextCursor(cursor)
+    
+        
+class ProcessViewer(QFrame):
     def __init__(self, *args, **kwargs):
         super(ProcessViewer, self).__init__(*args, **kwargs)
         self.grid_size = 32
         self.update()
         self.blocks = []
-        self.pos = QPoint(0, 0)
+        self.pos = QPoint(self.grid_size/2, self.grid_size/2)
         self.delta = QPoint(0, 0)
         self.offset = QPoint(0, 0)
         self.dragging = False
@@ -69,6 +122,7 @@ class ProcessViewer(QWidget):
         block.show()
         
     def paintEvent(self, event):
+        super().paintEvent(event)
         p = QPainter(self)
         p.setPen(QPen(QColor("#304357"), 1))
         xoff = (self.pos.x() + self.delta.x()) % self.grid_size
@@ -108,7 +162,10 @@ class ProcessViewer(QWidget):
 class ProcessBlock(QFrame):
     def __init__(self, query, name, min_width, min_height, *args, **kwargs):
         super(ProcessBlock, self).__init__(*args, **kwargs)
-        layout = QVBoxLayout()
+        self.main_frame = QFrame()
+        main_layout = QGridLayout()
+        layout = QGridLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
             
         self.query = query
         self.pos = QPoint(0, 0)
@@ -118,9 +175,12 @@ class ProcessBlock(QFrame):
         self.main_label.setMinimumHeight(24)
         self.main_label.setMaximumHeight(24)
 
-        layout.addWidget(self.main_label)
+        main_layout.addWidget(self.main_label, 0, 0)
+        main_layout.addWidget(self.main_frame, 1, 0)
+
         self.setup(layout)
-        self.setLayout(layout)
+        self.setLayout(main_layout)
+        self.main_frame.setLayout(layout)
         self.setMinimumWidth(min_width)
         self.setMinimumHeight(min_height)
         self.setStyleSheet("""
@@ -128,7 +188,6 @@ ProcessBlock {
     border-radius: 6px;
     border-style: solid;
     border-width: 2px;
-    border-color: lightgray;
 }
 """)
         self.update()
@@ -154,15 +213,7 @@ class SendEmailBlock(ProcessBlock):
         self.recipient.setText(", ".join(recipient))
         # self.when.setDateTime(QDateTime(str(when)))
         self.body.setText(body)
-        self.setStyleSheet("""
-SendEmailBlock {
-    border-radius: 6px;
-    border-style: solid;
-    border-width: 2px;
-    border-color: dodgerblue;
-}
-""")
-        
+
     def setup(self, layout):
         self.recipient = QLineEdit("")
         self.recipient.setPlaceholderText("recipient")
@@ -171,8 +222,6 @@ SendEmailBlock {
 
         self.body = QTextEdit("")
         self.body.setPlaceholderText("Enter the body of the email here")
-        layout.addWidget(self.recipient)
-        layout.addWidget(self.when)
-        layout.addWidget(self.body)
-
-        
+        layout.addWidget(self.recipient, 0, 0)
+        layout.addWidget(self.when, 1, 0)
+        layout.addWidget(self.body, 2, 0)

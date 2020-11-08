@@ -7,10 +7,12 @@ class NLP:
     def __init__(self, model):
         self.nlp = spacy.load(model)
         self.sim_model = spacy.load("en_core_web_md")
+        self.response_callback = None;
 
     def send_automate(self, verb, text):
         automate = Automate()
-        return automate.prepare(verb, text)
+        automate.response_callback = self.response_callback
+        return automate, automate.prepare(verb, text)
 
     def prepare(self, text):
         """
@@ -36,8 +38,9 @@ class NLP:
             doc_action = self.sim_model(action)
             similarity = doc_action.similarity(doc_verb)
             if similarity > 0.6:
-                response = self.send_automate(doc_verb.text, text)
-                return response
+                return self.send_automate(doc_verb.text, text)
+        return None, ""
+            
 
     def run(self, text):
         action = self.prepare(text)
