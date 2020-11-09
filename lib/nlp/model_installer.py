@@ -84,11 +84,11 @@ class Model_Installer:
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         with open("../../config/nlp_models.yaml", "r") as stream:
             nlp_models = yaml.safe_load(stream)
+        os.chdir(old_dir)
 
         nlp_models[language + " V" + selected["version"]] = (self.format_dict(selected))
 
-        update_settings("../../config/nlp_models", nlp_models)
-        os.chdir(old_dir)
+        update_settings("../config/nlp_models", nlp_models)
 
 
     def format_dict(self, selected: dict) -> dict:

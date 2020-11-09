@@ -8,7 +8,6 @@ from lib.settings import (  # noqa: E402
     load_user,
     update_settings,
     load_nlp_models_config,
-    get_model_languages,
 )
 
 
@@ -93,10 +92,8 @@ def config_email_host(email_config: dict) -> dict:
     return email_config
 
 
-def config_model_language() -> str:
+def config_model_language(languages: [str]) -> str:
     """ Prompt the user about choosing language for the NLP models"""
-    languages = get_model_languages()
-
     length = len(languages)
     prompt_msg = "Choose which language to use\n"
     for i in range(length):

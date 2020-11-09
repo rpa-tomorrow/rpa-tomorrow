@@ -9,6 +9,7 @@ from config import config_model_language, choose_model_version
 sys.path.append(".")
 
 from lib.nlp.model_installer import Model_Installer  # noqa: E402
+from lib.settings import SETTINGS, get_model_languages, update_settings
 
 
 def commands(arr, nlp):
@@ -20,7 +21,8 @@ def commands(arr, nlp):
     elif arr[0] == "help" or arr[0] == "h":
         prompt()
     elif arr[0] == "language" or arr[0] == "lang":
-        config_model_language()
+        SETTINGS["model_language"] = config_model_language(get_model_languages())
+        update_settings("../config/user", SETTINGS["user"])
     elif arr[0] == "install":
         model_installer = Model_Installer()
         language = config_model_language(model_installer.get_languages())
