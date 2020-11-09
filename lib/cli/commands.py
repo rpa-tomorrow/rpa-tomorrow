@@ -24,7 +24,7 @@ def commands(arr, nlp):
         SETTINGS["user"]["language"] = config_model_language(get_model_languages())
         SETTINGS["user"]["model_version"] = choose_model_version(get_model_versions(SETTINGS["user"]["language"]))
         update_settings("../config/user", SETTINGS["user"])
-    elif arr[0] == "install":
+    elif arr[0] == "install" or arr[0] == "i":
         model_installer = Model_Installer()
         language = config_model_language(model_installer.get_languages())
         version = choose_model_version(model_installer.get_versions(language))
