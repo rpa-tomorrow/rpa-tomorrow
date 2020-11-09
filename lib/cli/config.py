@@ -132,4 +132,3 @@ def choose_model_version(versions: [str]) -> str:
         print("Input needs to be a integer")
 
     return config_model_language(versions)
-

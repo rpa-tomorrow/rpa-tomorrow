@@ -71,4 +71,3 @@ def load_nlp_models_config(language: str, version: str):
     with open("../config/nlp_models.yaml", "r") as stream:
         SETTINGS["nlp_models"] = yaml.safe_load(stream)[language][version]
     os.chdir(old_dir)
-

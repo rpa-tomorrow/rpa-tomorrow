@@ -9,7 +9,7 @@ from config import config_model_language, choose_model_version
 sys.path.append(".")
 
 from lib.nlp.model_installer import Model_Installer  # noqa: E402
-from lib.settings import SETTINGS, get_model_languages, update_settings, get_model_versions
+from lib.settings import SETTINGS, get_model_languages, update_settings, get_model_versions  # noqa: E402
 
 
 def commands(arr, nlp):

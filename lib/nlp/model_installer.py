@@ -9,7 +9,7 @@ class Model_Installer:
     def __init__(self):
         self.load_models()
 
-    def load_models(self): 
+    def load_models(self):
         """Loads the information in nlp_models.yaml into self.lang_models"""
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -17,13 +17,11 @@ class Model_Installer:
             self.lang_models = yaml.safe_load(stream)
         os.chdir(old_dir)
 
-
     def get_languages(self) -> [str]:
         """
         :return: A list of available languages.
         """
         return list(self.lang_models.keys())
-
 
     def get_versions(self, language: str) -> [str]:
         """
@@ -33,14 +31,14 @@ class Model_Installer:
         versions.insert(0, "latest")
         return versions
 
-
     def install(self, language: str, version="latest"):
         """Gets information from nlp_models.yaml and installs the models listed
         for that specific language and version"""
+
         def is_v1_greater(version1: str, version2: str) -> bool:
             """Compares two strings and checks if version1 is greater then version2"""
-            v1 = version1.split('.')
-            v2 = version2.split('.')
+            v1 = version1.split(".")
+            v2 = version2.split(".")
             for i in range(3):
                 if v1[i] > v2[i]:
                     return True
@@ -76,7 +74,6 @@ class Model_Installer:
 
         self.update_model_config(selected, language)
 
-
     def update_model_config(self, selected: dict, language: str):
         """Updates the config/nlp_models.yaml file with the selected models"""
         nlp_models = None
@@ -86,10 +83,9 @@ class Model_Installer:
             nlp_models = yaml.safe_load(stream)
         os.chdir(old_dir)
 
-        nlp_models[language][selected["version"]] = (self.format_dict(selected))
+        nlp_models[language][selected["version"]] = self.format_dict(selected)
 
         update_settings("../config/nlp_models", nlp_models)
-
 
     def format_dict(self, selected: dict) -> dict:
         """
@@ -100,4 +96,3 @@ class Model_Installer:
             formated_dict[module["module"]] = module["name"]
 
         return formated_dict
-
