@@ -1,5 +1,5 @@
 from __future__ import print_function
-import lib.automate.modules.tools.time_convert as tc
+import lib.utils.tools.time_convert as tc
 import pickle
 import os.path
 import spacy
