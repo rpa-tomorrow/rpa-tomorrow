@@ -1,5 +1,8 @@
 import sys
 
+sys.path.append(".")
+sys.path.append("..")
+
 from lib import Error
 from lib.automate import Automate
 from lib.nlp import nlp
@@ -8,18 +11,14 @@ from lib.settings import load_settings
 
 load_settings()
 automate = Automate()
-n = nlp.NLP("en_rpa_simple")
+n = nlp.NLP("en_rpa_simple", "en_core_web_md")
 
 # Enable the CalDav server before running the following
 try:
-    text = "set meeting with Niklas at 20:00"
-    # Have to use automation module directly because the NLP model does not
-    # support Schedule yet
-    # response = n.run(text)
     when = datetime.now() + timedelta(hours=5.0)  # timestamp at: now + 5 hrs
-    # when = datetime.fromisoformat("2020-11-02T15:40:00")
-    response = automate.run("unschedule", ["rpa@substorm.com"], None, None)
-
+    text = "unschedule meeting with john"
+    print("input:", text)
+    response = n.run(text)
     print(response)
 except Error as err:
     print(err, file=sys.stdout)
