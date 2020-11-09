@@ -40,8 +40,12 @@ def load_user_from_cli():
         email_config = config_email_host(email_config)
         update = True
 
-    if SETTINGS["user"]["model_language"] is None:
-        SETTINGS["user"]["model_language"] = config_model_language()
+    if SETTINGS["user"]["language"] is None:
+        SETTINGS["user"]["language"] = config_model_language()
+        update = True
+
+    if SETTINGS["user"]["model_version"] is None:
+        SETTINGS["user"]["model_version"] = choose_model_version(SETTINGS["user"]["language"])
         update = True
 
     SETTINGS["user"]["email"] = email_config
@@ -49,7 +53,7 @@ def load_user_from_cli():
         update_settings("../config/user", SETTINGS["user"])
         print("User config updated")
 
-    load_nlp_models_config(SETTINGS["user"]["model_language"])
+    load_nlp_models_config(SETTINGS["user"]["language"], SETTINGS["user"]["model_version"])
 
 
 def config_user_name() -> str:

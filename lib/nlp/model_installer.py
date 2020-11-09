@@ -86,7 +86,7 @@ class Model_Installer:
             nlp_models = yaml.safe_load(stream)
         os.chdir(old_dir)
 
-        nlp_models[language + " V" + selected["version"]] = (self.format_dict(selected))
+        nlp_models[language][selected["version"]] = (self.format_dict(selected))
 
         update_settings("../config/nlp_models", nlp_models)
 
