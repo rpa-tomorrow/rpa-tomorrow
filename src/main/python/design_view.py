@@ -1,6 +1,8 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QEvent, QPoint, pyqtSlot
+from PyQt5.QtCore import *
+
+from worker_queue import Worker
 
 from lib.automate.modules.send import Send
 from lib.automate.modules.schedule import Schedule
@@ -8,7 +10,7 @@ from lib.automate.modules.reminder import Reminder
 
 from lib.nlp.nlp import NLP
 
-from threading import Thread
+from multiprocessing import Process, Manager
 
 import sys
 
@@ -23,19 +25,31 @@ def display_error_message(message, title="Error"):
 
 def handle_response(task, followup):
     display_error_message(str(followup) + ".")
-    
+
+def load_nlp_model(name, return_dict):
+    nlp = NLP(name)
+    return_dict['nlp'] = nlp
 
 class DesignView(QWidget):
     def __init__(self, main_window, *args, **kwargs):
         super(DesignView, self).__init__(*args, **kwargs)
+        self.main_window = main_window
+        self.threadpool = QThreadPool()
+        
         layout = QVBoxLayout()
         layout.setSpacing(8);
 
-        # self.nlp = NLP("en_rpa_simple") # TODO(alexander): model should not be hardcoded
-        # self.nlp.response_callback = handle_response
-        self.nlp = None # NOTE(alexander): loading nlp module takes sooooo... long time
+        # Load a NLP model on separate thread
+        self.nlp = None
 
-        self.main_window = main_window
+        worker = Worker(self.load_nlp_model, "Loading model en_rpa_simple", "en_rpa_simple")
+        worker.signals.result.connect(self.set_nlp_model)
+        worker.signals.error.connect(self.load_nlp_model_error)
+        
+        self.threadpool.start(worker)
+
+        # TODO(alexander): model should not be hardcoded
+        
         self.title = QLabel("Design")
         self.title.setObjectName("viewTitle")
         self.title.setMaximumHeight(48)
@@ -50,6 +64,20 @@ class DesignView(QWidget):
         self.setLayout(layout)
         self.process_text_edit.installEventFilter(self)
 
+    def set_nlp_model(self, nlp):
+        self.nlp = nlp
+
+    def load_nlp_model_error(self, error):
+        display_error_message(error[2])
+
+    def load_nlp_model(self, model):
+        manager = Manager()
+        return_dict = manager.dict()
+        proc = Process(target=load_nlp_model, args=(model, return_dict,))
+        proc.start()
+        proc.join()
+        return return_dict['nlp']
+
     def eventFilter(self, obj, event):
         if event.type() == QEvent.KeyPress and obj is self.process_text_edit:
             if event.key() == Qt.Key_Return and self.process_text_edit.hasFocus():
@@ -59,15 +87,14 @@ class DesignView(QWidget):
 
     def submit_input_text(self):
         self.process_text_edit.save_cursor_pos()
-        if not self.nlp:
-            self.main_window.set_info_message("Loading model en_rpa_simple...")
-            self.nlp = NLP("en_rpa_simple") # TODO(alexander): model should not be hardcoded
-            self.nlp.response_callback = handle_response
-            self.main_window.set_info_message("Done!")
 
         query = self.process_text_edit.toPlainText()
         block = None
-        
+
+        if not self.nlp:
+            display_error_message("NLP model has not been loaded yet!")
+            return
+
         try:
             task, _ = self.nlp.prepare(query)
             if isinstance(task, Send):

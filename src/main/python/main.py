@@ -1,11 +1,12 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt, QFile
+from PyQt5.QtCore import *
 
 from design_view import DesignView
 from settings_view import SettingsView
 
+from threading import Thread
 import sys
 
 from lib.settings import load_settings
@@ -18,9 +19,10 @@ class MainWindow(QMainWindow):
         layout = QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
 
+        self.bottom = BottomInfoBar()
         self.menu = SideMenuBar(self)
         self.content = ContentFrame(self)
-        self.bottom = BottomInfoBar()
+
 
         layout.addWidget(self.menu,    0, 0, 2, 1)
         layout.addWidget(self.content, 0, 1)

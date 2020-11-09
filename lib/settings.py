@@ -11,6 +11,16 @@ def load_settings():
     load_local_contacts()
 
 
+def load_editor_preferences():
+    old_dir = os.getcwd()
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    with open("../config/user.yaml", "r") as stream:
+        SETTINGS["user"] = yaml.safe_load(stream)
+
+    # Flag for checking if there is a need to update the config by writing to a file
+    update = False
+
+
 def load_user():
     """ Load user information from the config file
         if there are user settings missing then the user
