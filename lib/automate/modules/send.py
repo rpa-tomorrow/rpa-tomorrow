@@ -1,7 +1,6 @@
 import smtplib
-import re
 import spacy
-import lib.automate.modules.tools.time_convert as tc
+import lib.utils.tools.time_convert as tc
 import logging
 
 from fuzzywuzzy import process as fuzzy
@@ -10,6 +9,7 @@ from lib.automate.modules import Module, NoSenderError
 from lib import Error
 from lib.settings import SETTINGS
 from datetime import datetime, timedelta
+from lib.utils.email import is_email
 
 
 # Module logger
@@ -21,8 +21,11 @@ class Send(Module):
 
     def __init__(self):
         super(Send, self).__init__()
+        self.nlp_model = None
 
-    def prepare(self, text, sender):
+    def prepare(self, nlp_model_names, text, sender):
+        if self.nlp_model is None:
+            self.nlp_model = spacy.load(nlp_model_names["email"])
         to, when, body = self.nlp(text)
         return self.prepare_processed(to, when, body, sender)
 
@@ -55,7 +58,7 @@ class Send(Module):
             self.followup_type = "body"
             return "Found no message body. What message should be sent"
 
-        if not self.is_email(receiver):
+        if not is_email(receiver):
             # filter out the contacts that does not need to be considered
             possible_receivers = fuzzy.extract(receiver, SETTINGS["contacts"].keys())
             possible_receivers = list(filter(lambda x: x[1] > 87, possible_receivers))
@@ -138,17 +141,11 @@ class Send(Module):
         except KeyError:
             raise NoContactFoundError("No contact with name " + name + " was found")
 
-    def is_email(self, email: str) -> bool:
-        """ Uses regex to check if a incoming string is an email address"""
-        regex = "^([a-z0-9]+[\\._-]?[a-z0-9]+)[@](\\w+[.])+\\w{2,3}$"
-        return re.search(regex, email)
-
     def nlp(self, text):
         """
         Lets the reminder model work on the given text.
         """
-        nlp = spacy.load("en_rpa_simple")
-        doc = nlp(text)
+        doc = self.nlp_model(text)
 
         to = []
         when = []

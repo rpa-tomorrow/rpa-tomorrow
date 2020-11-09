@@ -1,5 +1,5 @@
 from __future__ import print_function
-import lib.automate.modules.tools.time_convert as tc
+import lib.utils.tools.time_convert as tc
 import pickle
 import os.path
 import spacy
@@ -7,6 +7,7 @@ import logging
 
 from lib import Error
 from lib.automate.modules import Module, NoSenderError
+from lib.utils.contacts import get_emails
 from datetime import datetime, timedelta
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -28,8 +29,11 @@ class Schedule(Module):
 
     def __init__(self):
         super(Schedule, self).__init__()
+        self.nlp_model = None
 
-    def prepare(self, text, sender):
+    def prepare(self, nlp_model_names, text, sender):
+        if self.nlp_model is None:
+            self.nlp_model = spacy.load(nlp_model_names["schedule"])
         to, when, body = self.nlp(text)
         return self.prepare_processed(to, when, body, sender)
 
@@ -39,6 +43,9 @@ class Schedule(Module):
         self.body = body
         self.sender = sender
         self.followup_type = None
+        # stores the available choices when the user needs to clarify the correct attendee
+        self.uncertain_attendee = None
+        self.unknown_attendee = None
 
         if not sender:
             raise NoSenderError("No sender found!")
@@ -58,15 +65,34 @@ class Schedule(Module):
 
         # Parse Time
         duration = 20  # TODO: Parse from input
-        start_time = self.when.isoformat() + "Z"  # 'Z' indicates UTC time
-        end_time = (self.when + timedelta(minutes=duration)).isoformat() + "Z"  # 'Z' indicates UTC time
+        start_time = tc.local_to_utc_time(self.when).isoformat()
+        end_time = (tc.local_to_utc_time(self.when) + timedelta(minutes=duration)).isoformat()
+
+        # Parse attendees (try to resolve email addresses)
+        attendees = []
+        parsed_attendees = get_emails(self.to)
+        for email in parsed_attendees["emails"]:
+            attendees.append({"email": email})
+        for (name, candidates) in parsed_attendees["uncertain"]:
+            self.uncertain_attendee = (name, candidates)
+            self.followup_type = "to_uncertain"
+            followup_str = f"Found multiple contacts with the name {name}\n"
+            for i in range(len(candidates)):
+                c_name, c_email = candidates[i]
+                followup_str += f"[{i+1}] {c_name} - {c_email}\n"
+            followup_str += f"Please choose one (1-{len(candidates)})"
+            return followup_str
+        for name in parsed_attendees["unknown"]:
+            self.followup_type = "to_unknown"
+            self.unknown_attendee = name
+            return f"Found no contact named {name}. Do you want to continue scheduling the meeting anyway? [Y/n]"
 
         # Define the event
         event = {
             "summary": summary,
             "start": {"dateTime": start_time},
             "end": {"dateTime": end_time},
-            "attendees": self.parse_attendees(settings["address"], self.to),
+            "attendees": attendees,
         }
         self.event = event
 
@@ -74,7 +100,7 @@ class Schedule(Module):
         creds = self.credentials(username)
 
         # Create Event using Google calendar API
-        service = build("calendar", "v3", credentials=creds)
+        service = build("calendar", "v3", credentials=creds, cache_discovery=False)
         self.service = service
 
         # Check if we are busy
@@ -121,6 +147,24 @@ class Schedule(Module):
                 raise ActionInterruptedByUserError("Interrupted due to busy attendees.")
             else:
                 return self.prepare_processed(self.to, self.when, self.body, self.sender)
+        elif self.followup_type == "to_uncertain":
+            try:
+                choice = int(answer) - 1
+            except Exception:
+                return self.prepare_processed(self.to, self.when, self.body, self.sender)
+            name, candidates = self.uncertain_attendee
+            if choice >= 0 and choice < len(candidates):
+                self.to.remove(name)  # update to so recursive call continues resolving new attendees
+                self.to.append(candidates[choice][1])  # add email of chosen attendee
+            return self.prepare_processed(self.to, self.when, self.body, self.sender)
+        elif self.followup_type == "to_unknown":
+            if answer == "" or answer.lower() == "y" or answer.lower() == "yes":
+                self.to.remove(self.unknown_attendee)
+                return self.prepare_processed(self.to, self.when, self.body, self.sender)
+            elif answer.lower() == "n" or answer.lower() == "no":
+                raise ActionInterruptedByUserError("Interrupted due to unknown attendee.")
+            else:
+                return self.prepare_processed(self.to, self.when, self.body, self.sender)
         else:
             raise NotImplementedError("Did not find any valid followup question to answer.")
 
@@ -152,22 +196,9 @@ class Schedule(Module):
         os.chdir(old_dir)
         return creds
 
-    def parse_attendees(self, sender_address, to):
-        """
-        Parses the attendees of the event and creates a list of dicts containing
-        there emails.
-        """
-        attendees = []
-        attendees.append({"email": sender_address})
-        for attende in to:
-            attendees.append({"email": attende})
-
-        return attendees
-
     def nlp(self, text):
 
-        nlp = spacy.load("en_rpa_simple_calendar")
-        doc = nlp(text)
+        doc = self.nlp_model(text)
 
         to = []
         when = []

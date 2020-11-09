@@ -2,10 +2,9 @@ import plac
 import sys
 import commands
 import logging
-from lib.settings import load_settings
+from config import load_settings_from_cli
+from lib.settings import SETTINGS
 from lib.nlp import nlp  # noqa: E402
-
-MODEL_NAME = "en_rpa_simple"
 
 
 def setup_logger(level):
@@ -27,16 +26,28 @@ def setup_logger(level):
     logger.addHandler(ch)
 
 
-@plac.annotations(debug=("Enable debug output", "flag", "d"))
-def cli(debug):
-    if debug:
-        setup_logger(logging.DEBUG)
-    else:
-        setup_logger(logging.WARNING)
+@plac.annotations(
+    debug=("Set the debug logging level which will be output", "option", "d", str),
+    verbose=("Enable verbose output", "flag", "v"),
+)
+def cli(debug, verbose):
+    try:
+        if debug is not None and verbose:
+            print("WARNING: Verbose and debug output are both enabled. Ignoring verbose flag!")
 
-    load_settings()
+        if debug is not None:
+            setup_logger(debug)
+        elif verbose:
+            setup_logger(logging.INFO)
+        else:
+            setup_logger(logging.WARNING)
+    except ValueError:
+        setup_logger(logging.WARNING)
+        print("WARNING: Could not parse debug flag. Using default log settings.")
+
+    load_settings_from_cli()
     print("Loading...")
-    n = nlp.NLP(MODEL_NAME)
+    n = nlp.NLP(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
     print("Ready!")
 
     while True:

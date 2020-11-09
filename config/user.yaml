@@ -1,8 +1,9 @@
 email:
   address: johndoe@email.com
   host: localhost
-  password: 
+  password: null
   port: 1025
   ssl: false
   username: None
+model_language: english
 name: John Doe

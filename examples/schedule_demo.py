@@ -8,7 +8,7 @@ from lib.nlp import nlp  # noqa: E402
 from lib.settings import load_settings  # noqa: E402
 
 load_settings()
-n = nlp.NLP("en_rpa_simple")
+n = nlp.NLP("en_rpa_simple", "en_core_web_md")
 
 # Enable the CalDav server before running the following
 try:

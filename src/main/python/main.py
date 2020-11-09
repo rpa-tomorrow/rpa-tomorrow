@@ -3,13 +3,14 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+from lib.settings import load_settings, SETTINGS
+
 from design_view import DesignView
 from settings_view import SettingsView
 
 from threading import Thread
 import sys
-
-from lib.settings import load_settings
+import os
 
 class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
@@ -152,13 +153,29 @@ if __name__ == '__main__':
     appctxt = ApplicationContext()
     window = MainWindow()
 
-    # Load base stylesheet
-    stylesheet = ""
+    # Load stylesheet
+    font_family = "Roboto, Segoe UI, Arial"
+    font_size = "12pt"
+    if SETTINGS["editor"]["font-family"]:
+        font_family = SETTINGS["editor"]["font-family"]
+    if SETTINGS["editor"]["font-size"]:
+        font_size = SETTINGS["editor"]["font-size"]
+    
+    stylesheet = """
+* {
+    font-family: """ + font_family + """;
+    font-size: """ + font_size + """;
+}
+"""
+
+    old_dir = os.getcwd()
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     with open("../qss/base.qss", "r") as fh:
         stylesheet += fh.read()
 
-    with open("../qss/dark-theme.qss", "r") as fh:
+    with open("../qss/" + SETTINGS["editor"]["theme"] + ".qss", "r") as fh:
         stylesheet += fh.read()
+    os.chdir(old_dir)
 
     window.setStyleSheet(stylesheet);
     window.resize(1200, 800)

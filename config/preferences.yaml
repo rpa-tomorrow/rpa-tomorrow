@@ -1,7 +1,0 @@
-general:
-  ui:
-    theme: light-theme
-    font-family: Roboto
-    font-size: 12pt
-  model:
-    language: english

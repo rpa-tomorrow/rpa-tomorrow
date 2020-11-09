@@ -1,5 +1,7 @@
 import spacy
 import time
+import pytz
+import tzlocal
 
 from datetime import datetime, timedelta
 from word2number import w2n
@@ -205,3 +207,11 @@ def unit_to_sec(unit):
         return 604800
     else:
         raise Exception("Could not convert time type.")
+
+
+def local_to_utc_time(when):
+    local_tz = tzlocal.get_localzone()
+    local = pytz.timezone(str(local_tz))
+    local_dt = local.localize(when, is_dst=None)
+    utc_dt = local_dt.astimezone(pytz.utc)
+    return utc_dt

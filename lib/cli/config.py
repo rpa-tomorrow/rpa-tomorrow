@@ -1,5 +1,57 @@
 import sys
 
+sys.path.append(".")
+
+from lib.settings import (  # noqa: E402
+    SETTINGS,
+    load_local_contacts,
+    load_user,
+    update_settings,
+    load_nlp_models_config,
+    get_model_languages,
+)
+
+
+def load_settings_from_cli():
+    """ Load settings from the config files located in /config
+    and prompts user if some needed config is missing"""
+    load_user_from_cli()
+    load_local_contacts()
+
+
+def load_user_from_cli():
+    """Load user information from the config file
+    if there are user settings missing then the user
+    is prompted to input these"""
+    load_user()
+
+    # Flag for checking if there is a need to update the config by writing to a file
+    update = False
+
+    if SETTINGS["user"]["name"] is None:
+        SETTINGS["user"]["name"] = config_user_name()
+        update = True
+
+    email_config = SETTINGS["user"]["email"]
+    if email_config["address"] is None:
+        email_config["address"] = config_email_address()
+        update = True
+
+    if email_config["host"] is None:
+        email_config = config_email_host(email_config)
+        update = True
+
+    if SETTINGS["user"]["model_language"] is None:
+        SETTINGS["user"]["model_language"] = config_model_language()
+        update = True
+
+    SETTINGS["user"]["email"] = email_config
+    if update:
+        update_settings("../config/user", SETTINGS["user"])
+        print("User config updated")
+
+    load_nlp_models_config(SETTINGS["user"]["model_language"])
+
 
 def config_user_name() -> str:
     """ Prompt the user about entering a name and return that name """
@@ -39,3 +91,24 @@ def config_email_host(email_config: dict) -> dict:
         ]
 
     return email_config
+
+
+def config_model_language() -> str:
+    """ Prompt the user about choosing language for the NLP models"""
+    languages = get_model_languages()
+
+    length = len(languages)
+    prompt_msg = "Choose which language to use\n"
+    for i in range(length):
+        prompt_msg += f"[{i+1}] {languages[i]}\n"
+    prompt_msg += f"Please choose one (1-{length})"
+    print(prompt_msg)
+    awnser = sys.stdin.readline().strip()
+    try:
+        choice = int(awnser) - 1
+        if choice >= 0 and choice < length:
+            return languages[choice]
+    except ValueError:
+        print("Input needs to be a integer")
+
+    return config_model_language(languages)

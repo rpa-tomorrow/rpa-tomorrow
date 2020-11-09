@@ -7,8 +7,8 @@ from worker_queue import Worker
 from lib.automate.modules.send import Send
 from lib.automate.modules.schedule import Schedule
 from lib.automate.modules.reminder import Reminder
-
 from lib.nlp.nlp import NLP
+from lib.settings import SETTINGS
 
 from multiprocessing import Process, Manager
 
@@ -26,9 +26,8 @@ def display_error_message(message, title="Error"):
 def handle_response(task, followup):
     display_error_message(str(followup) + ".")
 
-def load_nlp_model(name, return_dict):
-    nlp = NLP(name)
-    return_dict['nlp'] = nlp
+def load_nlp_model(basic_model, spacy_model, return_dict):
+    return_dict['nlp'] = NLP(basic_model, spacy_model)
 
 class DesignView(QWidget):
     def __init__(self, main_window, *args, **kwargs):
@@ -42,7 +41,10 @@ class DesignView(QWidget):
         # Load a NLP model on separate thread
         self.nlp = None
 
-        worker = Worker(self.load_nlp_model, "Loading model en_rpa_simple", "en_rpa_simple")
+        worker = Worker(self.load_nlp_model,
+                        "Loading model en_rpa_simple",
+                        SETTINGS["nlp_models"]["basic"],
+                        SETTINGS["nlp_models"]["spacy"])
         worker.signals.result.connect(self.set_nlp_model)
         worker.signals.error.connect(self.load_nlp_model_error)
         
@@ -70,10 +72,10 @@ class DesignView(QWidget):
     def load_nlp_model_error(self, error):
         display_error_message(error[2])
 
-    def load_nlp_model(self, model):
+    def load_nlp_model(self, basic_model, spacy_model):
         manager = Manager()
         return_dict = manager.dict()
-        proc = Process(target=load_nlp_model, args=(model, return_dict,))
+        proc = Process(target=load_nlp_model, args=(basic_model, spacy_model, return_dict,))
         proc.start()
         proc.join()
         return return_dict['nlp']
