@@ -9,7 +9,8 @@ class Model_Installer:
     def __init__(self):
         self.load_models()
 
-    def load_models(self):
+    def load_models(self): 
+        """Loads the information in nlp_models.yaml into self.lang_models"""
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         with open("nlp_models.yaml", "r") as stream:
@@ -18,17 +19,26 @@ class Model_Installer:
 
 
     def get_languages(self) -> [str]:
+        """
+        :return: A list of available languages.
+        """
         return list(self.lang_models.keys())
 
 
     def get_versions(self, language: str) -> [str]:
+        """
+        :return: A list of available versions for a specific language.
+        """
         versions = [v["version"] for v in self.lang_models[language]]
         versions.insert(0, "latest")
         return versions
 
 
     def install(self, language: str, version="latest"):
-        def is_v1_larger(version1: str, version2: str) -> bool:
+        """Gets information from nlp_models.yaml and installs the models listed
+        for that specific language and version"""
+        def is_v1_greater(version1: str, version2: str) -> bool:
+            """Compares two strings and checks if version1 is greater then version2"""
             v1 = version1.split('.')
             v2 = version2.split('.')
             for i in range(3):
@@ -47,7 +57,7 @@ class Model_Installer:
             if v["version"] == version:
                 selected = v
                 break
-            elif is_v1_larger(v["version"], selected["version"]):
+            elif is_v1_greater(v["version"], selected["version"]):
                 selected = v
 
         if selected["version"] == "0.0.0":
@@ -68,20 +78,23 @@ class Model_Installer:
 
 
     def update_model_config(self, selected: dict, language: str):
+        """Updates the config/nlp_models.yaml file with the selected models"""
         nlp_models = None
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
         with open("../../config/nlp_models.yaml", "r") as stream:
             nlp_models = yaml.safe_load(stream)
 
-        nlp_models[language + " v" + selected["version"]] = (self.format_dict(selected))
+        nlp_models[language + " V" + selected["version"]] = (self.format_dict(selected))
 
         update_settings("../../config/nlp_models", nlp_models)
         os.chdir(old_dir)
 
 
     def format_dict(self, selected: dict) -> dict:
-        """Formats a dict to be in the format that """
+        """
+        :return: A dict of models in the format seen in config/nlp_models.yaml.
+        """
         formated_dict = {}
         for module in selected["modules"]:
             formated_dict[module["module"]] = module["name"]
