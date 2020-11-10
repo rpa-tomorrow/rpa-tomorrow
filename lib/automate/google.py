@@ -124,12 +124,13 @@ class People:
         req = self.service.otherContacts().list(readMask=mask)
         while req:
             result = req.execute()
-            for contact in result["otherContacts"]:
-                if "emailAddresses" in contact and "names" in contact:
-                    for email in contact["emailAddresses"]:
-                        for name in contact["names"]:
-                            contacts[name["displayName"]] = email["value"]
-            req = self.service.otherContacts().list_next(req, result)
+            if "otherContacts" in result:
+                for contact in result["otherContacts"]:
+                    if "emailAddresses" in contact and "names" in contact:
+                        for email in contact["emailAddresses"]:
+                            for name in contact["names"]:
+                                contacts[name["displayName"]] = email["value"]
+                req = self.service.otherContacts().list_next(req, result)
         self.contacts = contacts
 
         with open(pickle_filename, "wb") as token:
