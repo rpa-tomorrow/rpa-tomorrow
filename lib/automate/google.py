@@ -79,7 +79,7 @@ class Calendar:
     def __init__(self, google: Google, settings):
         self.settings = settings
         self.google = google
-        self.service = build("calendar", "v3", credentials=google.creds)
+        self.service = build("calendar", "v3", credentials=google.creds, cache_discovery=False)
 
     def event(self, start: dt, duration: timedelta, attendees_email: [str], summary: str):
         return Event(start, duration, attendees_email, summary)
@@ -108,7 +108,7 @@ class People:
     def __init__(self, google: Google, username):
         self.username = username
         self.google = google
-        self.service = build("people", "v1", credentials=google.creds)
+        self.service = build("people", "v1", credentials=google.creds, cache_discovery=False)
         self.contacts = None
         self.fetch()
 
@@ -139,19 +139,10 @@ class People:
     def search(self, queries: [str]):
         results = []
         for query in queries:
-            match = fuzzy.extractOne(query, self.contacts.keys())[0]
-            results.append(self.contacts[match])
+            match = fuzzy.extractBests(query, self.contacts.keys(), score_cutoff=75)
+            results = list(map(lambda c: (c[0], self.contacts[c[0]]), match))
         results = list(set(results))
-        while len(results):
-            question = "Contact book search returned {0}. Continue? [Y/n]".format(
-                results[0] if len(results) == 1 else ", ".join(results[:-1]) + f"and {results[-1]}"
-            )
-            print(question, end=": ", flush=True)
-            answer = input().lower()
-            if answer == "y" or answer == "yes" or answer == "":
-                break
-            elif answer == "n" or answer == "no":
-                raise ContactBookInterruptedByUserError("User interrupted contact book search result!")
+
         return results
 
 

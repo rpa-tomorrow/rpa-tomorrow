@@ -10,7 +10,7 @@ from lib import Error
 from lib.settings import SETTINGS
 from datetime import datetime, timedelta
 
-from lib.utils.contacts import get_emails
+from lib.utils.contacts import *
 
 
 # Module logger
@@ -62,12 +62,8 @@ class Send(Module):
         for (name, candidates) in parsed_recipients["uncertain"]:
             self.uncertain_attendee = (name, candidates)
             self.followup_type = "to_uncertain"
-            followup_str = f"Found multiple contacts with the name {name}\n"
-            for i in range(len(candidates)):
-                c_name, c_email = candidates[i]
-                followup_str += f"[{i+1}] {c_name} - {c_email}\n"
-            followup_str += f"Please choose one (1-{len(candidates)})"
-            return followup_str
+
+            return prompt_contact_choice(name, candidates)
         for name in parsed_recipients["unknown"]:
             raise NoContactFoundError("Could not find any contacts with name " + name)
 
@@ -122,7 +118,9 @@ class Send(Module):
             except Exception:
                 return self.prepare_processed(self.to, self.when, self.body, self.sender)
             name, candidates = self.uncertain_attendee
-            if choice >= 0 and choice < len(candidates):
+            if choice < 0:
+                raise NoContactFoundError("No contact with name " + name + " was found")
+            elif choice >= 0 and choice < len(candidates):
                 self.to.remove(name)  # update to so recursive call continues resolving new attendees
                 self.to.append(candidates[choice][1])  # add email of chosen attendee
             return self.prepare_processed(self.to, self.when, self.body, self.sender)
@@ -167,10 +165,6 @@ class Send(Module):
         _body = " ".join(body)
 
         return (to, time, _body)
-
-
-class NoContactFoundError(Error):
-    pass
 
 
 class ToManyReceiversError(Error):

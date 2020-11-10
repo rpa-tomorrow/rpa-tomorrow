@@ -3,6 +3,7 @@ from fuzzywuzzy import process as fuzzy
 from lib.automate.google import Google, ContactBookInterruptedByUserError
 from lib.settings import SETTINGS, load_local_contacts
 from lib.utils.email import is_email
+from lib import Error
 
 MIN_SCORE = 75  # the minimum score needed to consider the fuzzy match
 
@@ -51,18 +52,21 @@ def get_emails(names, sender=None):
             emails.append(SETTINGS["contacts"][name]["email"]["address"])
         else:
             if sender:
+                possible_receivers = []
+
                 if not google:
                     settings = sender["email"]
                     username = settings.get("username")
                     google = Google(username).people()
+
                 try:
                     possible_receivers = list(set(google.search([name])))
                 except ContactBookInterruptedByUserError:
-                    possible_receivers = []
+                    pass
                 if len(possible_receivers) == 0:
                     unknown_contacts.append(name)
-                else:
-                    emails.append(possible_receivers[0])
+                elif len(possible_receivers) >= 1:
+                    uncertain_contacts.append((name, possible_receivers))
             else:
                 unknown_contacts.append(name)
 
@@ -71,3 +75,24 @@ def get_emails(names, sender=None):
         "uncertain": uncertain_contacts,
         "unknown": unknown_contacts,
     }
+
+
+def prompt_contact_choice(name: str, candidates) -> str:
+    followup_str = ""
+    if len(candidates) == 1:
+        followup_str = f"Found a contact with the name {name}\n"
+        c_name, c_email = candidates[0]
+        followup_str += f"[1] {c_name} - {c_email}\n"
+        followup_str += f"\n[0] Not the right one \nPlease choose one (0-1)"
+    else:
+        followup_str = f"Found multiple contacts with the name {name}\n"
+        for i in range(len(candidates)):
+            c_name, c_email = candidates[i]
+            followup_str += f"[{i+1}] {c_name} - {c_email}\n"
+        followup_str += f"\n[0] None of the above \nPlease choose one (0-{len(candidates)})"
+    return followup_str
+
+
+class NoContactFoundError(Error):
+    pass
+
