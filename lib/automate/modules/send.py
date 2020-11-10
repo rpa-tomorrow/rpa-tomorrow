@@ -10,8 +10,7 @@ from lib import Error
 from lib.settings import SETTINGS
 from datetime import datetime, timedelta
 
-from lib.utils.contacts import get_emails
-
+from lib.utils.contacts import get_emails, prompt_contact_choice, NoContactFoundError, followup_contact_choice
 
 # Module logger
 log = logging.getLogger(__name__)
@@ -62,12 +61,8 @@ class Send(Module):
         for (name, candidates) in parsed_recipients["uncertain"]:
             self.uncertain_attendee = (name, candidates)
             self.followup_type = "to_uncertain"
-            followup_str = f"Found multiple contacts with the name {name}\n"
-            for i in range(len(candidates)):
-                c_name, c_email = candidates[i]
-                followup_str += f"[{i+1}] {c_name} - {c_email}\n"
-            followup_str += f"Please choose one (1-{len(candidates)})"
-            return followup_str
+
+            return prompt_contact_choice(name, candidates)
         for name in parsed_recipients["unknown"]:
             raise NoContactFoundError("Could not find any contacts with name " + name)
 
@@ -117,15 +112,7 @@ class Send(Module):
             return self.prepare_processed(self.to, self.when, answer, self.sender)
 
         elif self.followup_type == "to_uncertain":
-            try:
-                choice = int(answer) - 1
-            except Exception:
-                return self.prepare_processed(self.to, self.when, self.body, self.sender)
-            name, candidates = self.uncertain_attendee
-            if choice >= 0 and choice < len(candidates):
-                self.to.remove(name)  # update to so recursive call continues resolving new attendees
-                self.to.append(candidates[choice][1])  # add email of chosen attendee
-            return self.prepare_processed(self.to, self.when, self.body, self.sender)
+            return followup_contact_choice(self, answer)
         else:
             raise NotImplementedError("Did not find any valid followup question to answer.")
 
@@ -167,10 +154,6 @@ class Send(Module):
         _body = " ".join(body)
 
         return (to, time, _body)
-
-
-class NoContactFoundError(Error):
-    pass
 
 
 class ToManyReceiversError(Error):
