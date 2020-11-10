@@ -10,7 +10,7 @@ from lib import Error
 from lib.settings import SETTINGS
 from datetime import datetime, timedelta
 
-from lib.utils.contacts import *
+from lib.utils.contacts import get_emails, prompt_contact_choice, NoContactFoundError
 
 
 # Module logger

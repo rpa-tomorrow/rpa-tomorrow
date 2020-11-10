@@ -6,7 +6,7 @@ import logging
 from lib import Error
 from lib.automate.google import Google
 from lib.automate.modules import Module, NoSenderError
-from lib.utils.contacts import *
+from lib.utils.contacts import get_emails, prompt_contact_choice, NoContactFoundError
 from datetime import datetime, timedelta
 
 # Module logger

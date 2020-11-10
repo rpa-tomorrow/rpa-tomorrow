@@ -83,7 +83,7 @@ def prompt_contact_choice(name: str, candidates) -> str:
         followup_str = f"Found a contact with the name {name}\n"
         c_name, c_email = candidates[0]
         followup_str += f"[1] {c_name} - {c_email}\n"
-        followup_str += f"\n[0] Not the right one \nPlease choose one (0-1)"
+        followup_str += "\n[0] Not the right one \nPlease choose one (0-1)"
     else:
         followup_str = f"Found multiple contacts with the name {name}\n"
         for i in range(len(candidates)):
@@ -95,4 +95,3 @@ def prompt_contact_choice(name: str, candidates) -> str:
 
 class NoContactFoundError(Error):
     pass
-
