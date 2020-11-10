@@ -93,5 +93,19 @@ def prompt_contact_choice(name: str, candidates) -> str:
     return followup_str
 
 
+def followup_contact_choice(module, answer):
+    try:
+        choice = int(answer) - 1
+    except Exception:
+        return module.prepare_processed(module.to, module.when, module.body, module.sender)
+    name, candidates = module.uncertain_attendee
+    if choice < 0:
+        raise NoContactFoundError("No contact with name " + name + " was found")
+    elif choice >= 0 and choice < len(candidates):
+        module.to.remove(name)  # update to so recursive call continues resolving new attendees
+        module.to.append(candidates[choice][1])  # add email of chosen attendee
+    return module.prepare_processed(module.to, module.when, module.body, module.sender)
+
+
 class NoContactFoundError(Error):
     pass

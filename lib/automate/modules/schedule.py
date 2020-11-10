@@ -6,7 +6,7 @@ import logging
 from lib import Error
 from lib.automate.google import Google
 from lib.automate.modules import Module, NoSenderError
-from lib.utils.contacts import get_emails, prompt_contact_choice, NoContactFoundError
+from lib.utils.contacts import get_emails, prompt_contact_choice, followup_contact_choice
 from datetime import datetime, timedelta
 
 # Module logger
@@ -112,17 +112,7 @@ class Schedule(Module):
             else:
                 return self.prepare_processed(self.to, self.when, self.body, self.sender)
         elif self.followup_type == "to_uncertain":
-            try:
-                choice = int(answer) - 1
-            except Exception:
-                return self.prepare_processed(self.to, self.when, self.body, self.sender)
-            name, candidates = self.uncertain_attendee
-            if choice < 0:
-                raise NoContactFoundError("No contact with name " + name + " was found")
-            elif choice >= 0 and choice < len(candidates):
-                self.to.remove(name)  # update to so recursive call continues resolving new attendees
-                self.to.append(candidates[choice][1])  # add email of chosen attendee
-            return self.prepare_processed(self.to, self.when, self.body, self.sender)
+            return followup_contact_choice(self, answer)
         elif self.followup_type == "to_unknown":
             if answer == "" or answer.lower() == "y" or answer.lower() == "yes":
                 self.to.remove(self.unknown_attendee)
