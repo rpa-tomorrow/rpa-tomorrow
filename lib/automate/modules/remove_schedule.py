@@ -6,9 +6,9 @@ import spacy
 
 from lib import Error
 from lib.utils import contacts
-from lib.automate.modules import Module, NoSenderError
+from lib.automate.modules import Module
 import lib.utils.tools.time_convert as tc
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 from fuzzywuzzy import process as fuzzy
 
 from googleapiclient.discovery import build
@@ -65,6 +65,7 @@ class RemoveSchedule(Module):
             self.get_event_by_timestamp(self.when)
 
         if (not self.event) and self.to:
+            # get emails of participants where only the name was entered
             attendees = []
             parsed_attendees = contacts.get_emails(self.to)
             for email in parsed_attendees["emails"]:
@@ -79,7 +80,7 @@ class RemoveSchedule(Module):
                 followup_str += f"Please choose one (1-{len(candidates)})"
                 return followup_str
 
-            participants = contacts.get_emails(self.to)
+            contacts.get_emails(self.to)
 
             if len(attendees) > 0:
                 self.get_event_by_participants(attendees)
@@ -89,7 +90,7 @@ class RemoveSchedule(Module):
         elif len(self.events) > 1:
             self.followup_type = "to_many_events"
 
-            followup_str = f"Found multiple events: \n"
+            followup_str = "Found multiple events: \n"
             for n in range(len(self.events)):
                 event = self.events[n]
                 start_time = event["start"]["dateTime"]
@@ -104,13 +105,14 @@ class RemoveSchedule(Module):
         return self.prompt_remove_event()
 
     def prompt_remove_event(self):
-        # if an event could be found then ask the user if it should be removed
+        """ Prompt the user about deleting an event"""
         start_time = self.event["start"]["dateTime"]
         start_time = datetime.fromisoformat(start_time)
         formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
 
         self.followup_type = "self_busy"
-        return f"You have the event '{self.event['summary']}' scheduled at {formated_time}. Do you want to remove it? [Y/n]"
+        return f"You have the event '{self.event['summary']}' scheduled at {formated_time}. \
+                Do you want to remove it? [Y/n]"
 
     def followup(self, answer):
         """ """
@@ -199,11 +201,11 @@ class RemoveSchedule(Module):
         return creds
 
     def get_event_by_timestamp(self, time: datetime):
-        """ 
-        takes a ISO formated time and fetches an event from the calendar where the given time is between 
+        """
+        takes a ISO formated time and fetches an event from the calendar where the given time is between
         the start and end time of the event, the method only looks for events happening in the future
 
-        NOTE: as of now this does not handle multiple events occuring at the same time 
+        NOTE: as of now this does not handle multiple events occuring at the same time
         """
         now = datetime.now()
         # ensure that the given time uses the same timezone as the computer
@@ -224,7 +226,7 @@ class RemoveSchedule(Module):
                 self.event.append(e)
 
     def get_event_by_summary(self, summary: str):
-        """ 
+        """
         try to find a event based on the event summary
         the method only looks for events in the future
         """
