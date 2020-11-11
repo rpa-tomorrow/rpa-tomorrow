@@ -8,6 +8,8 @@ from lib.settings import (  # noqa: E402
     load_user,
     update_settings,
     load_nlp_models_config,
+    get_model_languages,
+    get_test,
 )
 
 
@@ -54,6 +56,8 @@ def load_user_from_cli():
         print("User config updated")
 
     load_nlp_models_config(SETTINGS["user"]["language"], SETTINGS["user"]["language_version"])
+
+    get_test()
 
 
 def config_user_name() -> str:

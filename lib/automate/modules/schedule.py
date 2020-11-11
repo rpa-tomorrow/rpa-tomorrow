@@ -8,6 +8,11 @@ from lib.automate.google import Google
 from lib.automate.modules import Module, NoSenderError
 from lib.utils.contacts import get_emails, prompt_contact_choice, followup_contact_choice
 from datetime import datetime, timedelta
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+from lib.settings import SETTINGS
+
 
 # Module logger
 log = logging.getLogger(__name__)
@@ -75,8 +80,6 @@ class Schedule(Module):
         attendees = [settings["address"]] + attendees
         event = calendar.event(start_time, end_time, attendees, self.body)
         self.event = event
-
-        print("event = ", event)
 
         # Get or create user credentials
         creds = self.credentials(username)
@@ -172,9 +175,8 @@ class Schedule(Module):
             start_time = tc.parse_time(start)
 
         end_time = 0
-        duration = 20
         if len(end) == 0:
-            end_time = start_time + timedelta(minutes=duration)
+            end_time = start_time + timedelta(minutes=self.get_meeting_duration())
         else:
             end_time = tc.parse_time(end)
 
@@ -182,6 +184,17 @@ class Schedule(Module):
 
         return (to, start_time, end_time, _body)
 
+    def get_meeting_duration(self) -> str:
+        """
+        Retrieves the standard meeting duration from the settings file
+        """
+        try:
+            return SETTINGS["meeting"]["standard_duration"]
+        except KeyError:
+            raise NoValueFoundError("No value for meeting duration found!")
+
+class NoValueFoundError(Error):
+    pass
 
 class ActionInterruptedByUserError(Error):
     pass
