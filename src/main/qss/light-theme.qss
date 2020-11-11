@@ -1,5 +1,5 @@
 
-ProcessViewer {
+ProcessEditorView {
     background-color: white;
 } 
 
@@ -7,8 +7,13 @@ BottomInfoBar {
     background-color: lightgray;
 }
 
-ProcessTextEdit {
+ProcessTextEditView {
     background-color: white;
+}
+
+ProcessView {
+    background-color: #f0f0f0;
+    border-color: #d1d1d1;
 }
 
 SideMenuBar {
@@ -18,6 +23,18 @@ SideMenuBar {
 MenuBarButton {
     background-color: dodgerblue;
     color: white;
+}
+
+QTextEdit {
+    background-color: white;
+}
+
+QDateTimeEdit {
+    background-color: white;
+}
+
+QLineEdit {
+    background-color: white;
 }
 
 MenuBarButton:hover {

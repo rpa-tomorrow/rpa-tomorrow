@@ -5,10 +5,12 @@ from PyQt5.QtCore import *
 
 from lib.settings import load_settings, SETTINGS
 
+from model import Model
 from design_view import DesignView
+from play_view import PlayView
 from settings_view import SettingsView
 
-from threading import Thread
+from multiprocessing import Process, Queue
 import sys
 import os
 
@@ -19,6 +21,8 @@ class MainWindow(QMainWindow):
 
         layout = QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
+
+        self.model = Model("untitled")
 
         self.bottom = BottomInfoBar()
         self.menu = SideMenuBar(self)
@@ -74,10 +78,18 @@ class ContentFrame(QFrame):
 
         self.main_window = main_window
         self.design_view = DesignView(main_window)
+        self.save_view = QFrame()
+        self.load_view = QFrame()
+        self.play_view = PlayView(main_window, self.design_view.process_editor)
         self.settings_view = SettingsView()
+        self.info_view = QFrame()
 
         self.layout.addWidget(self.design_view)
+        self.layout.addWidget(self.save_view)
+        self.layout.addWidget(self.load_view)
+        self.layout.addWidget(self.play_view)
         self.layout.addWidget(self.settings_view)
+        self.layout.addWidget(self.info_view)
         self.setLayout(self.layout)
 
     def set_active_view(self, view):
@@ -134,21 +146,21 @@ class BottomInfoBar(QFrame):
         layout = QHBoxLayout()
         # layout.setContentsMargins(8, 0, 8, )
         self.setMaximumHeight(32)
-
-        self.info_label = QLabel("Done!")
         self.running_tasks_btn = QToolButton()
         self.running_tasks_btn.setText("\uf0ae")
+        self.info_label = QLabel("Done!")
 
+        layout.addWidget(self.running_tasks_btn)
         layout.addWidget(self.info_label)
         layout.addStretch(1)
-        layout.addWidget(self.running_tasks_btn)
-
+        
         self.setLayout(layout)
 
 def exit_program():
     sys.exit(0)
 
-if __name__ == '__main__':
+
+def initialize_app():
     load_settings()
     appctxt = ApplicationContext()
     window = MainWindow()
@@ -180,5 +192,9 @@ if __name__ == '__main__':
     window.setStyleSheet(stylesheet);
     window.resize(1200, 800)
     window.show()
+    return appctxt, window
+
+if __name__ == '__main__':
+    appctxt, window = initialize_app()
     exit_code = appctxt.app.exec_()
     sys.exit(exit_code)

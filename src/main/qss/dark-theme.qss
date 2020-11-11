@@ -7,15 +7,28 @@ MainWindow {
     background-color: #2f333d;
 }
 
-ProcessViewer {
-    background-color: #282c34;
-} 
+ProcessEditorView {
+    background-color: #21252b;
+}
+
+ProcessView {
+    background-color: #343a45;
+    border-color: #1c1f24;
+}
 
 BottomInfoBar {
     background-color: #1c1f24;
 }
 
-ProcessTextEdit {
+QTextEdit {
+    background-color: #282c34;
+}
+
+QDateTimeEdit {
+    background-color: #282c34;
+}
+
+QLineEdit {
     background-color: #282c34;
 }
 
@@ -38,4 +51,27 @@ MenuBarButton:pressed {
 
 MenuBarButton:checked {
     background-color: #2879c9;
+}
+
+QComboBox {
+    background-color: #282c34;
+}
+
+QComboBox::drop-down {
+    background-color: #282c34;
+}
+
+QMenu {
+    background-color: #21252b;
+    border-color: #1c1f24;
+}
+
+QToolButton#runButton {
+    color: #3fd166;
+    margin-bottom: 2px;
+}
+
+ProcessEntryView {
+    background-color: #343a45;
+    border-radius: 4px;
 }
