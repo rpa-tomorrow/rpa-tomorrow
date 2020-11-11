@@ -4,12 +4,12 @@ The commands available in the CLI
 
 import sys
 import os
-from config import config_model_language, choose_model_version
+from config import config_model_language, choose_version
 
 sys.path.append(".")
 
 from lib.nlp.model_installer import Model_Installer  # noqa: E402
-from lib.settings import SETTINGS, get_model_languages, update_settings, get_model_versions  # noqa: E402
+from lib.settings import SETTINGS, get_model_languages, update_settings, get_language_versions  # noqa: E402
 
 
 def commands(arr, nlp):
@@ -22,12 +22,12 @@ def commands(arr, nlp):
         prompt()
     elif arr[0] == "language" or arr[0] == "lang":
         SETTINGS["user"]["language"] = config_model_language(get_model_languages())
-        SETTINGS["user"]["model_version"] = choose_model_version(get_model_versions(SETTINGS["user"]["language"]))
+        SETTINGS["user"]["language_version"] = choose_version(get_language_versions(SETTINGS["user"]["language"]))
         update_settings("../config/user", SETTINGS["user"])
     elif arr[0] == "install" or arr[0] == "i":
         model_installer = Model_Installer()
         language = config_model_language(model_installer.get_languages())
-        version = choose_model_version(model_installer.get_versions(language))
+        version = choose_version(model_installer.get_versions(language))
         model_installer.install(language, version)
     else:
         listToStr = " ".join(map(str, arr))

@@ -10,10 +10,10 @@ class Model_Installer:
         self.load_models()
 
     def load_models(self):
-        """Loads the information in nlp_models.yaml into self.lang_models"""
+        """Loads the information in ../../config/language_releases.yaml into self.lang_models"""
         old_dir = os.getcwd()
         os.chdir(os.path.dirname(os.path.abspath(__file__)))
-        with open("nlp_models.yaml", "r") as stream:
+        with open("../../config/language_releases.yaml", "r") as stream:
             self.lang_models = yaml.safe_load(stream)
         os.chdir(old_dir)
 

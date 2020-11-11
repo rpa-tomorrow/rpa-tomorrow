@@ -44,8 +44,8 @@ def load_user_from_cli():
         SETTINGS["user"]["language"] = config_model_language()
         update = True
 
-    if SETTINGS["user"]["model_version"] is None:
-        SETTINGS["user"]["model_version"] = choose_model_version(SETTINGS["user"]["language"])
+    if SETTINGS["user"]["language_version"] is None:
+        SETTINGS["user"]["language_version"] = choose_version(SETTINGS["user"]["language"])
         update = True
 
     SETTINGS["user"]["email"] = email_config
@@ -53,7 +53,7 @@ def load_user_from_cli():
         update_settings("../config/user", SETTINGS["user"])
         print("User config updated")
 
-    load_nlp_models_config(SETTINGS["user"]["language"], SETTINGS["user"]["model_version"])
+    load_nlp_models_config(SETTINGS["user"]["language"], SETTINGS["user"]["language_version"])
 
 
 def config_user_name() -> str:
@@ -115,8 +115,8 @@ def config_model_language(languages: [str]) -> str:
     return config_model_language(languages)
 
 
-def choose_model_version(versions: [str]) -> str:
-    """ Prompt the user about choosing model version for the NLP models"""
+def choose_version(versions: [str]) -> str:
+    """ Prompt the user about choosing version"""
     length = len(versions)
     prompt_msg = "Choose which version to use\n"
     for i in range(length):
@@ -131,4 +131,4 @@ def choose_model_version(versions: [str]) -> str:
     except ValueError:
         print("Input needs to be a integer")
 
-    return config_model_language(versions)
+    return choose_version(versions)

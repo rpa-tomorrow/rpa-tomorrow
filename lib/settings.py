@@ -7,7 +7,7 @@ SETTINGS = {}
 def load_settings():
     """ Load settings from the config files located in /config"""
     load_user()
-    load_nlp_models_config(SETTINGS["user"]["language"], SETTINGS["user"]["model_version"])
+    load_nlp_models_config(SETTINGS["user"]["language"], SETTINGS["user"]["language_version"])
     load_local_contacts()
 
 
@@ -51,7 +51,7 @@ def get_model_languages() -> [str]:
     return languages
 
 
-def get_model_versions(language: str) -> [str]:
+def get_language_versions(language: str) -> [str]:
     """Reads a list of model versions from the nlp_model config file"""
     versions = []
 
