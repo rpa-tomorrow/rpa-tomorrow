@@ -9,7 +9,7 @@ from lib.settings import (  # noqa: E402
     update_settings,
     load_nlp_models_config,
     get_model_languages,
-    get_test,
+    get_meeting_settings,
 )
 
 
@@ -57,7 +57,7 @@ def load_user_from_cli():
 
     load_nlp_models_config(SETTINGS["user"]["language"], SETTINGS["user"]["language_version"])
 
-    get_test()
+    get_meeting_settings()
 
 
 def config_user_name() -> str:
