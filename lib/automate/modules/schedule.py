@@ -37,8 +37,6 @@ class Schedule(Module):
         self.uncertain_attendee = None
         self.unknown_attendee = None
 
-        # print("to = ", to, " start = ", start, " end = ", end,  " body = ", body, " sender = ", sender)
-
         if not sender:
             raise NoSenderError("No sender found!")
 
@@ -60,7 +58,6 @@ class Schedule(Module):
         # Parse Time
         start_time = tc.local_to_utc_time(self.start).isoformat()
         end_time = tc.local_to_utc_time(self.end).isoformat()
-
 
         # Parse attendees (try to resolve email addresses)
         parsed_attendees = get_emails(self.to, sender)
@@ -168,18 +165,22 @@ class Schedule(Module):
             log.debug("%s %s", token.text, token.dep_)
 
 
-        time1 = datetime.now()
+        start_time = datetime.now()
         if len(start) == 0:
-            time1 = time1 + timedelta(seconds=5)
+            start_time = start_time + timedelta(seconds=5)
         else:
-            time1 = tc.parse_time(start)
+            start_time = tc.parse_time(start)
 
-        time2 = datetime.now()
-        time2 = tc.parse_time(end)
+        end_time = 0
+        duration = 20
+        if len(end) == 0:
+            end_time = start_time + timedelta(minutes=duration)
+        else:
+            end_time = tc.parse_time(end)
 
         _body = " ".join(body)
 
-        return (to, time1, time2, _body)
+        return (to, start_time, end_time, _body)
 
 
 class ActionInterruptedByUserError(Error):
