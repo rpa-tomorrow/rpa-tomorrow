@@ -59,7 +59,7 @@ class Model_Installer:
                 selected = v
 
         if selected["version"] == "0.0.0":
-            return  # TODO: Add error
+            raise Exception(f"Can't find language version {version}")
 
         # Loops trough all the modules and installs them
         for module in selected["modules"]:
