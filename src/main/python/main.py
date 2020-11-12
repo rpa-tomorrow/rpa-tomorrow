@@ -2,7 +2,9 @@ from fbs_runtime.application_context.PyQt5 import ApplicationContext
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+import os, sys
 
+sys.path.append(".")
 from lib.settings import load_settings, SETTINGS
 
 from model import Model
@@ -13,7 +15,7 @@ from settings_view import SettingsView
 
 from multiprocessing import Process, Queue
 
-import os, sys
+
 
 
 class MainWindow(QMainWindow):

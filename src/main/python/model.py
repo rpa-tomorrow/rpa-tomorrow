@@ -2,6 +2,8 @@ INVALID_MODEL = 0
 PROCESS_MODEL = 1
 SEND_EMAIL_MODEL = 2
 
+import yaml
+
 
 class Model:
     def __init__(self, filename, processes=None):
