@@ -12,7 +12,7 @@ n = nlp.NLP("en_rpa_simple", "en_core_web_md")
 
 # Enable the CalDav server before running the following
 try:
-    text = "schedule meeting with aron@antarkt.is at 20:00"
+    text = "schedule meeting with test@example.com at 20:00"
     response = n.run(text)
 
     print(response)
