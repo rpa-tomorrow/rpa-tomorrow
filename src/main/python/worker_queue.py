@@ -75,6 +75,4 @@ class Backend:
         while True:
             task = in_queue.get()
             if task is isinstance(Task):
-                task.run(
-                    self,
-                )
+                task.run(self)
