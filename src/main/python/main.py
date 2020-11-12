@@ -7,12 +7,13 @@ from lib.settings import load_settings, SETTINGS
 
 from model import Model
 from design_view import DesignView
+from file_view import FileView
 from play_view import PlayView
 from settings_view import SettingsView
 
 from multiprocessing import Process, Queue
-import sys
-import os
+
+import os, sys
 
 class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
@@ -78,8 +79,8 @@ class ContentFrame(QFrame):
 
         self.main_window = main_window
         self.design_view = DesignView(main_window)
-        self.save_view = QFrame()
-        self.load_view = QFrame()
+        self.save_view = FileView(main_window, self.main_window.model)
+        self.load_view = FileView(main_window, self.main_window.model)
         self.play_view = PlayView(main_window, self.design_view.process_editor)
         self.settings_view = SettingsView()
         self.info_view = QFrame()
@@ -164,6 +165,8 @@ def initialize_app():
     load_settings()
     appctxt = ApplicationContext()
     window = MainWindow()
+
+    QResource.registerResource("resources.rcc");
 
     # Load stylesheet
     font_family = "Roboto, Segoe UI, Arial"

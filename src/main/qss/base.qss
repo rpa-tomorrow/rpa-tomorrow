@@ -106,6 +106,12 @@ QMenu::indicator {
     height: 13px;
 }
 
+QPushButton {
+    border-style: none;
+    padding: 6px 6px 6px 6px;
+    border-radius: 4px;
+}
+
 QLabel#processEntryHeading {
     font-weight: bold;
 }
@@ -113,4 +119,29 @@ QLabel#processEntryHeading {
 QLabel#processEntryIcon {
     padding-right: 4px;
     font-size: 20px;
+}
+
+QTreeView {
+    border-style: none;
+}
+
+QListView {
+    border-style: none;
+}
+
+QHeaderView {
+    border-style: none;
+}
+
+QHeaderView::Section {
+    padding-top: 4px;
+    padding-bottom: 0;
+    padding-left: 8px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: gray;
+    border-top: none;
+    border-bottom: none;
+    border-right: none;
+    margin-bottom: 6px;
 }

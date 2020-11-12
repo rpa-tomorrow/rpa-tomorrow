@@ -71,7 +71,64 @@ QToolButton#runButton {
     margin-bottom: 2px;
 }
 
+CurrentDirectoryView {
+    background-color: #282c34;
+    border-radius: 4px
+}
+
+QPushButton {
+    background-color: #282c34;
+}
+
+QPushButton:hover {
+    background-color: #343a45;
+}
+
+QPushButton:pressed {
+    background-color: #535d70;
+}
+
 ProcessEntryView {
     background-color: #343a45;
     border-radius: 4px;
+}
+
+QTreeView {
+    background-color: #282c34;
+}
+
+QListView {
+    background-color: #282c34;
+}
+
+QHeaderView {
+    background-color: #282c34;
+}
+
+QHeaderView::section {
+    background-color: #21252b;
+}
+
+QTreeView::branch:has-siblings:!adjoins-item {
+    border-image: url(vline.png) 0;
+}
+
+QTreeView::branch:has-siblings:adjoins-item {
+    border-image: url(branch-more.png) 0;
+}
+
+QTreeView::branch:!has-children:!has-siblings:adjoins-item {
+    border-image: url(branch-end.png) 0;
+}
+
+QTreeView::branch:has-children:!has-siblings:closed,
+QTreeView::branch:closed:has-children:has-siblings {
+    border-image: none;
+    image: url(branch-closed.png);
+}
+
+QTreeView::branch:open:has-children:!has-siblings,
+QTreeView::branch:open:has-children:has-siblings  {
+    border-image: none;
+    image: url(branch-open.png);
 }
