@@ -6,10 +6,12 @@ import spacy
 
 from lib import Error
 from lib.utils import contacts
+from lib.automate.google import Google
 from lib.automate.modules import Module
 import lib.utils.tools.time_convert as tc
 from datetime import datetime, timedelta
 from fuzzywuzzy import process as fuzzy
+from lib.utils.contacts import get_emails, prompt_contact_choice, followup_contact_choice
 
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -39,8 +41,10 @@ class RemoveSchedule(Module):
         # Get or create user credentials
         settings = sender["email"]
         username = settings.get("username")
-        creds = self.credentials(username)
-        self.service = build("calendar", "v3", credentials=creds, cache_discovery=False)
+        google = Google(username)
+        calendar = google.calendar(settings)
+        self.calendar = calendar
+
         self.event = None
 
         return self.prepare_processed(to, when, body, sender)
@@ -73,12 +77,7 @@ class RemoveSchedule(Module):
             for (name, candidates) in parsed_attendees["uncertain"]:
                 self.uncertain_attendee = (name, candidates)
                 self.followup_type = "to_uncertain"
-                followup_str = f"Found multiple contacts with the name {name}\n"
-                for i in range(len(candidates)):
-                    c_name, c_email = candidates[i]
-                    followup_str += f"[{i+1}] {c_name} - {c_email}\n"
-                followup_str += f"Please choose one (1-{len(candidates)})"
-                return followup_str
+                return prompt_contact_choice(name, candidates)
 
             contacts.get_emails(self.to)
 
@@ -97,7 +96,8 @@ class RemoveSchedule(Module):
                 start_time = datetime.fromisoformat(start_time)
                 formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
                 followup_str += f"[{n+1}] {event['summary']} at {formated_time}\n"
-            followup_str += f"Please choose one (1-{len(self.events)})"
+            followup_str += f"\n[0] None of the above \nPlease choose one (0-{len(self.events)})"
+
             return followup_str
         else:
             raise NoEventFoundError("Could not find an event.")
@@ -111,8 +111,10 @@ class RemoveSchedule(Module):
         formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
 
         self.followup_type = "self_busy"
-        return f"You have the event '{self.event['summary']}' scheduled at {formated_time}. \
-                Do you want to remove it? [Y/n]"
+        return (
+            f"You have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
+            "Do you want to remove it? [Y/n]"
+        )
 
     def followup(self, answer):
         """ """
@@ -123,30 +125,24 @@ class RemoveSchedule(Module):
             else:
                 raise ActionInterruptedByUserError("Event Not removed.")
         elif self.followup_type == "to_uncertain":
-            try:
-                choice = int(answer) - 1
-            except Exception:
-                return self.prepare_processed(self.to, self.when, self.body, self.sender)
-
-            name, candidates = self.uncertain_attendee
-            if choice >= 0 and choice < len(candidates):
-                self.to.remove(name)  # update to so recursive call continues resolving new attendees
-                self.to.append(candidates[choice][1])  # add email of chosen attendee
-            return self.prepare_processed(self.to, self.when, self.body, self.sender)
+            return followup_contact_choice(self, answer)
         elif self.followup_type == "to_many_events":
             try:
                 choice = int(answer) - 1
             except Exception:
                 return self.prepare_processed(self.to, self.when, self.body, self.sender)
 
-            if choice >= 0 and choice < len(self.events):
+            if choice < 0:
+                raise NoEventFoundError("No event was chosen for deletion")
+
+            elif choice >= 0 and choice < len(self.events):
                 self.event = self.events[choice]
                 return self.prepare_processed(self.to, self.when, self.body, self.sender)
         else:
             raise NotImplementedError("")
 
     def execute(self):
-        self.service.events().delete(calendarId="primary", eventId=self.event["id"]).execute()
+        self.calendar.delete_event(self.event["id"])
         return f"'{self.event['summary']}' was removed from your calendar"
 
     def nlp(self, text):
@@ -172,34 +168,6 @@ class RemoveSchedule(Module):
 
         return (to, time, _body)
 
-    def credentials(self, username):
-        """
-        The file token.pickle stores the user's access and refresh tokens, and is
-        created automatically when the authorization flow completes for the first
-        time.
-        """
-        old_dir = os.getcwd()
-        os.chdir(os.path.dirname(os.path.abspath(__file__)) + "/../../..")
-        creds = None
-        pickle_filename = f"pickle_jar/{username}_token.pickle"
-
-        if os.path.exists(pickle_filename):
-            with open(pickle_filename, "rb") as token:
-                creds = pickle.load(token)
-        # If there are no (valid) credentials available, let the user log in.
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", SCOPES)
-                creds = flow.run_local_server(port=0)
-            # Save the credentials for the next run
-            with open(pickle_filename, "wb") as token:
-                pickle.dump(creds, token)
-
-        os.chdir(old_dir)
-        return creds
-
     def get_event_by_timestamp(self, time: datetime):
         """
         takes a ISO formated time and fetches an event from the calendar where the given time is between
@@ -207,12 +175,12 @@ class RemoveSchedule(Module):
 
         NOTE: as of now this does not handle multiple events occuring at the same time
         """
-        now = datetime.now()
         # ensure that the given time uses the same timezone as the computer
+        now = datetime.now()
         time = time.astimezone(now.tzinfo)
 
-        events = self.service.events().list(calendarId="primary", timeMin=(now.isoformat() + "Z")).execute()["items"]
-
+        events = self.calendar.get_events()
+        filtered_events = []
         # find the wanted event
         for e in events:
             event_start = next(v for k, v in e["start"].items() if "date" in k)
@@ -223,15 +191,15 @@ class RemoveSchedule(Module):
 
             # check if the given time is between the start and end of an event
             if time >= event_start and time <= event_end:
-                self.event.append(e)
+                filtered_events.append(e)
+        self.events = filtered_events
 
     def get_event_by_summary(self, summary: str):
         """
         try to find a event based on the event summary
         the method only looks for events in the future
         """
-        now = datetime.now()
-        events = self.service.events().list(calendarId="primary", timeMin=(now.isoformat() + "Z")).execute()["items"]
+        events = self.calendar.get_events()
         events = fuzzy.extractBests(summary, events, score_cutoff=50)
 
         self.events = list(filter(lambda e: e[0], events))
@@ -240,8 +208,7 @@ class RemoveSchedule(Module):
         """
         Try to find an event based on the participants of the event
         """
-        now = datetime.now()
-        events = self.service.events().list(calendarId="primary", timeMin=(now.isoformat() + "Z")).execute()["items"]
+        events = self.calendar.get_events()
         events = list(filter(lambda e: "attendees" in e.keys(), events))
         filtered_events = []
         for e in events:

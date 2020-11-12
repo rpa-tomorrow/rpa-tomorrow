@@ -104,6 +104,17 @@ class Calendar:
         freebusy = map(lambda x: x[0], filter(lambda x: x[1]["busy"], freebusy["calendars"].items()))
         return list(freebusy)
 
+    def get_events(self):
+        """ 
+        Returns a list of events from the primary calendar
+        Does not return past events that has already ended 
+        """
+        now = dt.now()
+        return self.service.events().list(calendarId="primary", timeMin=(now.isoformat() + "Z")).execute()["items"]
+
+    def delete_event(self, eventId: str):
+        self.service.events().delete(calendarId="primary", eventId=eventId).execute()
+
 
 class People:
     def __init__(self, google: Google, username):
