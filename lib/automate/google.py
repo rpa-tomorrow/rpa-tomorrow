@@ -113,7 +113,7 @@ class People:
         self.fetch()
 
     def fetch(self):
-        pickle_filename = f"pickle_jar/{self.username}_contacts.pickle"
+        pickle_filename = f"pickle_jar/{self.username}_contacts_v2.pickle"
         if os.path.exists(pickle_filename):
             with open(pickle_filename, "rb") as token:
                 self.contacts = pickle.load(token)
