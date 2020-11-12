@@ -2,6 +2,7 @@
 # For English it is recommended to use 'xx_ent_wiki_sm' as the model.
 from fuzzywuzzy import process as fuzzy
 
+
 LABEL_PERSON = "PER"
 MIN_SCORE = 80
 
