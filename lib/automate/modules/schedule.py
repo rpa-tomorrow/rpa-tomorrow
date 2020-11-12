@@ -6,11 +6,9 @@ import logging
 from lib import Error
 from lib.automate.google import Google
 from lib.automate.modules import Module, NoSenderError
-from lib.utils.contacts import get_emails, prompt_contact_choice, followup_contact_choice
+from lib.utils.contacts import get_emails, prompt_contact_choice,
 from datetime import datetime, timedelta
 from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
 from lib.settings import SETTINGS
 
 
