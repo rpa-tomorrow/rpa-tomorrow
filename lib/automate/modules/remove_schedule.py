@@ -1,6 +1,4 @@
 from __future__ import print_function
-import pickle
-import os.path
 import logging
 import spacy
 
@@ -11,11 +9,7 @@ from lib.automate.modules import Module
 import lib.utils.tools.time_convert as tc
 from datetime import datetime, timedelta
 from fuzzywuzzy import process as fuzzy
-from lib.utils.contacts import get_emails, prompt_contact_choice, followup_contact_choice
-
-from googleapiclient.discovery import build
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
+from lib.utils.contacts import prompt_contact_choice, followup_contact_choice
 
 log = logging.getLogger(__name__)
 
@@ -45,6 +39,7 @@ class RemoveSchedule(Module):
         calendar = google.calendar(settings)
         self.calendar = calendar
 
+        self.events = []
         self.event = None
 
         return self.prepare_processed(to, when, body, sender)

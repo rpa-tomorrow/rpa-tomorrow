@@ -105,9 +105,9 @@ class Calendar:
         return list(freebusy)
 
     def get_events(self):
-        """ 
+        """
         Returns a list of events from the primary calendar
-        Does not return past events that has already ended 
+        Does not return past events that has already ended
         """
         now = dt.now()
         return self.service.events().list(calendarId="primary", timeMin=(now.isoformat() + "Z")).execute()["items"]
