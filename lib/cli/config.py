@@ -8,7 +8,6 @@ from lib.settings import (  # noqa: E402
     load_user,
     update_settings,
     load_nlp_models_config,
-    get_model_languages,
 )
 
 
@@ -41,8 +40,12 @@ def load_user_from_cli():
         email_config = config_email_host(email_config)
         update = True
 
-    if SETTINGS["user"]["model_language"] is None:
-        SETTINGS["user"]["model_language"] = config_model_language()
+    if SETTINGS["user"]["language"] is None:
+        SETTINGS["user"]["language"] = config_model_language()
+        update = True
+
+    if SETTINGS["user"]["language_version"] is None:
+        SETTINGS["user"]["language_version"] = choose_version(SETTINGS["user"]["language"])
         update = True
 
     SETTINGS["user"]["email"] = email_config
@@ -50,7 +53,7 @@ def load_user_from_cli():
         update_settings("../config/user", SETTINGS["user"])
         print("User config updated")
 
-    load_nlp_models_config(SETTINGS["user"]["model_language"])
+    load_nlp_models_config(SETTINGS["user"]["language"], SETTINGS["user"]["language_version"])
 
 
 def config_user_name() -> str:
@@ -93,10 +96,8 @@ def config_email_host(email_config: dict) -> dict:
     return email_config
 
 
-def config_model_language() -> str:
+def config_model_language(languages: [str]) -> str:
     """ Prompt the user about choosing language for the NLP models"""
-    languages = get_model_languages()
-
     length = len(languages)
     prompt_msg = "Choose which language to use\n"
     for i in range(length):
@@ -112,3 +113,22 @@ def config_model_language() -> str:
         print("Input needs to be a integer")
 
     return config_model_language(languages)
+
+
+def choose_version(versions: [str]) -> str:
+    """ Prompt the user about choosing version"""
+    length = len(versions)
+    prompt_msg = "Choose which version to use\n"
+    for i in range(length):
+        prompt_msg += f"[{i+1}] {versions[i]}\n"
+    prompt_msg += f"Please choose one (1-{length})"
+    print(prompt_msg)
+    awnser = sys.stdin.readline().strip()
+    try:
+        choice = int(awnser) - 1
+        if choice >= 0 and choice < length:
+            return versions[choice]
+    except ValueError:
+        print("Input needs to be a integer")
+
+    return choose_version(versions)
