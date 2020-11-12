@@ -6,9 +6,10 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
-# If modifying these scopes, delete the files *.pickle.
 from lib import Error
+from lib.utils.tools import time_convert as tc
 
+# If modifying these scopes, delete the files *.pickle.
 SCOPES = [
     "https://www.googleapis.com/auth/calendar.events.owned",
     "https://www.googleapis.com/auth/calendar.readonly",
@@ -64,8 +65,8 @@ class Event:
 
     def to_dict(self):
         # Parse Time
-        start_time = self.start.isoformat() + "Z"  # 'Z' indicates UTC time
-        end_time = self.end.isoformat() + "Z"  # 'Z' indicates UTC time
+        start_time = tc.local_to_utc_time(self.start).isoformat()
+        end_time = tc.local_to_utc_time(self.end).isoformat()
 
         return {
             "summary": self.summary,
