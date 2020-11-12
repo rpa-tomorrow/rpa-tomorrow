@@ -7,7 +7,7 @@ SETTINGS = {}
 def load_settings():
     """ Load settings from the config files located in /config"""
     load_user()
-    load_nlp_models_config(SETTINGS["user"]["model_language"])
+    load_nlp_models_config(SETTINGS["user"]["language"], SETTINGS["user"]["language_version"])
     load_local_contacts()
     load_editor_preferences()
 
@@ -47,7 +47,7 @@ def update_settings(file_path: str, data: dict):
     os.chdir(old_dir)
 
 
-def get_model_languages():
+def get_model_languages() -> [str]:
     """Reads a list of languages from the nlp_model config file"""
     languages = []
 
@@ -60,10 +60,23 @@ def get_model_languages():
     return languages
 
 
-def load_nlp_models_config(language):
+def get_language_versions(language: str) -> [str]:
+    """Reads a list of model versions from the nlp_model config file"""
+    versions = []
+
+    old_dir = os.getcwd()
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    with open("../config/nlp_models.yaml", "r") as stream:
+        versions = list(yaml.safe_load(stream)[language].keys())
+    os.chdir(old_dir)
+
+    return versions
+
+
+def load_nlp_models_config(language: str, version: str):
     """Loads the language specific nlp model names from the config file"""
     old_dir = os.getcwd()
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     with open("../config/nlp_models.yaml", "r") as stream:
-        SETTINGS["nlp_models"] = yaml.safe_load(stream)[language]
+        SETTINGS["nlp_models"] = yaml.safe_load(stream)[language][version]
     os.chdir(old_dir)

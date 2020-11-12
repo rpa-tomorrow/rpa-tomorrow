@@ -10,15 +10,11 @@ from lib.settings import load_settings  # noqa: E402
 load_settings()
 n = nlp.NLP("en_rpa_simple", "en_core_web_md")
 
-# Enable the SMTP server before running the following
+# Enable the CalDav server before running the following
 try:
-    text = "send John an email saying Hello there"
+    text = "schedule meeting with John at 20:00"
     response = n.run(text)
-    print(response)
 
-    print("\nIf you have an Erik in your Gmail 'Other contacts', this should work as well::")
-    text = "send an email to Erik saying Hello there"
-    response = n.run(text)
     print(response)
 except Error as err:
     print(err, file=sys.stdout)

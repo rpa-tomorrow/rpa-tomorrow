@@ -5,3 +5,4 @@ Options:
 exit, e           Exit program.
 help, h           Show this message.
 language, lang    Set the language.
+install, i        Install NLP models.
