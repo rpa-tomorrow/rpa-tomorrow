@@ -75,12 +75,10 @@ def load_nlp_models_config(language: str, version: str):
 
 
 def load_meeting_settings():
-    """Loads the meetings specific settings from the config file""" 
+    """Loads the meetings specific settings from the config file"""
 
     old_dir = os.getcwd()
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     with open("../config/meetings.yaml", "r") as stream:
         SETTINGS["meeting"] = yaml.safe_load(stream)
     os.chdir(old_dir)
-
-    print(json.dumps(SETTINGS, indent=4, sort_keys=True))

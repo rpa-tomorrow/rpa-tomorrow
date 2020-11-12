@@ -167,7 +167,6 @@ class Schedule(Module):
                 body.append(token.text)
             log.debug("%s %s", token.text, token.dep_)
 
-
         start_time = datetime.now()
         if len(start) == 0:
             start_time = start_time + timedelta(seconds=5)
@@ -193,8 +192,10 @@ class Schedule(Module):
         except KeyError:
             raise NoValueFoundError("No value for meeting duration found!")
 
+
 class NoValueFoundError(Error):
     pass
+
 
 class ActionInterruptedByUserError(Error):
     pass
