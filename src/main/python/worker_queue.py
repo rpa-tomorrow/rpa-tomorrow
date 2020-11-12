@@ -19,7 +19,7 @@ import traceback, sys
 #         self.args = args
 #         self.kwargs = kwargs
 #         self.signals = WorkerSignals()
-    
+
 #     @pyqtSlot()
 #     def run(self):
 #         try:
@@ -33,6 +33,7 @@ import traceback, sys
 #         finally:
 #             self.signals.finished.emit()
 
+
 class Worker:
     def __init__(self, fn, *args, **kwargs):
         super(Worker, self).__init__()
@@ -43,21 +44,23 @@ class Worker:
 
     def run(self):
         return self.fn(*self.args, **self.kwargs)
-        
+
         # try:
         # except:
-            # traceback.print_exc()
-            # exctype, value = sys.exc_info()[:2]
-            # self.signals.error.emit((exctype, value, traceback.format_exc()))
+        # traceback.print_exc()
+        # exctype, value = sys.exc_info()[:2]
+        # self.signals.error.emit((exctype, value, traceback.format_exc()))
         # else:
-            # self.signals.result.emit(result)
+        # self.signals.result.emit(result)
         # finally:
-            # self.signals.finished.emit()
+        # self.signals.finished.emit()
+
 
 def exit_process(out_queue):
     out_queue.put(Worker(exit_process))
     out_queue.close()
     out_queue.join_thread()
+
 
 def load_nlp_model(self, out_queue, *args, **kwargs):
     out_queue.put(Worker(set_info_message, "Loading models..."))
@@ -66,10 +69,12 @@ def load_nlp_model(self, out_queue, *args, **kwargs):
 
 class Backend:
     def __init__(self):
-        self.nlp = None;
+        self.nlp = None
 
     def run_backend_proc(in_queue, out_queue):
         while True:
             task = in_queue.get()
             if task is isinstance(Task):
-                task.run(self,)
+                task.run(
+                    self,
+                )

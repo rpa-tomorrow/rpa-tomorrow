@@ -15,6 +15,7 @@ from multiprocessing import Process, Queue
 
 import os, sys
 
+
 class MainWindow(QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
@@ -29,12 +30,11 @@ class MainWindow(QMainWindow):
         self.menu = SideMenuBar(self)
         self.content = ContentFrame(self)
 
-
-        layout.addWidget(self.menu,    0, 0, 2, 1)
+        layout.addWidget(self.menu, 0, 0, 2, 1)
         layout.addWidget(self.content, 0, 1)
-        layout.addWidget(self.bottom,  1, 1)
-        layout.setHorizontalSpacing(0);
-        layout.setVerticalSpacing(0);
+        layout.addWidget(self.bottom, 1, 1)
+        layout.setHorizontalSpacing(0)
+        layout.setVerticalSpacing(0)
 
         widget = QWidget()
         widget.setLayout(layout)
@@ -70,7 +70,8 @@ class MainWindow(QMainWindow):
 
     def open_settings_window(self):
         if self.settings_view:
-            self.settings_view = SettingsView();
+            self.settings_view = SettingsView()
+
 
 class ContentFrame(QFrame):
     def __init__(self, main_window, *args, **kwargs):
@@ -94,7 +95,8 @@ class ContentFrame(QFrame):
         self.setLayout(self.layout)
 
     def set_active_view(self, view):
-        self.layout.setCurrentIndex(view);
+        self.layout.setCurrentIndex(view)
+
 
 class MenuBarButton(QToolButton):
     def __init__(self, parent, view_id, text, *args, **kwargs):
@@ -110,14 +112,15 @@ class MenuBarButton(QToolButton):
     def set_active_view(self):
         self.parent.set_active_view(self, self.view_id)
 
+
 class SideMenuBar(QFrame):
     def __init__(self, parent, *args, **kwargs):
         super(SideMenuBar, self).__init__(*args, **kwargs)
         layout = QVBoxLayout()
         layout.setContentsMargins(4, 4, 0, 4)
 
-        self.parent = parent;
-        self.setMaximumWidth(48+12)
+        self.parent = parent
+        self.setMaximumWidth(48 + 12)
 
         self.items = []
         self.items.append(MenuBarButton(self, 0, "\uf044"))
@@ -131,7 +134,7 @@ class SideMenuBar(QFrame):
 
         for item in self.items:
             layout.addWidget(item)
-        layout.insertStretch(-1, 1);
+        layout.insertStretch(-1, 1)
 
         self.setLayout(layout)
 
@@ -139,7 +142,8 @@ class SideMenuBar(QFrame):
         for item in self.items:
             item.setChecked(False)
         target.setChecked(True)
-        self.parent.set_active_view(view);
+        self.parent.set_active_view(view)
+
 
 class BottomInfoBar(QFrame):
     def __init__(self, *args, **kwargs):
@@ -154,8 +158,9 @@ class BottomInfoBar(QFrame):
         layout.addWidget(self.running_tasks_btn)
         layout.addWidget(self.info_label)
         layout.addStretch(1)
-        
+
         self.setLayout(layout)
+
 
 def exit_program():
     sys.exit(0)
@@ -166,7 +171,7 @@ def initialize_app():
     appctxt = ApplicationContext()
     window = MainWindow()
 
-    QResource.registerResource("resources.rcc");
+    QResource.registerResource("resources.rcc")
 
     # Load stylesheet
     font_family = "Roboto, Segoe UI, Arial"
@@ -175,13 +180,19 @@ def initialize_app():
         font_family = SETTINGS["editor"]["font-family"]
     if SETTINGS["editor"]["font-size"]:
         font_size = SETTINGS["editor"]["font-size"]
-    
-    stylesheet = """
+
+    stylesheet = (
+        """
 * {
-    font-family: """ + font_family + """;
-    font-size: """ + font_size + """;
+    font-family: """
+        + font_family
+        + """;
+    font-size: """
+        + font_size
+        + """;
 }
 """
+    )
 
     old_dir = os.getcwd()
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -192,12 +203,13 @@ def initialize_app():
         stylesheet += fh.read()
     os.chdir(old_dir)
 
-    window.setStyleSheet(stylesheet);
+    window.setStyleSheet(stylesheet)
     window.resize(1200, 800)
     window.show()
     return appctxt, window
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     appctxt, window = initialize_app()
     exit_code = appctxt.app.exec_()
     sys.exit(exit_code)

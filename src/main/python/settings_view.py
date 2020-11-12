@@ -4,11 +4,12 @@ from PyQt5.QtCore import Qt
 
 from lib.settings import *
 
+
 class SettingsView(QWidget):
     def __init__(self, *args, **kwargs):
         super(SettingsView, self).__init__(*args, **kwargs)
         layout = QGridLayout()
-        layout.setVerticalSpacing(8);
+        layout.setVerticalSpacing(8)
 
         self.title = QLabel("Settings")
         self.title.setObjectName("viewTitle")
@@ -30,7 +31,6 @@ class SettingsView(QWidget):
         layout.addWidget(QLabel("Editor font"), row, 0)
         layout.addWidget(self.font_family, row, 1)
 
-
         row += 1
         self.font_size = QLineEdit(SETTINGS["editor"]["font-size"])
         layout.addWidget(QLabel("Editor font size"), row, 0)
@@ -40,10 +40,5 @@ class SettingsView(QWidget):
         row += 1
         layout.addWidget(QLabel(""), row, 0)
         layout.setRowStretch(row, 1)
-        
 
         self.setLayout(layout)
-        
-
-
-    

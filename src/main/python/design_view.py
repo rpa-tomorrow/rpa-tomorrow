@@ -15,6 +15,7 @@ from datetime import datetime
 
 import traceback, sys
 
+
 def display_error_message(message, title="Error"):
     msg = QMessageBox()
     msg.setIcon(QMessageBox.Critical)
@@ -23,15 +24,16 @@ def display_error_message(message, title="Error"):
     msg.resize(360, 280)
     msg.exec_()
 
+
 class DesignView(QWidget):
     def __init__(self, main_window, *args, **kwargs):
         super(DesignView, self).__init__(*args, **kwargs)
         self.main_window = main_window
-        self.model = self.main_window.model;
+        self.model = self.main_window.model
         # self.threadpool = QThreadPool()
 
         layout = QVBoxLayout()
-        layout.setSpacing(8);
+        layout.setSpacing(8)
 
         # Load nlp model somewhere else takes forever!!!
         self.nlp = None
@@ -52,7 +54,6 @@ class DesignView(QWidget):
         layout.addWidget(self.process_editor)
         self.setLayout(layout)
         self.process_text_edit.installEventFilter(self)
-
 
     def handle_response(self, task, followup):
         self.main_window.set_info_message(str(followup).replace("\n", ". ") + ".")
@@ -77,7 +78,7 @@ class DesignView(QWidget):
         view = None
 
         try:
-            task = self.nlp.prepare(query) 
+            task = self.nlp.prepare(query)
             # TODO(alexander): use different models, but they are all similar atm.
             model = SendEmailModel(self.process_editor, query, task.to, task.when, task.body)
             if isinstance(task, Send):
@@ -95,13 +96,14 @@ class DesignView(QWidget):
             self.process_text_edit.restore_cursor_pos()
             display_error_message(str(sys.exc_info()[1]) + ".")
             return
-        
+
         view = ProcessView(self.process_editor, view, model)
         view.show()
 
         self.process_text_edit.set_cursor_pos(0)
         self.process_text_edit.clear()
         self.process_editor.append_process(view, model)
+
 
 class ProcessTextEditView(QTextEdit):
     def __init__(self, *args, **kwargs):
@@ -120,6 +122,7 @@ class ProcessTextEditView(QTextEdit):
         cursor.setPosition(pos)
         self.setTextCursor(cursor)
 
+
 class ProcessEditorView(QFrame):
     def __init__(self, model):
         super(ProcessEditorView, self).__init__()
@@ -127,13 +130,13 @@ class ProcessEditorView(QFrame):
         self.process_views = []
         self.grid_size = 32
         self.update()
-        self.pos = QPoint(self.grid_size/2, self.grid_size/2)
+        self.pos = QPoint(self.grid_size / 2, self.grid_size / 2)
         self.delta = QPoint(0, 0)
         self.offset = QPoint(0, 0)
         self.dragging = False
 
         for proc in self.model.processes:
-            if isinstance(proc, SendEmailModel): # TODO(alexander): might not be the most effective method!!!
+            if isinstance(proc, SendEmailModel):  # TODO(alexander): might not be the most effective method!!!
                 self.process_views.append(ProcessView(self, SendEmailView(proc), proc))
             else:
                 self.process_views.append(ProcessView(self, QFrame(), proc))
@@ -153,7 +156,6 @@ class ProcessEditorView(QFrame):
         view.pos = QPoint(model.x, model.y)
         view.show()
         self.update()
-        
 
     def remove_process(self, view, model):
         self.process_views.delete(view)
@@ -164,7 +166,7 @@ class ProcessEditorView(QFrame):
     def paintEvent(self, event):
         super().paintEvent(event)
         p = QPainter(self)
-        p.setRenderHints( QPainter.HighQualityAntialiasing )
+        p.setRenderHints(QPainter.HighQualityAntialiasing)
         if SETTINGS["editor"]["theme"] == "light-theme":
             p.setPen(QPen(QColor("#e0e0e0"), 1))
         else:
@@ -172,10 +174,10 @@ class ProcessEditorView(QFrame):
         xoff = (self.pos.x() + self.delta.x()) % self.grid_size
         yoff = (self.pos.y() + self.delta.y()) % self.grid_size
         for i in range(0, self.width() + self.grid_size, self.grid_size):
-            p.drawLine(i-xoff, 0, i-xoff, self.height())
+            p.drawLine(i - xoff, 0, i - xoff, self.height())
 
         for i in range(0, self.height() + self.grid_size, self.grid_size):
-            p.drawLine(0, i-yoff, self.width(), i-yoff)
+            p.drawLine(0, i - yoff, self.width(), i - yoff)
 
         p.setPen(QPen(QColor("#1d8ac4"), 3))
         prev_view = None
@@ -186,7 +188,7 @@ class ProcessEditorView(QFrame):
             y = view.pos.y() - self.delta.y()
 
             if prev_view:
-                width  = prev_view.width()
+                width = prev_view.width()
                 height = prev_view.height()
                 p.drawLine(prev_x + width + 8, prev_y + height - 20, prev_x + width, prev_y + height - 20)
                 p.drawLine(prev_x + width + 8, prev_y + height - 20, x - 8, y + 20)
@@ -220,6 +222,7 @@ class ProcessEditorView(QFrame):
                 view.delta = QPoint(0, 0)
             self.dragging = False
 
+
 class ProcessView(QFrame):
     def __init__(self, process_editor, view, model):
         super(ProcessView, self).__init__(process_editor)
@@ -227,8 +230,8 @@ class ProcessView(QFrame):
         self.view = view
         self.query = model.query
         self.name = model.name
-        self.model = model;
-        
+        self.model = model
+
         layout = QGridLayout()
 
         self.default_width = 260
@@ -242,7 +245,7 @@ class ProcessView(QFrame):
         layout.addWidget(self.title, 0, 0)
         layout.addWidget(self.view, 1, 0)
         layout.addWidget(QLabel("Next"), 2, 0, 1, 1, Qt.AlignRight)
-        
+
         self.setLayout(layout)
         self.setGeometry(model.x, model.y, model.width, model.height)
 
@@ -257,7 +260,7 @@ class ProcessView(QFrame):
         delete = contextMenu.addAction("Delete")
         action = contextMenu.exec_(self.mapToGlobal(event.pos()))
         # if action == edit:
-            # self.process_editor.process_text_edit.setText(self.query)
+        # self.process_editor.process_text_edit.setText(self.query)
         if action == delete:
             self.process_editor.remove_process(self, self.model)
         self.process_editor.update()
@@ -278,24 +281,25 @@ class ProcessView(QFrame):
     def setup(self, layout):
         return
 
+
 class SendEmailView(QFrame):
     def __init__(self, model):
         super(SendEmailView, self).__init__()
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.model = model
-        
+
         self.recipients = QLineEdit(", ".join(model.recipients))
         self.recipients.setPlaceholderText("Recipient1, Recipient2, ...")
         self.recipients.textChanged.connect(model.setRecipients)
 
         self.when = QDateTimeEdit(QDateTime(model.when))
         self.when.dateTimeChanged.connect(self.setWhen)
-        
+
         self.body = QTextEdit(model.body)
         self.body.setPlaceholderText("Enter the body...")
         self.body.textChanged.connect(model.setBody)
-        
+
         layout.addWidget(self.recipients)
         layout.addWidget(self.when)
         layout.addWidget(self.body)
@@ -305,9 +309,11 @@ class SendEmailView(QFrame):
     def setWhen(qt_date_time):
         self.model.setWhen(dt.toPyDateTime())
 
+
 # NOTE(alexander): DEV mode entry point only!!!
-if __name__ == '__main__':
+if __name__ == "__main__":
     from main import initialize_app
+
     appctxt, window = initialize_app()
     view = window.content.design_view
 
