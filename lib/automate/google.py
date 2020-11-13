@@ -57,9 +57,9 @@ class Google:
 
 
 class Event:
-    def __init__(self, start: dt, duration: timedelta, attendees_email: [str], summary: str):
+    def __init__(self, start: dt, end: dt, attendees_email: [str], summary: str):
         self.start = start
-        self.end = self.start + duration
+        self.end = end
         self.attendees_email = attendees_email
         self.summary = summary
 
@@ -82,19 +82,19 @@ class Calendar:
         self.google = google
         self.service = build("calendar", "v3", credentials=google.creds, cache_discovery=False)
 
-    def event(self, start: dt, duration: timedelta, attendees_email: [str], summary: str):
-        return Event(start, duration, attendees_email, summary)
+    def event(self, start: dt, end: dt, attendees_email: [str], summary: str):
+        return Event(start, end, attendees_email, summary)
 
     def send_event(self, event: Event):
         return self.service.events().insert(calendarId="primary", body=event.to_dict()).execute()
 
-    def freebusy(self, start: dt, duration: timedelta, attendees_email):
+    def freebusy(self, start: dt, end: dt, attendees_email):
         if not attendees_email:
             return []
 
         # Parse Time
         start_time = start.isoformat() + "Z"  # 'Z' indicates UTC time
-        end_time = (start + duration).isoformat() + "Z"
+        end_time = end.isoformat() + "Z"
         to_items = [{"id": email} for email in attendees_email]
         freebusy = (
             self.service.freebusy()

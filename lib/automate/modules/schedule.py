@@ -6,11 +6,8 @@ import logging
 from lib import Error
 from lib.automate.google import Google
 from lib.automate.modules import Module, NoSenderError
-from lib.utils.contacts import get_emails, prompt_contact_choice
+from lib.utils.contacts import get_emails, prompt_contact_choice, followup_contact_choice
 from datetime import datetime, timedelta
-from googleapiclient.discovery import build
-from lib.settings import SETTINGS
-
 
 # Module logger
 log = logging.getLogger(__name__)
@@ -43,9 +40,9 @@ class Schedule(Module):
         if not sender:
             raise NoSenderError("No sender found!")
 
-        if not isinstance(start, datetime):
+        if not isinstance(self.start, datetime):
             self.followup_type = "start"
-            return "Could not parse date to schedule start time.\nPlease enter date in YYYYMMDD HH:MM format"
+            return "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
 
         if not body:
             self.followup_type = "body"
@@ -57,10 +54,6 @@ class Schedule(Module):
         google = Google(username)
         calendar = google.calendar(settings)
         self.calendar = calendar
-
-        # Parse Time
-        start_time = tc.local_to_utc_time(self.start).isoformat()
-        end_time = tc.local_to_utc_time(self.end).isoformat()
 
         # Parse attendees (try to resolve email addresses)
         parsed_attendees = get_emails(self.to, sender)
@@ -76,19 +69,12 @@ class Schedule(Module):
             return f"Found no contact named {name}. Do you want to continue scheduling the meeting anyway? [Y/n]"
 
         attendees = [settings["address"]] + attendees
-        event = calendar.event(start_time, end_time, attendees, self.body)
+        event = calendar.event(self.start, self.end, attendees, self.body)
         self.event = event
 
-        # Get or create user credentials
-        creds = self.credentials(username)
-
-        # Create Event using Google calendar API
-        service = build("calendar", "v3", credentials=creds, cache_discovery=False)
-        self.service = service
-
         # Check if we are busy
-        me_busy = calendar.freebusy(start_time, end_time, ["primary"])
-        to_busy = calendar.freebusy(start_time, end_time, to)
+        me_busy = calendar.freebusy(self.start, self.end, ["primary"])
+        to_busy = calendar.freebusy(self.start, self.end, to)
         other = f"{', '.join(to_busy[:-1])} and {to_busy[-1]}" if len(to_busy) > 1 else "".join(to_busy)
         if me_busy and to_busy:
             self.followup_type = "both_busy"
@@ -109,12 +95,12 @@ class Schedule(Module):
         Follow up method after the module have had to ask a question to clarify some parameter, or just
         want to check that it interpreted everything correctly.
         """
-        if self.followup_type == "start":
+        if self.followup_type == "when":
             try:
-                start = datetime.fromisoformat(answer)
+                self.start = datetime.fromisoformat(answer)
             except Exception:
-                start = None
-            return self.prepare_processed(self.to, start, self.body, self.sender)
+                self.start = None
+            return self.prepare_processed(self.to, self.start, self.body, self.sender)
         elif self.followup_type == "body":
             return self.prepare_processed(self.to, self.start, answer, self.sender)
         elif self.followup_type == "self_busy" or self.followup_type == "both_busy" or self.followup_type == "to_busy":
@@ -125,15 +111,7 @@ class Schedule(Module):
             else:
                 return self.prepare_processed(self.to, self.start, self.body, self.sender)
         elif self.followup_type == "to_uncertain":
-            try:
-                choice = int(answer) - 1
-            except Exception:
-                return self.prepare_processed(self.to, self.start, self.body, self.sender)
-            name, candidates = self.uncertain_attendee
-            if choice >= 0 and choice < len(candidates):
-                self.to.remove(name)  # update to so recursive call continues resolving new attendees
-                self.to.append(candidates[choice][1])  # add email of chosen attendee
-            return self.prepare_processed(self.to, self.start, self.body, self.sender)
+            return followup_contact_choice(self, answer)
         elif self.followup_type == "to_unknown":
             if answer == "" or answer.lower() == "y" or answer.lower() == "yes":
                 self.to.remove(self.unknown_attendee)
@@ -180,19 +158,6 @@ class Schedule(Module):
         _body = " ".join(body)
 
         return (to, start_time, end_time, _body)
-
-    def get_meeting_duration(self) -> str:
-        """
-        Retrieves the standard meeting duration from the settings file
-        """
-        try:
-            return SETTINGS["meeting"]["standard_duration"]
-        except KeyError:
-            raise NoValueFoundError("No value for meeting duration found!")
-
-
-class NoValueFoundError(Error):
-    pass
 
 
 class ActionInterruptedByUserError(Error):
