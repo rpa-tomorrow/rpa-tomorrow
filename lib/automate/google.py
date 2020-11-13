@@ -1,7 +1,7 @@
 import pickle
 import os.path
 from fuzzywuzzy import process as fuzzy
-from datetime import datetime as dt, timedelta
+from datetime import datetime as dt
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
