@@ -8,7 +8,6 @@ from lib.settings import (  # noqa: E402
     load_user,
     update_settings,
     load_nlp_models_config,
-    get_model_languages,
     load_meeting_settings,
 )
 
