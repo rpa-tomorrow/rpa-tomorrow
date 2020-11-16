@@ -8,6 +8,7 @@ from lib.automate.google import Google
 from lib.automate.modules import Module, NoSenderError
 from lib.utils.contacts import get_emails, prompt_contact_choice, followup_contact_choice
 from datetime import datetime, timedelta
+from lib.settings import SETTINGS
 
 # Module logger
 log = logging.getLogger(__name__)
@@ -158,6 +159,18 @@ class Schedule(Module):
         _body = " ".join(body)
 
         return (to, start_time, end_time, _body)
+
+    def get_meeting_duration(self) -> str:
+        """
+        Retrieves the standard meeting duration from the settings file
+        """
+        try:
+            return SETTINGS["meeting"]["standard_duration"]
+        except KeyError:
+            raise NoValueFoundError("No value for meeting duration found!")
+
+class NoValueFoundError(Error):
+    pass
 
 
 class ActionInterruptedByUserError(Error):
