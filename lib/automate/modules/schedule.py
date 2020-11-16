@@ -168,8 +168,10 @@ class Schedule(Module):
         except KeyError:
             raise NoValueFoundError("No value for meeting duration found!")
 
+
 class NoValueFoundError(Error):
     pass
+
 
 class ActionInterruptedByUserError(Error):
     pass
