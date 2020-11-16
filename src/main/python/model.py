@@ -1,8 +1,9 @@
+import yaml
+
+
 INVALID_MODEL = 0
 PROCESS_MODEL = 1
 SEND_EMAIL_MODEL = 2
-
-import yaml
 
 
 class Model:
@@ -32,8 +33,8 @@ class Model:
             data = yaml.safe_load(fh)
         if not data:
             return  # TODO(alexander): report loading errors
-        filename = data["filename"]
-        absolute_path = filepath
+        self.filename = data["filename"]
+        self.absolute_path = filepath
         self.processes.clear()
         for proc in data["processes"]:
             if proc["kind"] == INVALID_MODEL:

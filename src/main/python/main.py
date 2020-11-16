@@ -1,10 +1,9 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-import os, sys
+import PyQt5.QtWidgets as QtWidgets
+from PyQt5.QtCore import QResource
+import os
+import sys
 
-sys.path.append(".")
 from lib.settings import load_settings, SETTINGS
 
 from model import Model
@@ -13,15 +12,13 @@ from file_view import FileView
 from play_view import PlayView
 from settings_view import SettingsView
 
-from multiprocessing import Process, Queue
 
-
-class MainWindow(QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setWindowTitle("RPA Tomorrow")
 
-        layout = QGridLayout()
+        layout = QtWidgets.QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
 
         self.model = Model("untitled")
@@ -36,29 +33,9 @@ class MainWindow(QMainWindow):
         layout.setHorizontalSpacing(0)
         layout.setVerticalSpacing(0)
 
-        widget = QWidget()
+        widget = QtWidgets.QWidget()
         widget.setLayout(layout)
         self.setCentralWidget(widget)
-
-    def create_file_menu(self):
-        menu_bar = self.menuBar()
-        file_menu = menu_bar.addMenu("File")
-
-        action_demo_process = QAction("Demo Process Editor", self)
-        action_demo_process.triggered.connect(lambda: self.set_active_view(PROCESS_EDITOR_VIEW))
-
-        action_demo_chatbot = QAction("Demo Chatbot", self)
-        action_demo_chatbot.triggered.connect(lambda: self.set_active_view(CHATBOT_VIEW))
-
-        action_demo_chatbot = QAction("Settings", self)
-        action_demo_chatbot.triggered.connect(lambda: self.open_settings_window)
-
-        action_file_exit = QAction("Exit", self)
-        action_file_exit.triggered.connect(exit_program)
-
-        file_menu.addAction(action_demo_process)
-        file_menu.addAction(action_demo_chatbot)
-        file_menu.addAction(action_file_exit)
 
     def set_active_view(self, view):
         self.content.set_active_view(view)
@@ -73,10 +50,10 @@ class MainWindow(QMainWindow):
             self.settings_view = SettingsView()
 
 
-class ContentFrame(QFrame):
+class ContentFrame(QtWidgets.QFrame):
     def __init__(self, main_window, *args, **kwargs):
         super(ContentFrame, self).__init__(*args, **kwargs)
-        self.layout = QStackedLayout()
+        self.layout = QtWidgets.QStackedLayout()
 
         self.main_window = main_window
         self.design_view = DesignView(main_window)
@@ -84,7 +61,7 @@ class ContentFrame(QFrame):
         self.load_view = FileView(main_window, self.main_window.model)
         self.play_view = PlayView(main_window, self.design_view.process_editor)
         self.settings_view = SettingsView()
-        self.info_view = QFrame()
+        self.info_view = QtWidgets.QFrame()
 
         self.layout.addWidget(self.design_view)
         self.layout.addWidget(self.save_view)
@@ -98,7 +75,7 @@ class ContentFrame(QFrame):
         self.layout.setCurrentIndex(view)
 
 
-class MenuBarButton(QToolButton):
+class MenuBarButton(QtWidgets.QToolButton):
     def __init__(self, parent, view_id, text, *args, **kwargs):
         super(MenuBarButton, self).__init__(*args, **kwargs)
         self.setFixedSize(56, 56)
@@ -113,10 +90,10 @@ class MenuBarButton(QToolButton):
         self.parent.set_active_view(self, self.view_id)
 
 
-class SideMenuBar(QFrame):
+class SideMenuBar(QtWidgets.QFrame):
     def __init__(self, parent, *args, **kwargs):
         super(SideMenuBar, self).__init__(*args, **kwargs)
-        layout = QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(4, 4, 0, 4)
 
         self.parent = parent
@@ -145,15 +122,15 @@ class SideMenuBar(QFrame):
         self.parent.set_active_view(view)
 
 
-class BottomInfoBar(QFrame):
+class BottomInfoBar(QtWidgets.QFrame):
     def __init__(self, *args, **kwargs):
         super(BottomInfoBar, self).__init__(*args, **kwargs)
-        layout = QHBoxLayout()
+        layout = QtWidgets.QHBoxLayout()
         # layout.setContentsMargins(8, 0, 8, )
         self.setMaximumHeight(32)
-        self.running_tasks_btn = QToolButton()
+        self.running_tasks_btn = QtWidgets.QToolButton()
         self.running_tasks_btn.setText("\uf0ae")
-        self.info_label = QLabel("Done!")
+        self.info_label = QtWidgets.QLabel("Done!")
 
         layout.addWidget(self.running_tasks_btn)
         layout.addWidget(self.info_label)

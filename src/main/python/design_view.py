@@ -1,8 +1,11 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+import PyQt5.QtWidgets as QtWidgets
+import PyQt5.QtGui as QtGui
+import PyQt5.QtCore as QtCore
 
-from model import *
+import traceback
+import sys
+from datetime import datetime
+from model import ProcessModel, SendEmailModel
 
 from lib.automate.modules.send import Send
 from lib.automate.modules.schedule import Schedule
@@ -10,35 +13,30 @@ from lib.automate.modules.reminder import Reminder
 from lib.nlp.nlp import NLP
 from lib.settings import SETTINGS
 
-from multiprocessing import Process, Manager
-from datetime import datetime
-
-import traceback, sys
-
 
 def display_error_message(message, title="Error"):
-    msg = QMessageBox()
-    msg.setIcon(QMessageBox.Critical)
+    msg = QtWidgets.QMessageBox()
+    msg.setIcon(QtWidgets.QMessageBox.Critical)
     msg.setText(message)
     msg.setWindowTitle(title)
     msg.resize(360, 280)
     msg.exec_()
 
 
-class DesignView(QWidget):
+class DesignView(QtWidgets.QWidget):
     def __init__(self, main_window, *args, **kwargs):
         super(DesignView, self).__init__(*args, **kwargs)
         self.main_window = main_window
         self.model = self.main_window.model
         # self.threadpool = QThreadPool()
 
-        layout = QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(8)
 
         # Load nlp model somewhere else takes forever!!!
         self.nlp = None
 
-        self.title = QLabel("Design")
+        self.title = QtWidgets.QLabel("Design")
         self.title.setObjectName("viewTitle")
         self.title.setMaximumHeight(48)
         layout.addWidget(self.title)
@@ -60,8 +58,8 @@ class DesignView(QWidget):
         return task
 
     def eventFilter(self, obj, event):
-        if event.type() == QEvent.KeyPress and obj is self.process_text_edit:
-            if event.key() == Qt.Key_Return and self.process_text_edit.hasFocus():
+        if event.type() == QtCore.QEvent.KeyPress and obj is self.process_text_edit:
+            if event.key() == QtCore.Qt.Key_Return and self.process_text_edit.hasFocus():
                 self.submit_input_text()
                 return True
         return super().eventFilter(obj, event)
@@ -91,7 +89,7 @@ class DesignView(QWidget):
                 display_error_message("Failed to understand what task you wanted to perform.")
                 return
             view = SendEmailView(model)
-        except:
+        except:  # noqa: E722
             traceback.print_exc()
             self.process_text_edit.restore_cursor_pos()
             display_error_message(str(sys.exc_info()[1]) + ".")
@@ -105,7 +103,7 @@ class DesignView(QWidget):
         self.process_editor.append_process(view, model)
 
 
-class ProcessTextEditView(QTextEdit):
+class ProcessTextEditView(QtWidgets.QTextEdit):
     def __init__(self, *args, **kwargs):
         super(ProcessTextEditView, self).__init__(*args, **kwargs)
         self.setPlaceholderText("Enter process query here")
@@ -123,23 +121,23 @@ class ProcessTextEditView(QTextEdit):
         self.setTextCursor(cursor)
 
 
-class ProcessEditorView(QFrame):
+class ProcessEditorView(QtWidgets.QFrame):
     def __init__(self, model):
         super(ProcessEditorView, self).__init__()
         self.model = model
         self.process_views = []
         self.grid_size = 32
         self.update()
-        self.pos = QPoint(self.grid_size / 2, self.grid_size / 2)
-        self.delta = QPoint(0, 0)
-        self.offset = QPoint(0, 0)
+        self.pos = QtCore.QPoint(self.grid_size / 2, self.grid_size / 2)
+        self.delta = QtCore.QPoint(0, 0)
+        self.offset = QtCore.QPoint(0, 0)
         self.dragging = False
 
         for proc in self.model.processes:
             if isinstance(proc, SendEmailModel):  # TODO(alexander): might not be the most effective method!!!
                 self.process_views.append(ProcessView(self, SendEmailView(proc), proc))
             else:
-                self.process_views.append(ProcessView(self, QFrame(), proc))
+                self.process_views.append(ProcessView(self, QtWidgets.QFrame(), proc))
 
     def position_after_last(self, model):
         num_processes = len(self.process_views)
@@ -153,7 +151,7 @@ class ProcessEditorView(QFrame):
         self.process_views.append(view)
         self.model.processes.append(model)
         view.setGeometry(model.x, model.y, model.width, model.height)
-        view.pos = QPoint(model.x, model.y)
+        view.pos = QtCore.QPoint(model.x, model.y)
         view.show()
         self.update()
 
@@ -165,12 +163,12 @@ class ProcessEditorView(QFrame):
 
     def paintEvent(self, event):
         super().paintEvent(event)
-        p = QPainter(self)
-        p.setRenderHints(QPainter.HighQualityAntialiasing)
+        p = QtGui.QPainter(self)
+        p.setRenderHints(QtGui.QPainter.HighQualityAntialiasing)
         if SETTINGS["editor"]["theme"] == "light-theme":
-            p.setPen(QPen(QColor("#e0e0e0"), 1))
+            p.setPen(QtGui.QPen(QtGui.QColor("#e0e0e0"), 1))
         else:
-            p.setPen(QPen(QColor("#2d333b"), 1))
+            p.setPen(QtGui.QPen(QtGui.QColor("#2d333b"), 1))
         xoff = (self.pos.x() + self.delta.x()) % self.grid_size
         yoff = (self.pos.y() + self.delta.y()) % self.grid_size
         for i in range(0, self.width() + self.grid_size, self.grid_size):
@@ -179,7 +177,7 @@ class ProcessEditorView(QFrame):
         for i in range(0, self.height() + self.grid_size, self.grid_size):
             p.drawLine(0, i - yoff, self.width(), i - yoff)
 
-        p.setPen(QPen(QColor("#1d8ac4"), 3))
+        p.setPen(QtGui.QPen(QtGui.QColor("#1d8ac4"), 3))
         prev_view = None
         prev_x = 0
         prev_y = 0
@@ -199,14 +197,14 @@ class ProcessEditorView(QFrame):
         p.end()
 
     def mousePressEvent(self, event):
-        if event.buttons() & Qt.RightButton:
+        if event.buttons() & QtCore.Qt.RightButton:
             self.offset = event.pos()
             for view in self.process_views:
                 view.offset = event.pos()
             self.dragging = True
 
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.RightButton and self.dragging:
+        if event.buttons() & QtCore.Qt.RightButton and self.dragging:
             self.delta = self.offset - event.pos()
             for view in self.process_views:
                 view.delta = event.pos() - view.offset
@@ -216,14 +214,14 @@ class ProcessEditorView(QFrame):
     def mouseReleaseEvent(self, event):
         if self.dragging:
             self.pos = self.pos + self.delta
-            self.delta = QPoint(0, 0)
+            self.delta = QtCore.QPoint(0, 0)
             for view in self.process_views:
                 view.pos = view.pos + view.delta
-                view.delta = QPoint(0, 0)
+                view.delta = QtCore.QPoint(0, 0)
             self.dragging = False
 
 
-class ProcessView(QFrame):
+class ProcessView(QtWidgets.QFrame):
     def __init__(self, process_editor, view, model):
         super(ProcessView, self).__init__(process_editor)
         self.process_editor = process_editor
@@ -232,31 +230,31 @@ class ProcessView(QFrame):
         self.name = model.name
         self.model = model
 
-        layout = QGridLayout()
+        layout = QtWidgets.QGridLayout()
 
         self.default_width = 260
         self.default_height = 320
-        self.pos = QPoint(model.x, model.y)
-        self.offset = QPoint(0, 0)
-        self.title = QLabel(self.name)
+        self.pos = QtCore.QPoint(model.x, model.y)
+        self.offset = QtCore.QPoint(0, 0)
+        self.title = QtWidgets.QLabel(self.name)
         self.title.setMinimumHeight(24)
         self.title.setMaximumHeight(24)
 
         layout.addWidget(self.title, 0, 0)
         layout.addWidget(self.view, 1, 0)
-        layout.addWidget(QLabel("Next"), 2, 0, 1, 1, Qt.AlignRight)
+        layout.addWidget(QtWidgets.QLabel("Next"), 2, 0, 1, 1, QtCore.Qt.AlignRight)
 
         self.setLayout(layout)
         self.setGeometry(model.x, model.y, model.width, model.height)
 
     def contextMenuEvent(self, event):
-        contextMenu = QMenu(self)
-        edit = contextMenu.addAction("Edit")
-        change_type = QMenu("Change type")
-        contextMenu.addMenu(change_type)
-        change_to_email = change_type.addAction("Send Email")
-        change_to_reminder = change_type.addAction("Reminder")
-        change_to_schedule = change_type.addAction("Schedule")
+        contextMenu = QtWidgets.QMenu(self)
+        # edit = contextMenu.addAction("Edit")
+        # change_type = QMenu("Change type")
+        # contextMenu.addMenu(change_type)
+        # change_to_email = change_type.addAction("Send Email")
+        # change_to_reminder = change_type.addAction("Reminder")
+        # change_to_schedule = change_type.addAction("Schedule")
         delete = contextMenu.addAction("Delete")
         action = contextMenu.exec_(self.mapToGlobal(event.pos()))
         # if action == edit:
@@ -266,14 +264,14 @@ class ProcessView(QFrame):
         self.process_editor.update()
 
     def mousePressEvent(self, event):
-        if event.buttons() & Qt.LeftButton:
+        if event.buttons() & QtCore.Qt.LeftButton:
             self.raise_()
             self.offset = event.pos()
-        elif event.buttons() & Qt.RightButton:
+        elif event.buttons() & QtCore.Qt.RightButton:
             self.contextMenuEvent(event)
 
     def mouseMoveEvent(self, event):
-        if event.buttons() & Qt.LeftButton:
+        if event.buttons() & QtCore.Qt.LeftButton:
             self.pos = self.mapToParent(event.pos() - self.offset)
             self.move(self.pos)
             self.parent().update()
@@ -282,21 +280,21 @@ class ProcessView(QFrame):
         return
 
 
-class SendEmailView(QFrame):
+class SendEmailView(QtWidgets.QFrame):
     def __init__(self, model):
         super(SendEmailView, self).__init__()
-        layout = QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
         self.model = model
 
-        self.recipients = QLineEdit(", ".join(model.recipients))
+        self.recipients = QtWidgets.QLineEdit(", ".join(model.recipients))
         self.recipients.setPlaceholderText("Recipient1, Recipient2, ...")
         self.recipients.textChanged.connect(model.setRecipients)
 
-        self.when = QDateTimeEdit(QDateTime(model.when))
+        self.when = QtWidgets.QDateTimeEdit(QtCore.QDateTime(model.when))
         self.when.dateTimeChanged.connect(self.setWhen)
 
-        self.body = QTextEdit(model.body)
+        self.body = QtWidgets.QTextEdit(model.body)
         self.body.setPlaceholderText("Enter the body...")
         self.body.textChanged.connect(model.setBody)
 
@@ -306,7 +304,7 @@ class SendEmailView(QFrame):
 
         self.setLayout(layout)
 
-    def setWhen(qt_date_time):
+    def setWhen(self, dt):
         self.model.setWhen(dt.toPyDateTime())
 
 

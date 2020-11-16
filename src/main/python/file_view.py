@@ -1,29 +1,29 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+import PyQt5.QtWidgets as QtWidgets
+import PyQt5.QtCore as QtCore
 
 from functools import partial
-import os, sys
+import os
+import sys
 
 
-class FileView(QWidget):
+class FileView(QtWidgets.QWidget):
     def __init__(self, main_window, model, *args, **kwargs):
         super(FileView, self).__init__(*args, **kwargs)
         self.main_window = main_window
         self.model = model
 
-        layout = QGridLayout()
+        layout = QtWidgets.QGridLayout()
 
-        self.file_system_model = QFileSystemModel()
-        self.file_system_model.setRootPath(QDir.rootPath())
-        self.files_view = QListView()
+        self.file_system_model = QtWidgets.QFileSystemModel()
+        self.file_system_model.setRootPath(QtCore.QDir.rootPath())
+        self.files_view = QtWidgets.QListView()
         self.files_view.setModel(self.file_system_model)
         self.files_view.setRootIndex(self.file_system_model.index(os.getcwd()))
         self.files_view.doubleClicked.connect(self.enter_directory_index)
 
         self.current_dir_view = CurrentDirectoryView(self.files_view, self.file_system_model)
 
-        self.filename_view = QLineEdit(self.model.filename)
+        self.filename_view = QtWidgets.QLineEdit(self.model.filename)
 
         layout.addWidget(self.current_dir_view, 0, 0)
         layout.addWidget(self.files_view, 1, 0)
@@ -37,12 +37,12 @@ class FileView(QWidget):
         self.current_dir_view.set_current_directory_index(index)
 
 
-class CurrentDirectoryView(QFrame):
+class CurrentDirectoryView(QtWidgets.QFrame):
     def __init__(self, files_view, file_system_model, *args, **kwargs):
         super(CurrentDirectoryView, self).__init__(*args, **kwargs)
         self.files_view = files_view
         self.file_system_model = file_system_model
-        self.layout = QHBoxLayout()
+        self.layout = QtWidgets.QHBoxLayout()
         self.layout.setContentsMargins(2, 2, 2, 2)
         self.set_current_directory_index(self.files_view.rootIndex())
         self.setLayout(self.layout)
@@ -55,13 +55,13 @@ class CurrentDirectoryView(QFrame):
             child = self.layout.takeAt(0)
 
         while index and index.isValid():
-            btn = QPushButton(str(index.data()))
+            btn = QtWidgets.QPushButton(str(index.data()))
             btn.index = index
             btn.clicked.connect(partial(self.directory_button_clicked, index))
             self.layout.insertWidget(0, btn)
             index = index.parent()
             if index and index.isValid():
-                self.layout.insertWidget(0, QLabel(">"))
+                self.layout.insertWidget(0, QtWidgets.QLabel(">"))
 
         self.layout.addStretch(1)
         self.update()

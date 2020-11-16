@@ -1,20 +1,19 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
+import PyQt5.QtWidgets as QtWidgets
+import PyQt5.QtCore as QtCore
 
 import sys
 
 
-class PlayView(QWidget):
+class PlayView(QtWidgets.QWidget):
     def __init__(self, main_window, *args, **kwargs):
         super(PlayView, self).__init__(*args, **kwargs)
         self.main_window = main_window
         # self.threadpool = QThreadPool()
 
-        layout = QVBoxLayout()
+        layout = QtWidgets.QVBoxLayout()
         layout.setSpacing(8)
 
-        self.title = QLabel("Play")
+        self.title = QtWidgets.QLabel("Play")
         self.title.setObjectName("viewTitle")
         self.title.setMaximumHeight(48)
         layout.addWidget(self.title)
@@ -27,13 +26,13 @@ class PlayView(QWidget):
         self.setLayout(layout)
 
 
-class ProcessView(QFrame):
+class ProcessView(QtWidgets.QFrame):
     def __init__(self, name, *args, **kwargs):
         super(ProcessView, self).__init__(*args, **kwargs)
-        layout = QGridLayout()
+        layout = QtWidgets.QGridLayout()
 
-        self.name = QLabel(name)
-        self.run_btn = QToolButton()
+        self.name = QtWidgets.QLabel(name)
+        self.run_btn = QtWidgets.QToolButton()
         self.run_btn.setText("\uf04b")
         self.run_btn.setObjectName("runButton")
 
@@ -42,7 +41,7 @@ class ProcessView(QFrame):
         self.proc3 = ProcessEntryView("\uf271", "Schedule - John Doe", "Hello world 3")
 
         layout.addWidget(self.name, 0, 0)
-        layout.addWidget(self.run_btn, 0, 1, 1, 1, Qt.AlignLeft)
+        layout.addWidget(self.run_btn, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
         layout.addWidget(self.proc1, 1, 0, 1, 2)
         layout.addWidget(self.proc2, 2, 0, 1, 2)
         layout.addWidget(self.proc3, 3, 0, 1, 2)
@@ -50,20 +49,20 @@ class ProcessView(QFrame):
         self.setLayout(layout)
 
 
-class ProcessEntryView(QFrame):
+class ProcessEntryView(QtWidgets.QFrame):
     def __init__(self, icon, heading, body):
         super(ProcessEntryView, self).__init__()
-        layout = QGridLayout()
+        layout = QtWidgets.QGridLayout()
 
-        icon = QLabel(icon)
+        icon = QtWidgets.QLabel(icon)
         icon.setObjectName("processEntryIcon")
 
-        heading = QLabel(heading)
+        heading = QtWidgets.QLabel(heading)
         heading.setObjectName("processEntryHeading")
 
-        layout.addWidget(icon, 0, 0, 2, 1, Qt.AlignCenter)
+        layout.addWidget(icon, 0, 0, 2, 1, QtCore.Qt.AlignCenter)
         layout.addWidget(heading, 0, 1)
-        layout.addWidget(QLabel(body), 1, 1)
+        layout.addWidget(QtWidgets.QLabel(body), 1, 1)
         layout.setColumnStretch(1, 1)
 
         self.setLayout(layout)
