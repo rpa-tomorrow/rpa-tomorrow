@@ -95,7 +95,7 @@ class Schedule(Module):
         Follow up method after the module have had to ask a question to clarify some parameter, or just
         want to check that it interpreted everything correctly.
         """
-        if self.followup_type == "when":
+        if self.followup_type == "start":
             try:
                 self.start = datetime.fromisoformat(answer)
             except Exception:
