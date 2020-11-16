@@ -171,6 +171,5 @@ class Schedule(Module):
 class NoValueFoundError(Error):
     pass
 
-
 class ActionInterruptedByUserError(Error):
     pass
