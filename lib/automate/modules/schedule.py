@@ -8,6 +8,7 @@ from lib.automate.google import Google
 from lib.automate.modules import Module, NoSenderError
 from lib.utils.contacts import get_emails, prompt_contact_choice, followup_contact_choice
 from datetime import datetime, timedelta
+from lib.settings import SETTINGS
 
 # Module logger
 log = logging.getLogger(__name__)
@@ -39,7 +40,7 @@ class Schedule(Module):
         if not sender:
             raise NoSenderError("No sender found!")
 
-        if not isinstance(when, datetime):
+        if not isinstance(self.when["start"], datetime):
             self.followup_type = "when"
             return "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
 
@@ -53,8 +54,6 @@ class Schedule(Module):
         google = Google(username)
         calendar = google.calendar(settings)
         self.calendar = calendar
-
-        duration = timedelta(minutes=20)  # TODO: Parse from input
 
         # Parse attendees (try to resolve email addresses)
         parsed_attendees = get_emails(self.to, sender)
@@ -70,12 +69,12 @@ class Schedule(Module):
             return f"Found no contact named {name}. Do you want to continue scheduling the meeting anyway? [Y/n]"
 
         attendees = [settings["address"]] + attendees
-        event = calendar.event(when, duration, attendees, self.body)
+        event = calendar.event(self.when["start"], self.when["end"], attendees, self.body)
         self.event = event
 
         # Check if we are busy
-        me_busy = calendar.freebusy(when, duration, ["primary"])
-        to_busy = calendar.freebusy(when, duration, to)
+        me_busy = calendar.freebusy(self.when["start"], self.when["end"], ["primary"])
+        to_busy = calendar.freebusy(self.when["start"], self.when["end"], to)
         other = f"{', '.join(to_busy[:-1])} and {to_busy[-1]}" if len(to_busy) > 1 else "".join(to_busy)
         if me_busy and to_busy:
             self.followup_type = "both_busy"
@@ -98,10 +97,10 @@ class Schedule(Module):
         """
         if self.followup_type == "when":
             try:
-                when = datetime.fromisoformat(answer)
+                self.when = {"start": datetime.fromisoformat(answer), "end": None}
             except Exception:
-                when = None
-            return self.prepare_processed(self.to, when, self.body, self.sender)
+                self.when = None
+            return self.prepare_processed(self.to, self.when, self.body, self.sender)
         elif self.followup_type == "body":
             return self.prepare_processed(self.to, self.when, answer, self.sender)
         elif self.followup_type == "self_busy" or self.followup_type == "both_busy" or self.followup_type == "to_busy":
@@ -129,27 +128,49 @@ class Schedule(Module):
         doc = self.nlp_model(text)
 
         to = []
-        when = []
+        start = []
+        end = []
         body = []
 
         for token in doc:
             if token.dep_ == "TO":
                 to.append(token.text)
-            elif token.dep_ == "WHEN":
-                when.append(token.text)
+            elif token.dep_ == "START":
+                start.append(token.text)
+            elif token.dep_ == "END":
+                end.append(token.text)
             elif token.dep_ == "BODY":
                 body.append(token.text)
             log.debug("%s %s", token.text, token.dep_)
 
-        time = datetime.now()
-        if len(when) == 0:
-            time = time + timedelta(seconds=5)
+        start_time = datetime.now()
+        if len(start) == 0:
+            start_time = start_time + timedelta(seconds=5)
         else:
-            time = tc.parse_time(when)
+            start_time = tc.parse_time(start)
+
+        end_time = 0
+        if len(end) == 0:
+            end_time = start_time + timedelta(minutes=self.get_meeting_duration())
+        else:
+            end_time = tc.parse_time(end)
 
         _body = " ".join(body)
 
-        return (to, time, _body)
+        return (to, {"start": start_time, "end": end_time}, _body)
+
+    def get_meeting_duration(self) -> str:
+        """
+        Retrieves the standard meeting duration from the settings file
+        """
+        try:
+            return SETTINGS["meeting"]["standard_duration"]
+        except KeyError:
+            raise NoValueFoundError("No value for meeting duration found!")
+
+
+class NoValueFoundError(Error):
+    pass
 
 
 class ActionInterruptedByUserError(Error):
