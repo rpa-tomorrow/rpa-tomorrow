@@ -119,6 +119,10 @@ class Calendar:
 
     def delete_event(self, eventId: str):
         self.service.events().delete(calendarId="primary", eventId=eventId).execute()
+    
+    def update_event(self, eventId: str, event_body: dict):
+        return self.service.events().patch(calendarId="primary", eventId=eventId, body=event_body).execute()
+
 
 
 class People:
