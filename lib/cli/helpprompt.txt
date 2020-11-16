@@ -1,8 +1,9 @@
-Program where the user can write instrutions in clear text using machine learning 
-and natural language processing, in order to instruct the computer what to do.
+Program where the user can write instrutions in clear text or record speech in
+order to instruct the computer what to do.
     
 Options:
 exit, e           Exit program.
 help, h           Show this message.
 language, lang    Set the language.
 install, i        Install NLP models.
+record, r         Begin recording of input.
