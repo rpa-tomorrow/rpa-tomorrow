@@ -1,16 +1,18 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 import PyQt5.QtWidgets as QtWidgets
-from PyQt5.QtCore import QResource
+import PyQt5.QtGui as QtGui
 import os
 import sys
+import resources  # noqa: F401
 
-from lib.settings import load_settings, SETTINGS
+sys.path.append(".")
+from lib.settings import load_settings, SETTINGS  # noqa: E402
 
-from model import Model
-from design_view import DesignView
-from file_view import FileView
-from play_view import PlayView
-from settings_view import SettingsView
+from model import Model  # noqa: E402
+from design_view import DesignView  # noqa: E402
+from file_view import FileView  # noqa: E402
+from play_view import PlayView  # noqa: E402
+from settings_view import SettingsView  # noqa: E402
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -148,7 +150,7 @@ def initialize_app():
     appctxt = ApplicationContext()
     window = MainWindow()
 
-    QResource.registerResource("resources.rcc")
+    QtGui.QFontDatabase.addApplicationFont(":/fontawesome.ttf")
 
     # Load stylesheet
     font_family = "Roboto, Segoe UI, Arial"

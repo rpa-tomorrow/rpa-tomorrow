@@ -5,7 +5,6 @@ QLabel#viewTitle {
 
 QToolButton {
     font-family: FontAwesome;
-    font-size: 12pt;
     border-style: none;
 }
 

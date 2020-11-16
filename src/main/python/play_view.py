@@ -1,4 +1,5 @@
 import PyQt5.QtWidgets as QtWidgets
+import PyQt5.QtGui as QtGui
 import PyQt5.QtCore as QtCore
 
 import sys
@@ -33,6 +34,7 @@ class ProcessView(QtWidgets.QFrame):
 
         self.name = QtWidgets.QLabel(name)
         self.run_btn = QtWidgets.QToolButton()
+        self.run_btn.setFont(QtGui.QFont("RPATomorrowIconFont", 24))
         self.run_btn.setText("\uf04b")
         self.run_btn.setObjectName("runButton")
 
