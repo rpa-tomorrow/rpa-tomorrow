@@ -143,6 +143,7 @@ cython_debug/
 
 # Google API Credentials
 client_secret.json
+service_account.json
 
 # Model folders
 en_rpa_simple/
