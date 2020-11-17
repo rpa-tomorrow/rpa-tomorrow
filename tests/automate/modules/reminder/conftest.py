@@ -5,7 +5,7 @@ import pytest
 import sys
 
 from lib.automate.modules.reminder import Reminder
-
+from lib.automate.pool import ModelPool
 
 @pytest.fixture
 def run(monkeypatch):
@@ -13,7 +13,7 @@ def run(monkeypatch):
         pass
 
     def helper(when, body):
-        reminder = Reminder()
+        reminder = Reminder(None)
         # mock the timer used to schedule the reminder
         monkeypatch.setattr("threading.Timer.start", mock_timer_start)
         reminder.prepare_processed(None, when, body, None)
@@ -30,7 +30,7 @@ def notify(monkeypatch):
         called_with.append(popenargs)
 
     def helper(os, body):
-        reminder = Reminder()
+        reminder = Reminder(None)
         monkeypatch.setattr("lib.automate.modules.reminder.run", mock_subprocess_run)
         return reminder.notify(os, body)
 
