@@ -5,7 +5,7 @@ import logging
 from config import load_settings_from_cli
 from lib.settings import SETTINGS
 from lib.nlp import nlp  # noqa: E402
-
+import time
 
 def setup_logger(level):
     # create logger
@@ -48,7 +48,6 @@ def cli(debug, verbose):
     load_settings_from_cli()
     print("Loading...")
     n = nlp.NLP(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
-    print("Ready!")
 
     while True:
         txt = sys.stdin.readline().strip()
