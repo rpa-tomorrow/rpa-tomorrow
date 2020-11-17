@@ -19,7 +19,7 @@ class Automate:
         self.loaded_modules = []
         self.modules = []
         self.verbs = []
-        # Shared models added here
+        # Should be added dynamically from the settings
         self.pool = ModelPool(["xx_ent_wiki_sm"])
 
         for module in self._modules:

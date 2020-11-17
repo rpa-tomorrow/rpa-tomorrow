@@ -164,7 +164,7 @@ class Send(Module):
 
         _body = " ".join(body)
 
-        self.model_pool.release_model("xx_ent_wiki_sm")
+        self.model_pool.release_model(ner_model)
         return (to, time, _body)
 
 

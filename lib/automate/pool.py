@@ -51,14 +51,14 @@ class ModelPool:
 
         raise NoModelFoundError("No model by the name %s found", model_name)
 
-    def release_model(self, model_name):
+    def release_model(self, model):
         """
         Relases the lock for a model such that others can use it.
         :param model_name: The name of the spacy model to release.
         :type model_name: string
         """
-        for name, _, lock in self.pool:
-            if name == model_name:
+        for name, shared_model, lock in self.pool:
+            if model == shared_model:
                 lock.release()
                 log.debug("Released lock for model %s", name)
 
