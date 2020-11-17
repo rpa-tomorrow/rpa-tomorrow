@@ -1,7 +1,6 @@
 import pytest
 
 from lib.automate.modules.send import Send
-from lib.automate.pool import ModelPool
 
 TEST_SETTINGS = {
     "contacts": {
@@ -32,8 +31,7 @@ TEST_SETTINGS = {
 @pytest.fixture
 def get_test_email(monkeypatch):
     def helper(name):
-        pool = ModelPool(["xx_ent_wiki_sm"])
-        send = Send(pool)
+        send = Send(None)
         monkeypatch.setattr("lib.automate.modules.send.SETTINGS", TEST_SETTINGS)
         return send.get_email(name)
 
