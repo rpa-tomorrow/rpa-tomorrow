@@ -9,6 +9,15 @@ def load_settings():
     load_user()
     load_nlp_models_config(SETTINGS["user"]["language"], SETTINGS["user"]["language_version"])
     load_local_contacts()
+    load_editor_preferences()
+
+
+def load_editor_preferences():
+    old_dir = os.getcwd()
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+    with open("../config/editor.yaml", "r") as stream:
+        SETTINGS["editor"] = yaml.safe_load(stream)
+    os.chdir(old_dir)
 
 
 def load_user():

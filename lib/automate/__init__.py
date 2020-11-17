@@ -14,6 +14,7 @@ class Automate:
             import_module("lib.automate.modules.remove_schedule").RemoveSchedule,
             import_module("lib.automate.modules.reminder").Reminder,
         ]
+        self.response_callback = None
         self.verbs = {}
         for module in self.modules:
             for verb in module.verbs:
@@ -60,8 +61,12 @@ class Automate:
                 instance = self.verbs[fuzzy_match]()
             else:
                 raise AutomationNotFoundError("Automation module not found")
+
         followup = instance.prepare(SETTINGS["nlp_models"], text, sender)
-        return handle_response(followup)
+        if self.response_callback:
+            return self.response_callback(instance, followup)
+        else:
+            return handle_response(followup)
 
 
 class NoResponseError(Error):

@@ -1,0 +1,50 @@
+
+ProcessEditorView {
+    background-color: white;
+} 
+
+BottomInfoBar {
+    background-color: lightgray;
+}
+
+ProcessTextEditView {
+    background-color: white;
+}
+
+ProcessView {
+    background-color: #f0f0f0;
+    border-color: #d1d1d1;
+}
+
+SideMenuBar {
+    background-color: dodgerblue;
+}
+
+MenuBarButton {
+    background-color: dodgerblue;
+    color: white;
+}
+
+QTextEdit {
+    background-color: white;
+}
+
+QDateTimeEdit {
+    background-color: white;
+}
+
+QLineEdit {
+    background-color: white;
+}
+
+MenuBarButton:hover {
+    background-color: #1774cf;
+}
+
+MenuBarButton:pressed {
+    background-color: #2879c9;
+}
+
+MenuBarButton:checked {
+    background-color: #2879c9;
+}

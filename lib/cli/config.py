@@ -13,7 +13,7 @@ from lib.settings import (  # noqa: E402
 
 
 def load_settings_from_cli():
-    """ Load settings from the config files located in /config
+    """Load settings from the config files located in /config
     and prompts user if some needed config is missing"""
     load_user_from_cli()
     load_local_contacts()

@@ -97,6 +97,14 @@ The CLI can be started as follows
 
 The CLI should now be running in your terminal. Type `help` for more instructions. See [User input](#user-input) if the program is struggling to understand the input.
 
+### GUI
+
+The GUI can be started as follows
+- `cd` into the project folder
+- Run `fbs run`
+
+Note: in the future if possible the GUI will be distributed as a single executable file.
+
 ## Testing
 
 The tests can be run with the following command

@@ -36,8 +36,8 @@ class NLP:
             doc_action = self.sim_model(action)
             similarity = doc_action.similarity(doc_verb)
             if similarity > 0.6:
-                response = self.send_automate(doc_verb.text, text)
-                return response
+                return self.send_automate(doc_verb.text, text)
+        return None
 
     def run(self, text):
         action = self.prepare(text)
