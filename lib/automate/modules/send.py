@@ -2,6 +2,8 @@ import smtplib
 import spacy
 import lib.utils.tools.time_convert as tc
 import logging
+import lib.utils.ner as ner
+import asyncio
 
 from email.message import EmailMessage
 
@@ -19,13 +21,14 @@ log = logging.getLogger(__name__)
 class Send(Module):
     verbs = ["send", "mail", "e-mail", "email"]
 
-    def __init__(self):
-        super(Send, self).__init__()
+    def __init__(self, model_pool):
+        super(Send, self).__init__(model_pool)
         self.nlp_model = None
 
     def prepare(self, nlp_model_names, text, sender):
         if self.nlp_model is None:
             self.nlp_model = spacy.load(nlp_model_names["email"])
+            log.debug("Model loaded into memory")
         to, when, body = self.nlp(text)
         return self.prepare_processed(to, when, body, sender)
 
@@ -131,10 +134,15 @@ class Send(Module):
         Lets the reminder model work on the given text.
         """
         doc = self.nlp_model(text)
-
         to = []
         when = []
         body = []
+
+        # Create event loop here. Unless we decide to use async/await in the whole program
+        # you have to do this the ugly way
+        ner_model = asyncio.run(self.model_pool.acquire_model("xx_ent_wiki_sm"))
+
+        persons = ner.get_persons(ner_model, text)
 
         for token in doc:
             if token.dep_ == "TO":
@@ -145,6 +153,9 @@ class Send(Module):
                 body.append(token.text)
             log.debug("%s %s", token.text, token.dep_)
 
+        to = ner.cross_check_names(to, persons)
+        log.debug("Recipients: %s", ",".join(to))
+
         time = datetime.now()
         if len(when) == 0:
             time = time + timedelta(seconds=5)
@@ -153,6 +164,7 @@ class Send(Module):
 
         _body = " ".join(body)
 
+        self.model_pool.release_model("xx_ent_wiki_sm")
         return (to, time, _body)
 
 

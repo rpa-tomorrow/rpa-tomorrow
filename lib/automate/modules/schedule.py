@@ -17,8 +17,8 @@ log = logging.getLogger(__name__)
 class Schedule(Module):
     verbs = ["book", "schedule", "meeting"]
 
-    def __init__(self):
-        super(Schedule, self).__init__()
+    def __init__(self, model_pool):
+        super(Schedule, self).__init__(model_pool)
         self.nlp_model = None
 
     def prepare(self, nlp_model_names, text, sender):

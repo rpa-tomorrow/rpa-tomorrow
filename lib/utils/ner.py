@@ -1,5 +1,5 @@
 # Named Entity Recognition utils using a supported spacy model.
-# For English it is recommended to use 'xx_ent_wiki_sm' as the model.
+# For most languages it is recommended to use 'xx_ent_wiki_sm' as the model.
 from fuzzywuzzy import process as fuzzy
 
 
@@ -48,5 +48,4 @@ def cross_check_names(tagged, persons) -> list:
         value, score = fuzzy.extractOne(tag, persons)
         if score > MIN_SCORE and value not in ok:
             ok.append(value)
-
     return ok
