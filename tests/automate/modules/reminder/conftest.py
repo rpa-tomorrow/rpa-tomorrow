@@ -5,7 +5,7 @@ import pytest
 import sys
 
 from lib.automate.modules.reminder import Reminder
-from lib.automate.pool import ModelPool
+
 
 @pytest.fixture
 def run(monkeypatch):
