@@ -19,8 +19,7 @@ class Automate:
         self.loaded_modules = []
         self.modules = []
         self.verbs = []
-        # Should be added dynamically from the settings
-        self.pool = ModelPool(["xx_ent_wiki_sm"])
+        self.pool = ModelPool([SETTINGS["nlp_models"]["ner"]])
 
         for module in self._modules:
             self.verbs.extend(module.verbs)
