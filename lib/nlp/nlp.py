@@ -1,24 +1,16 @@
 import spacy
 
 from lib.automate import Automate
-import time
-import asyncio
+import spinner
+
+spinner.Spinner()
 
 
 class NLP:
     def __init__(self, model, spacy_model_name):
-        self.loop = asyncio.get_event_loop()
-        self.testbool = True
-        self.nlp = None
-        self.sim_model = None
-        self.automate = None
-        
-        try:
-            asyncio.ensure_future(self.firstWorker())
-            asyncio.ensure_future(self.secondWorker(model, spacy_model_name))
-            self.loop.run_until_complete(self.secondWorker(model, spacy_model_name))
-        finally:
-            print("Ready!")
+        self.nlp = spacy.load(model)
+        self.sim_model = spacy.load(spacy_model_name)
+        self.automate = Automate()
 
     def send_automate(self, verb, text):
         return self.automate.prepare(verb, text)
@@ -56,25 +48,3 @@ class NLP:
             response = action.execute()
             return response
         return "I did not understand"
-
-    async def firstWorker(self):
-        animation = "|/-\\"
-        idx = 0
-        while self.testbool:
-            print("Processing input... " + animation[idx % len(animation)], end="\r")
-            idx += 1
-            await asyncio.sleep(0.1)
-            # print("First Worker Executed")
-            # await asyncio.sleep(1)
-
-
-    async def secondWorker(self, model, spacy_model_name):
-        while self.testbool:
-            # print("Second Worker Executed")
-            # self.nlp = spacy.load(model)
-            # self.sim_model = await spacy.load(spacy_model_name)
-            # self.automate = await Automate()
-            await asyncio.sleep(5)
-            self.testbool = False
-        print("\r")
-    
