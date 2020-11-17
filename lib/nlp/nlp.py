@@ -16,9 +16,7 @@ class NLP:
         try:
             asyncio.ensure_future(self.firstWorker())
             asyncio.ensure_future(self.secondWorker(model, spacy_model_name))
-            self.loop.run_forever()
-        except KeyboardInterrupt:
-            pass
+            self.loop.run_until_complete(self.secondWorker(model, spacy_model_name))
         finally:
             print("Ready!")
 
@@ -72,12 +70,11 @@ class NLP:
 
     async def secondWorker(self, model, spacy_model_name):
         while self.testbool:
-            print("Second Worker Executed")
+            # print("Second Worker Executed")
             # self.nlp = spacy.load(model)
-            # self.sim_model = spacy.load(spacy_model_name)
-            # self.automate = Automate()
+            # self.sim_model = await spacy.load(spacy_model_name)
+            # self.automate = await Automate()
             await asyncio.sleep(5)
             self.testbool = False
         print("\r")
-        raise KeyboardInterrupt
     
