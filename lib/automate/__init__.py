@@ -4,6 +4,7 @@ from importlib import import_module
 from lib import Error
 from lib.settings import SETTINGS
 from lib.automate.pool import ModelPool
+import spinner
 
 
 class Automate:
@@ -70,22 +71,31 @@ class Automate:
         :type text: string
         :rtype: string
         """
-        sender = SETTINGS["user"]
 
+        spin = spinner.Spinner()
+        spin.setMessage("Executing command...")
+        with spin:
+            sender = SETTINGS["user"]
+
+        instance = self._load_module(module_name)
         def handle_response(response):
             if response:
+                spin.busy = False
                 print(response, end=": ", flush=True)
                 return handle_response(instance.followup(input()))
             else:
                 return instance
 
-        instance = self._load_module(module_name)
-
-        followup = instance.prepare(SETTINGS["nlp_models"], text, sender)
-        if self.response_callback:
-            return self.response_callback(instance, followup)
+        if module_name in self.verbs:
+            instance = self.verbs[module_name]()
         else:
-            return handle_response(followup)
+            fuzzy_match, score = fuzzy.extractOne(module_name, self.get_verbs())
+            if score > 30:
+                instance = self.verbs[fuzzy_match]()
+            else:
+                raise AutomationNotFoundError("Automation module not found")
+        followup = instance.prepare(SETTINGS["nlp_models"], text, sender)
+        return handle_response(followup)
 
 
 class NoResponseError(Error):
