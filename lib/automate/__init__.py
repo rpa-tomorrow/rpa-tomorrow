@@ -77,7 +77,6 @@ class Automate:
         with spin:
             sender = SETTINGS["user"]
 
-        instance = self._load_module(module_name)
         def handle_response(response):
             if response:
                 spin.busy = False
@@ -85,6 +84,8 @@ class Automate:
                 return handle_response(instance.followup(input()))
             else:
                 return instance
+
+        instance = self._load_module(module_name)
 
         if module_name in self.verbs:
             instance = self.verbs[module_name]()
