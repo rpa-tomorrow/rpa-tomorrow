@@ -25,8 +25,8 @@ SCOPES = [
 class RemoveSchedule(Module):
     verbs = ["unschedule", "remove"]
 
-    def __init__(self):
-        super(RemoveSchedule, self).__init__()
+    def __init__(self, model_pool):
+        super(RemoveSchedule, self).__init__(model_pool)
         self.nlp_model = None
 
     def prepare(self, nlp_model_names, text, sender):
