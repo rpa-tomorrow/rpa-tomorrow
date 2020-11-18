@@ -45,14 +45,13 @@ def cli(debug, verbose):
     except ValueError:
         setup_logger(logging.WARNING)
         print("WARNING: Could not parse debug flag. Using default log settings.")
-    
+
     spin = spinner.Spinner()
     spin.setMessage("Loading settings and nlp models...")
     with spin:
         load_settings_from_cli()
         n = nlp.NLP(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
         print("\nNatural language processing ready!")
-
 
     while True:
         txt = sys.stdin.readline().strip()
