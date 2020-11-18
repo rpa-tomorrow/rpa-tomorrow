@@ -90,7 +90,7 @@ class Schedule(Module):
 
     def execute(self):
         event = self.calendar.send_event(self.event)
-        return "Event created, see link: %s" % (event.get("htmlLink"))
+        return "\rEvent created, see link: %s" % (event.get("htmlLink"))
 
     def followup(self, answer):
         """
