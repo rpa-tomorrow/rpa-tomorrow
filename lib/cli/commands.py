@@ -8,7 +8,7 @@ from config import config_model_language, choose_version
 
 sys.path.append(".")
 
-from lib.nlp.model_installer import Model_Installer  # noqa: E402
+from lib.selector.model_installer import Model_Installer  # noqa: E402
 from lib.settings import SETTINGS, get_model_languages, update_settings, get_language_versions  # noqa: E402
 
 

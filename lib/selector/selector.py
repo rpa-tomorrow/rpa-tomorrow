@@ -3,7 +3,7 @@ import spacy
 from lib.automate import Automate
 
 
-class NLP:
+class ModuleSelector:
     def __init__(self, model, spacy_model_name):
         self.nlp = spacy.load(model)
         self.sim_model = spacy.load(spacy_model_name)

@@ -2,10 +2,11 @@ import plac
 import sys
 import commands
 import logging
+import spinner
+
 from config import load_settings_from_cli
 from lib.settings import SETTINGS
-from lib.nlp import nlp  # noqa: E402
-import spinner
+from lib.selector.selector import ModuleSelector  # noqa: E402
 
 
 def setup_logger(level):
@@ -50,7 +51,7 @@ def cli(debug, verbose):
     spin.set_message("Loading settings and nlp models...")
     with spin:
         load_settings_from_cli()
-        n = nlp.NLP(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
+        n = ModuleSelector(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
         print("\nNatural language processing ready!")
 
     while True:
