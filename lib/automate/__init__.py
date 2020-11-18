@@ -4,7 +4,7 @@ from importlib import import_module
 from lib import Error
 from lib.settings import SETTINGS
 from lib.automate.pool import ModelPool
-import spinner
+from lib.cli import spinner
 
 
 class Automate:
