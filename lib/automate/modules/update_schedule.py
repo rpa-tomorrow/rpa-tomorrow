@@ -1,6 +1,8 @@
 from __future__ import print_function
 import logging
 import spacy
+import asyncio
+import lib.utils.ner as ner
 
 from lib import Error
 from lib.utils import contacts
@@ -23,8 +25,8 @@ SCOPES = [
 class UpdateSchedule(Module):
     verbs = ["reschedule", "update"]
 
-    def __init__(self):
-        super(UpdateSchedule, self).__init__()
+    def __init__(self, model_pool):
+        super(UpdateSchedule, self).__init__(model_pool)
         self.nlp_model = None
 
     def prepare(self, nlp_model_names, text, sender):
@@ -142,9 +144,12 @@ class UpdateSchedule(Module):
 
     def nlp(self, text):
         doc = self.nlp_model(text)
+        ner_model = asyncio.run(self.model_pool.acquire_model("xx_ent_wiki_sm"))
+
         to = []
         when = []
         body = []
+        persons = ner.get_persons(ner_model, text)
 
         for token in doc:
             if token.dep_ == "TO":
@@ -159,7 +164,10 @@ class UpdateSchedule(Module):
             if len(when) > 0:
                 time = tc.parse_time(when)
 
+        to = ner.cross_check_names(to, persons)
+        log.debug("Recipients: %s", ",".join(to))
         _body = " ".join(body)
+        self.model_pool.release_model(ner_model)
 
         return (to, time, _body)
 

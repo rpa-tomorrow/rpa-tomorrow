@@ -13,7 +13,6 @@ load_settings()
 automate = Automate()
 n = nlp.NLP("en_rpa_simple", "en_core_web_md")
 
-# Enable the SMTP server before running the following
 try:
     text = "reschedule meeting with John"
     response = n.run(text)
