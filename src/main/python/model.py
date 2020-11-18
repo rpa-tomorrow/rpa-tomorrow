@@ -3,7 +3,8 @@ import yaml
 
 INVALID_MODEL = 0
 PROCESS_MODEL = 1
-SEND_EMAIL_MODEL = 2
+ENTRY_POINT_MODEL = 2
+SEND_EMAIL_MODEL = 3
 
 
 class Model:
@@ -77,6 +78,13 @@ class ProcessModel:
         self.y = data["y"]
         self.width = data["width"]
         self.height = data["height"]
+
+class EntryPointModel(ProcessModel):
+    def __init__(self, name="", x=32, y=32, width=260, height=320):
+        super(EntryPointModel, self).__init__(name, "", x, y, width, height)
+        self.kind = ENTRY_POINT_MODEL
+        
+
 
 
 class SendEmailModel(ProcessModel):

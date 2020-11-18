@@ -32,27 +32,6 @@ QLineEdit {
     background-color: #282c34;
 }
 
-SideMenuBar {
-    background-color: dodgerblue;
-}
-
-MenuBarButton {
-    background-color: dodgerblue;
-    color: white;
-}
-
-MenuBarButton:hover {
-    background-color: #1774cf;
-}
-
-MenuBarButton:pressed {
-    background-color: #2879c9;
-}
-
-MenuBarButton:checked {
-    background-color: #2879c9;
-}
-
 QComboBox {
     background-color: #282c34;
 }
@@ -107,28 +86,4 @@ QHeaderView {
 
 QHeaderView::section {
     background-color: #21252b;
-}
-
-QTreeView::branch:has-siblings:!adjoins-item {
-    border-image: url(vline.png) 0;
-}
-
-QTreeView::branch:has-siblings:adjoins-item {
-    border-image: url(branch-more.png) 0;
-}
-
-QTreeView::branch:!has-children:!has-siblings:adjoins-item {
-    border-image: url(branch-end.png) 0;
-}
-
-QTreeView::branch:has-children:!has-siblings:closed,
-QTreeView::branch:closed:has-children:has-siblings {
-    border-image: none;
-    image: url(branch-closed.png);
-}
-
-QTreeView::branch:open:has-children:!has-siblings,
-QTreeView::branch:open:has-children:has-siblings  {
-    border-image: none;
-    image: url(branch-open.png);
 }

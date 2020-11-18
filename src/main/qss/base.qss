@@ -8,11 +8,30 @@ QToolButton {
     border-style: none;
 }
 
+SideMenuBar {
+    background-color: dodgerblue;
+    border-radius: 0;
+}
+
 MenuBarButton {
+    color: white;
+    background-color: dodgerblue;
     font-size: 32px;
     border-radius: 6px;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
+}
+
+MenuBarButton:hover {
+    background-color: #1774cf;
+}
+
+MenuBarButton:pressed {
+    background-color: #2879c9;
+}
+
+MenuBarButton:checked {
+    background-color: #2879c9;
 }
 
 ProcessEditorView {
@@ -23,6 +42,22 @@ ProcessView {
     border-radius: 4px;
     border-style: solid;
     border-width: 1px;
+}
+
+ProcessConnector {
+    border-color: #1d8ac4;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 7px;
+}
+
+ProcessConnector:Checked {
+    background-color: #1d8ac4;
+}
+
+ProcessConnector:Hover {
+    background-color: #187aad;
+    border-color: #187aad;
 }
 
 QDateTimeEdit {
