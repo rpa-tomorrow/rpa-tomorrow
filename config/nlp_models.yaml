@@ -5,3 +5,4 @@ english:
     reminder: en_rpa_simple_reminder
     schedule: en_rpa_simple_calendar
     spacy: en_core_web_md
+    ner: xx_ent_wiki_sm

@@ -98,6 +98,7 @@ dependencies:
   - simplejson=3.17.2=py38h1e0a361_1
   - six=1.15.0=py_0
   - spacy=2.3.2=py38hfd86e86_0
+  - spacy-model-en_core_web_md=2.3.1=pyh9f0ad1d_0
   - spacy-model-en_core_web_sm=2.3.1=pyh9f0ad1d_0
   - sqlite=3.33.0=h62c20be_0
   - srsly=1.0.2=py38he6710b0_0

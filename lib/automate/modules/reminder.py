@@ -25,8 +25,8 @@ class Reminder(Module):
     verbs = ["remind", "reminder", "notify"]
     supported_os = ["linux"]
 
-    def __init__(self):
-        super(Reminder, self).__init__()
+    def __init__(self, model_pool):
+        super(Reminder, self).__init__(model_pool)
         self.nlp_model = None
 
     def notify(self, os, body):
