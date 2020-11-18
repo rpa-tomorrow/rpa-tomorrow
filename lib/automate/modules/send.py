@@ -134,14 +134,11 @@ class Send(Module):
         Lets the reminder model work on the given text.
         """
         doc = self.nlp_model(text)
+        ner_model = asyncio.run(self.model_pool.acquire_model("xx_ent_wiki_sm"))
+
         to = []
         when = []
         body = []
-
-        # Create event loop here. Unless we decide to use async/await in the whole program
-        # you have to do this the ugly way
-        ner_model = asyncio.run(self.model_pool.acquire_model("xx_ent_wiki_sm"))
-
         persons = ner.get_persons(ner_model, text)
 
         for token in doc:
