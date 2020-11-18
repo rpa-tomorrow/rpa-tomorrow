@@ -50,13 +50,13 @@ class Send(Module):
 
         if not to or len(to) == 0:
             self.followup_type = "to1"
-            return "Found no receiver. Please enter the name of the receiver"
+            return "\nFound no receiver. Please enter the name of the receiver"
         elif len(to) > 1:
             raise ToManyReceiversError("Can only handle one (1) receiver at this time")
 
         if not body:
             self.followup_type = "body"
-            return "Found no message body. What message should be sent"
+            return "\nFound no message body. What message should be sent"
 
         parsed_recipients = get_emails(self.to, sender)
         recipients = parsed_recipients["emails"]
@@ -67,7 +67,7 @@ class Send(Module):
 
             return prompt_contact_choice(name, candidates)
         for name in parsed_recipients["unknown"]:
-            raise NoContactFoundError("Could not find any contacts with name " + name)
+            raise NoContactFoundError("\nCould not find any contacts with name " + name)
 
     def execute(self):
         return self.send_email(self.settings, self.receiver, self.subject, self.content)
@@ -117,7 +117,7 @@ class Send(Module):
         elif self.followup_type == "to_uncertain":
             return followup_contact_choice(self, answer)
         else:
-            raise NotImplementedError("Did not find any valid followup question to answer.")
+            raise NotImplementedError("\nDid not find any valid followup question to answer.")
 
     def get_email(self, name: str) -> str:
         """

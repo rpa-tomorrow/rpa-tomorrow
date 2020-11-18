@@ -24,6 +24,7 @@ class Spinner:
             time.sleep(self.delay)
             sys.stdout.write('\b')
             sys.stdout.flush()
+        print("\n")
 
     def __enter__(self):
         self.busy = True
