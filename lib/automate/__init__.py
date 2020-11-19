@@ -4,7 +4,6 @@ from importlib import import_module
 from lib import Error
 from lib.settings import SETTINGS
 from lib.automate.pool import ModelPool
-from lib.cli import spinner
 
 
 class Automate:
@@ -72,10 +71,7 @@ class Automate:
         :rtype: string
         """
 
-        spin = spinner.Spinner()
-        spin.set_message("Executing command...")
-        with spin:
-            sender = SETTINGS["user"]
+        sender = SETTINGS["user"]
 
         def handle_response(response):
             if response:
