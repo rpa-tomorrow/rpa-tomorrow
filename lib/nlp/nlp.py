@@ -1,9 +1,6 @@
 import spacy
 
 from lib.automate import Automate
-import spinner
-
-spinner.Spinner()
 
 
 class NLP:
