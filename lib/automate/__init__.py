@@ -73,7 +73,7 @@ class Automate:
         """
 
         spin = spinner.Spinner()
-        spin.setMessage("Executing command...")
+        spin.set_message("Executing command...")
         with spin:
             sender = SETTINGS["user"]
 

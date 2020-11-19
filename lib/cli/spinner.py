@@ -39,5 +39,5 @@ class Spinner:
         if exception is not None:
             return False
 
-    def setMessage(self, message):
+    def set_message(self, message):
         self.custom_message = message
