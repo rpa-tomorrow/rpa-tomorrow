@@ -79,7 +79,6 @@ class Automate:
 
         def handle_response(response):
             if response:
-                spin.busy = False
                 print(response, end=": ", flush=True)
                 return handle_response(instance.followup(input()))
             else:
@@ -87,16 +86,11 @@ class Automate:
 
         instance = self._load_module(module_name)
 
-        if module_name in self.verbs:
-            instance = self.verbs[module_name]()
-        else:
-            fuzzy_match, score = fuzzy.extractOne(module_name, self.get_verbs())
-            if score > 30:
-                instance = self.verbs[fuzzy_match]()
-            else:
-                raise AutomationNotFoundError("Automation module not found")
         followup = instance.prepare(SETTINGS["nlp_models"], text, sender)
-        return handle_response(followup)
+        if self.response_callback:
+            return self.response_callback(instance, followup)
+        else:
+            return handle_response(followup)
 
 
 class NoResponseError(Error):
