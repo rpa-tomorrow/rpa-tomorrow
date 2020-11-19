@@ -1,0 +1,47 @@
+filename: untitled
+processes:
+- classname: EntryPointModel
+  height: 70
+  name: main
+  out_next: -1
+  query: ''
+  width: 120
+  x: 32
+  y: 32
+- body: Hello World
+  classname: SendModel
+  height: 320
+  name: Send
+  out_next: -1
+  query: Email John Doe Hello World
+  recipients:
+  - John Doe
+  - Alexander Mennborg
+  when: '2020-11-19 22:08:31.113097'
+  width: 260
+  x: 216
+  y: 32
+- body: Hello World
+  classname: ReminderModel
+  height: 320
+  name: Reminder
+  out_next: -1
+  query: Remind John Doe Hello World
+  recipients:
+  - John Doe
+  when: '2020-11-19 22:08:31.113097'
+  width: 260
+  x: 540
+  y: 32
+- body: Hello World
+  classname: ScheduleModel
+  height: 320
+  name: Schedule
+  out_next: -1
+  query: Schedule a meeting with John Doe Hello World
+  recipients:
+  - John Doe
+  when: '2020-11-19 22:08:31.113097'
+  width: 260
+  x: 864
+  y: 32

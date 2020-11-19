@@ -8,7 +8,8 @@ import resources  # noqa: F401
 sys.path.append(".")
 from lib.settings import load_settings, SETTINGS  # noqa: E402
 
-from model import Model  # noqa: E402
+import process_models as proc_model
+
 from design_view import DesignView  # noqa: E402
 from file_view import FileView  # noqa: E402
 from play_view import PlayView  # noqa: E402
@@ -23,7 +24,7 @@ class MainWindow(QtWidgets.QMainWindow):
         layout = QtWidgets.QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.model = Model("untitled")
+        self.model = proc_model.Model("untitled")
 
         self.bottom = BottomInfoBar()
         self.menu = SideMenuBar(self)

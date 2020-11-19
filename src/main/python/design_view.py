@@ -4,8 +4,9 @@ import PyQt5.QtCore as QtCore
 
 import traceback
 import sys
-from datetime import datetime
-from model import ProcessModel, EntryPointModel, SendEmailModel
+import datetime
+
+import process_models as proc_models
 
 from lib.automate.modules.send import Send
 from lib.automate.modules.schedule import Schedule
@@ -44,7 +45,7 @@ class DesignView(QtWidgets.QWidget):
         self.process_text_edit = ProcessTextEditView("")
         self.process_text_edit.setMaximumHeight(180)
 
-        self.main_process = EntryPointModel("main", 32, 32, 120, 70)
+        self.main_process = proc_models.EntryPointModel()
         self.model.processes.append(self.main_process)
         self.process_editor = ProcessEditorView(self.model)
 
@@ -52,6 +53,13 @@ class DesignView(QtWidgets.QWidget):
         layout.addWidget(self.process_editor)
         self.setLayout(layout)
         self.process_text_edit.installEventFilter(self)
+        
+        self.save_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+S'), self)
+        self.save_shortcut.activated.connect(self.save_model)
+
+    def save_model(self):
+        self.model.save();
+        self.main_window.set_info_message("Wrote " + self.model.absolute_path)
 
     def handle_response(self, task, followup):
         self.main_window.set_info_message(str(followup).replace("\n", ". ") + ".")
@@ -78,13 +86,12 @@ class DesignView(QtWidgets.QWidget):
         try:
             task = self.nlp.prepare(query)
             # TODO(alexander): use different models, but they are all similar atm.
-            model = SendEmailModel(self.process_editor, query, task.to, task.when, task.body)
             if isinstance(task, Send):
-                model.name = "Send Email"
+                model = proc_models.SendModel()
             elif isinstance(task, Reminder):
-                model.name = "Reminder"
+                model = proc_models.ReminderModel()
             elif isinstance(task, Schedule):
-                model.name = "Schedule"
+                model = proc_models.ScheduleModel()
             else:
                 display_error_message("Failed to understand what task you wanted to perform.")
                 return
@@ -140,9 +147,13 @@ class ProcessEditorView(QtWidgets.QFrame):
         self.setMouseTracking(True)
 
         for proc in self.model.processes:
-            if isinstance(proc, SendEmailModel):  # TODO(alexander): might not be the most effective method!!!
+            if isinstance(proc, proc_models.SendModel):
                 self.process_views.append(ProcessView(self, SendEmailView(proc), proc))
-            elif isinstance(proc, EntryPointModel):
+            if isinstance(proc, proc_models.ReminderModel):
+                self.process_views.append(ProcessView(self, SendEmailView(proc), proc))
+            if isinstance(proc, proc_models.ScheduleModel):
+                self.process_views.append(ProcessView(self, SendEmailView(proc), proc))
+            elif isinstance(proc, proc_models.EntryPointModel):
                 self.process_views.append(ProcessView(self, QtWidgets.QFrame(), proc, False))
             else:
                 self.process_views.append(ProcessView(self, QtWidgets.QFrame(), proc))
@@ -196,9 +207,9 @@ class ProcessEditorView(QtWidgets.QFrame):
                 out_y = out_conn.y() + 7
                 in_x = out_conn.connected.x() + 7
                 in_y = out_conn.connected.y() + 7
-                p.drawLine(out_x,     out_y, out_x + 16, out_y)
+                p.drawLine(out_x,      out_y, out_x + 16, out_y)
                 p.drawLine(out_x + 16, out_y,  in_x - 16,  in_y)
-                p.drawLine( in_x - 16,  in_y, in_x, in_y)
+                p.drawLine( in_x - 16,  in_y,  in_x,       in_y)
             
         if self.active_connector:
             out_x = self.active_connector.x() + 7
@@ -214,9 +225,9 @@ class ProcessEditorView(QtWidgets.QFrame):
                 in_x = out_x; in_y = out_y
                 out_x = temp_x; out_y = temp_y
 
-            p.drawLine(out_x,     out_y, out_x + 16, out_y)
+            p.drawLine(out_x,      out_y, out_x + 16, out_y)
             p.drawLine(out_x + 16, out_y,  in_x - 16,  in_y)
-            p.drawLine( in_x - 16,  in_y, in_x, in_y)
+            p.drawLine( in_x - 16,  in_y,  in_x,       in_y)
         p.end()
 
     def mousePressEvent(self, event):
@@ -412,7 +423,7 @@ class SendEmailView(QtWidgets.QFrame):
         layout.setContentsMargins(0, 0, 0, 0)
         self.model = model
 
-        self.recipients = QtWidgets.QLineEdit(", ".join(model.recipients))
+        self.recipients = QtWidgets.QLineEdit(model.recipients)
         self.recipients.setPlaceholderText("Recipient1, Recipient2, ...")
         self.recipients.textChanged.connect(model.setRecipients)
 
@@ -441,13 +452,29 @@ if __name__ == "__main__":
     view = window.content.design_view
 
     editor = view.process_editor
-    time_now = datetime.now()
-    model1 = SendEmailModel("Send email", "Email John Doe Hello World", ["John Doe"], time_now, "Hello World")
-    model2 = SendEmailModel("Reminder", "Remind John Doe Hello World", ["John Doe"], time_now, "Hello World")
-    model3 = SendEmailModel("Schedule", "Schedule John Doe Hello World", ["John Doe"], time_now, "Hello World")
+    time_now = datetime.datetime.now()
+
+    model1 = proc_models.SendModel()
+    model1.query = "Email John Doe Hello World"
+    model1.recipients = "John Doe"
+    model1.when = time_now
+    model1.body = "Hello World"
     view1 = SendEmailView(model1)
+
+    model2 = proc_models.ReminderModel()
+    model2.query = "Remind John Doe Hello World"
+    model2.recipients = "John Doe"
+    model2.when = time_now
+    model2.body = "Hello World"
     view2 = SendEmailView(model2)
+    
+    model3 = proc_models.ScheduleModel()
+    model3.query = "Schedule a meeting with John Doe Hello World"
+    model3.recipients = "John Doe"
+    model3.when = time_now
+    model3.body = "Hello World"
     view3 = SendEmailView(model3)
+    
     editor.append_process(ProcessView(editor, view1, model1), model1)
     editor.append_process(ProcessView(editor, view2, model2), model2)
     editor.append_process(ProcessView(editor, view3, model3), model3)
