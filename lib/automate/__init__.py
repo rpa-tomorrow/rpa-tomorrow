@@ -70,6 +70,7 @@ class Automate:
         :type text: string
         :rtype: string
         """
+
         sender = SETTINGS["user"]
 
         def handle_response(response):

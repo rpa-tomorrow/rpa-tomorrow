@@ -97,7 +97,7 @@ class RemoveSchedule(Module):
 
             return followup_str
         else:
-            raise NoEventFoundError("Could not find an event.")
+            raise NoEventFoundError("\nCould not find an event.")
 
         return self.prompt_remove_event()
 
@@ -109,7 +109,7 @@ class RemoveSchedule(Module):
 
         self.followup_type = "self_busy"
         return (
-            f"You have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
+            f"\nYou have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
             "Do you want to remove it? [Y/n]"
         )
 
@@ -130,7 +130,7 @@ class RemoveSchedule(Module):
                 return self.prepare_processed(self.to, self.when, self.body, self.sender)
 
             if choice < 0:
-                raise NoEventFoundError("No event was chosen for deletion")
+                raise NoEventFoundError("\nNo event was chosen for deletion")
 
             elif choice >= 0 and choice < len(self.events):
                 self.event = self.events[choice]
@@ -140,7 +140,7 @@ class RemoveSchedule(Module):
 
     def execute(self):
         self.calendar.delete_event(self.event["id"])
-        return f"'{self.event['summary']}' was removed from your calendar"
+        return f"\n'{self.event['summary']}' was removed from your calendar"
 
     def nlp(self, text):
         doc = self.nlp_model(text)

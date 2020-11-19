@@ -5,6 +5,7 @@ import logging
 from config import load_settings_from_cli
 from lib.settings import SETTINGS
 from lib.nlp import nlp  # noqa: E402
+import spinner
 
 
 def setup_logger(level):
@@ -45,10 +46,12 @@ def cli(debug, verbose):
         setup_logger(logging.WARNING)
         print("WARNING: Could not parse debug flag. Using default log settings.")
 
-    load_settings_from_cli()
-    print("Loading...")
-    n = nlp.NLP(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
-    print("Ready!")
+    spin = spinner.Spinner()
+    spin.set_message("Loading settings and nlp models...")
+    with spin:
+        load_settings_from_cli()
+        n = nlp.NLP(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
+        print("\nNatural language processing ready!")
 
     while True:
         txt = sys.stdin.readline().strip()

@@ -44,11 +44,11 @@ class Schedule(Module):
 
         if not isinstance(self.when["start"], datetime):
             self.followup_type = "when"
-            return "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
+            return "\nCould not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
 
         if not body:
             self.followup_type = "body"
-            return "Found no event summary. What is the event about"
+            return "\nFound no event summary. What is the event about"
 
         settings = sender["email"]
         username = settings.get("username")
@@ -68,7 +68,7 @@ class Schedule(Module):
         for name in parsed_attendees["unknown"]:
             self.followup_type = "to_unknown"
             self.unknown_attendee = name
-            return f"Found no contact named {name}. Do you want to continue scheduling the meeting anyway? [Y/n]"
+            return f"\nFound no contact named {name}. Do you want to continue scheduling the meeting anyway? [Y/n]"
 
         attendees = [settings["address"]] + attendees
         event = calendar.event(self.when["start"], self.when["end"], attendees, self.body)
@@ -80,17 +80,17 @@ class Schedule(Module):
         other = f"{', '.join(to_busy[:-1])} and {to_busy[-1]}" if len(to_busy) > 1 else "".join(to_busy)
         if me_busy and to_busy:
             self.followup_type = "both_busy"
-            return f"You as well as {other} seem to be busy. Do you want to book the meeting anyway? [Y/n]"
+            return f"\nYou as well as {other} seem to be busy. Do you want to book the meeting anyway? [Y/n]"
         elif me_busy:
             self.followup_type = "self_busy"
-            return "You seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
+            return "\nYou seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
         elif to_busy:
             self.followup_type = "to_busy"
-            return f"{other} seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
+            return f"\n{other} seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
 
     def execute(self):
         event = self.calendar.send_event(self.event)
-        return "Event created, see link: %s" % (event.get("htmlLink"))
+        return "\rEvent created, see link: %s" % (event.get("htmlLink"))
 
     def followup(self, answer):
         """
@@ -109,7 +109,7 @@ class Schedule(Module):
             if answer == "" or answer.lower() == "y" or answer.lower() == "yes":
                 return None
             elif answer.lower() == "n" or answer.lower() == "no":
-                raise ActionInterruptedByUserError("Interrupted due to busy attendees.")
+                raise ActionInterruptedByUserError("\nInterrupted due to busy attendees.")
             else:
                 return self.prepare_processed(self.to, self.when, self.body, self.sender)
         elif self.followup_type == "to_uncertain":
@@ -119,11 +119,11 @@ class Schedule(Module):
                 self.to.remove(self.unknown_attendee)
                 return self.prepare_processed(self.to, self.when, self.body, self.sender)
             elif answer.lower() == "n" or answer.lower() == "no":
-                raise ActionInterruptedByUserError("Interrupted due to unknown attendee.")
+                raise ActionInterruptedByUserError("\nInterrupted due to unknown attendee.")
             else:
                 return self.prepare_processed(self.to, self.when, self.body, self.sender)
         else:
-            raise NotImplementedError("Did not find any valid followup question to answer.")
+            raise NotImplementedError("\nDid not find any valid followup question to answer.")
 
     def nlp(self, text):
         doc = self.nlp_model(text)

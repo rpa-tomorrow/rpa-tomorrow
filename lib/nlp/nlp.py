@@ -19,7 +19,6 @@ class NLP:
         :param text: The user NL input to process
         :type text: string
         """
-        # Currently only supports mail and schedule.
         actions = []
         for v in self.automate.get_verbs():
             actions.append(v)
