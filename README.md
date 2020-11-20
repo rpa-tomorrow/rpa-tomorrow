@@ -66,8 +66,6 @@ Now the schedule module should work and any created meetings should show up in t
 
 To use the Speech-to-Text feature of the program a Google service account key is required, since it uses the Google [Cloud Speech-to-Text API](https://cloud.google.com/speech-to-text).
 
-With the Cloud Speech-to-Text API [enabled](https://console.cloud.google.com/apis/library/speech.googleapis.com) in your project the key can be created and downloaded as follows
-
 1. Navigate to [Google Cloud Console](https://console.cloud.google.com/apis/) and make sure the correct project is selected.
 2. Go to `credentials`
 3. Click `Create credentials` and select `Service account`
@@ -76,8 +74,7 @@ With the Cloud Speech-to-Text API [enabled](https://console.cloud.google.com/api
 6. When prompted to choose key type select `JSON`
 7. Save the key as `service_account.json`
 8. Move the key into the project folder
-
-**Please note that this Google service is only free for the first 60 minutes of Speech-to-Text processed each month. If you can I recommend starting a [trial account](https://console.cloud.google.com/freetrial/signup/tos) which will give you \$300 free credits.**
+9. [Enable](https://console.cloud.google.com/apis/library/speech.googleapis.com) the Cloud Speech-to-Text API for the same project you created the key for. **Please note that this Google service is only free for the first 60 minutes of Speech-to-Text processed each month. If you can I recommend starting a [trial account](https://console.cloud.google.com/freetrial/signup/tos) which will give you \$300 free credits.**
 
 ## Usage
 
@@ -125,6 +122,7 @@ The CLI should now be running in your terminal. Type `help` for more instruction
 ### GUI
 
 The GUI can be started as follows
+
 - `cd` into the project folder
 - Run `fbs run`
 
