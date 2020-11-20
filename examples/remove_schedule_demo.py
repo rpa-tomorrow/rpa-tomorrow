@@ -11,7 +11,7 @@ from lib.settings import load_settings  # noqa: E402
 
 load_settings()
 automate = Automate()
-n = ModuleSelector("en_rpa_simple", "en_core_web_md")
+n = ModuleSelector()
 
 # Enable the CalDav server before running the following
 try:
