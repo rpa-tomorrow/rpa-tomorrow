@@ -76,7 +76,7 @@ class DesignView(QtWidgets.QWidget):
         view = None
 
         try:
-            task = self.nlp.prepare(query)
+            task = self.nlp.prepare(query)[0]
             # TODO(alexander): use different models, but they are all similar atm.
             model = SendEmailModel(self.process_editor, query, task.to, task.when, task.body)
             if isinstance(task, Send):
