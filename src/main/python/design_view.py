@@ -66,7 +66,7 @@ class DesignView(QtWidgets.QWidget):
 
     def submit_input_text(self):
         if not self.nlp:
-            self.nlp = ModuleSelector(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
+            self.nlp = ModuleSelector()
             self.nlp.automate.response_callback = self.handle_response
 
         self.process_text_edit.save_cursor_pos()

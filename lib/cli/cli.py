@@ -5,7 +5,6 @@ import logging
 import spinner
 
 from config import load_settings_from_cli
-from lib.settings import SETTINGS
 from lib.selector.selector import ModuleSelector  # noqa: E402
 
 
@@ -51,7 +50,7 @@ def cli(debug, verbose):
     spin.set_message("Loading settings and nlp models...")
     with spin:
         load_settings_from_cli()
-        n = ModuleSelector(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
+        n = ModuleSelector()
         print("\nNatural language processing ready!")
 
     while True:
@@ -60,8 +59,8 @@ def cli(debug, verbose):
         if txt == "":
             continue
         else:
-            txtArr = txt.split(" ")
-            commands.commands(txtArr, n)
+            txt_arr = txt.split(" ")
+            commands.commands(txt_arr, n)
 
 
 if __name__ == "__main__":

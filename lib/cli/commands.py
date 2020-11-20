@@ -30,10 +30,11 @@ def commands(arr, nlp):
         version = choose_version(model_installer.get_versions(language))
         model_installer.install(language, version)
     else:
-        listToStr = " ".join(map(str, arr))
+        text = " ".join(map(str, arr))
         try:
-            response = nlp.run(listToStr)
-            print(response + "\n")
+            responses = nlp.run(text)
+            for response in responses:
+                print(response + "\n")
         except Exception as e:
             print("Failed to execute action.\n", e, file=sys.stderr)
 
