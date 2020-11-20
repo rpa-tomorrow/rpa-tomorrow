@@ -10,7 +10,7 @@ from model import ProcessModel, SendEmailModel
 from lib.automate.modules.send import Send
 from lib.automate.modules.schedule import Schedule
 from lib.automate.modules.reminder import Reminder
-from lib.nlp.nlp import NLP
+from lib.selector.selector import ModuleSelector
 from lib.settings import SETTINGS
 
 
@@ -66,7 +66,7 @@ class DesignView(QtWidgets.QWidget):
 
     def submit_input_text(self):
         if not self.nlp:
-            self.nlp = NLP(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
+            self.nlp = ModuleSelector()
             self.nlp.automate.response_callback = self.handle_response
 
         self.process_text_edit.save_cursor_pos()
@@ -76,7 +76,7 @@ class DesignView(QtWidgets.QWidget):
         view = None
 
         try:
-            task = self.nlp.prepare(query)
+            task = self.nlp.prepare(query)[0]
             # TODO(alexander): use different models, but they are all similar atm.
             model = SendEmailModel(self.process_editor, query, task.to, task.when, task.body)
             if isinstance(task, Send):
