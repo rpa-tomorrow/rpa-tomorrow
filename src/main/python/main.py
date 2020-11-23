@@ -105,7 +105,7 @@ class SideMenuBar(QtWidgets.QFrame):
         self.items = []
         self.items.append(MenuBarButton(self, 0, "\uf044"))
         self.items.append(MenuBarButton(self, 1, "\uf0c7"))
-        self.items.append(MenuBarButton(self, 2, "\uf07c"))
+        self.items.append(MenuBarButton(self, 2, "\uf115"))
         self.items.append(MenuBarButton(self, 3, "\uf04b"))
         self.items.append(MenuBarButton(self, 4, "\uf013"))
         self.items.append(MenuBarButton(self, 5, "\uf05a"))

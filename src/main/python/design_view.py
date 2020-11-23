@@ -29,10 +29,10 @@ class DesignView(QtWidgets.QWidget):
         super(DesignView, self).__init__(*args, **kwargs)
         self.main_window = main_window
         self.model = self.main_window.model
-        # self.threadpool = QThreadPool()
 
-        layout = QtWidgets.QVBoxLayout()
-        layout.setSpacing(8)
+        layout = QtWidgets.QGridLayout()
+        layout.setVerticalSpacing(8)
+        layout.setHorizontalSpacing(8)
 
         # Load nlp model somewhere else takes forever!!!
         self.nlp = None
@@ -42,18 +42,18 @@ class DesignView(QtWidgets.QWidget):
         self.title.setMaximumHeight(48)
         layout.addWidget(self.title)
 
-        self.process_text_edit = ProcessTextEditView("")
+        self.process_text_edit = ProcessTextEditView(self, "")
         self.process_text_edit.setMaximumHeight(180)
 
         self.main_process = proc_models.EntryPointModel()
         self.model.processes.append(self.main_process)
-        self.process_editor = ProcessEditorView(self.model)
+        self.process_editor = ProcessEditorView(self, self.model)
 
         layout.addWidget(self.process_text_edit)
         layout.addWidget(self.process_editor)
-        self.setLayout(layout)
-        self.process_text_edit.installEventFilter(self)
         
+        self.setLayout(layout)
+
         self.save_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+S'), self)
         self.save_shortcut.activated.connect(self.save_model)
 
@@ -65,21 +65,16 @@ class DesignView(QtWidgets.QWidget):
         self.main_window.set_info_message(str(followup).replace("\n", ". ") + ".")
         return task
 
-    def eventFilter(self, obj, event):
-        if event.type() == QtCore.QEvent.KeyPress and obj is self.process_text_edit:
-            if event.key() == QtCore.Qt.Key_Return and self.process_text_edit.hasFocus():
-                self.submit_input_text()
-                return True
-        return super().eventFilter(obj, event)
-
-    def submit_input_text(self):
+    def submit_input_text(self, proc_view=None):
         if not self.nlp:
             self.nlp = NLP(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
             self.nlp.automate.response_callback = self.handle_response
 
         self.process_text_edit.save_cursor_pos()
 
-        query = self.process_text_edit.toPlainText()
+        query = self.process_text_edit.get_text()
+        if query == "": return
+        
         model = None
         view = None
 
@@ -102,49 +97,52 @@ class DesignView(QtWidgets.QWidget):
             display_error_message(str(sys.exc_info()[1]) + ".")
             return
 
-        view = ProcessView(self.process_editor, view, model)
-        view.show()
+        if not proc_view:
+            proc_view = ProcessView(self.process_editor, view, model)
+            proc_view.show()
+            self.process_editor.append_process(proc_view, model)
+        else:
+            proc_view.layout.replaceWidget(proc_view.view, view)
+            proc_view.view.close()
+            self.model.processes.remove(view.model)
+            self.model.processes.append(model)
+            prov_view.model = model
+            self.update()
 
         self.process_text_edit.set_cursor_pos(0)
         self.process_text_edit.clear()
-        self.process_editor.append_process(view, model)
-
-
-class ProcessTextEditView(QtWidgets.QTextEdit):
-    def __init__(self, *args, **kwargs):
-        super(ProcessTextEditView, self).__init__(*args, **kwargs)
-        self.setPlaceholderText("Enter process query here")
-        self.cursor_pos = 0
-
-    def save_cursor_pos(self):
-        self.cursor_pos = self.textCursor().position()
-
-    def restore_cursor_pos(self):
-        self.set_cursor_pos(self.cursor_pos)
-
-    def set_cursor_pos(self, pos):
-        cursor = self.textCursor()
-        cursor.setPosition(pos)
-        self.setTextCursor(cursor)
+        
 
 
 class ProcessEditorView(QtWidgets.QFrame):
-    def __init__(self, model):
+    def __init__(self, design_view, model):
         super(ProcessEditorView, self).__init__()
+        self.design_view = design_view
         self.model = model
         self.process_views = []
+        
         self.in_connectors = []
         self.out_connectors = []
         self.snapped_connector = None
         self.active_connector = None
+        
         self.grid_size = 32
-        self.update()
+
+        self.selecting = False
+        self.selected_processes = []
+        self.selection_box = QtWidgets.QWidget(self)
+        self.selection_box.hide()
+        self.selection_box.setObjectName("selectionBox")
+        self.selection_pos = QtCore.QPoint(0, 0)
+
         self.pos = QtCore.QPoint(self.grid_size / 2, self.grid_size / 2)
         self.delta = QtCore.QPoint(0, 0)
         self.offset = QtCore.QPoint(0, 0)
         self.mouse_pos = QtCore.QPoint(0, 0)
         self.dragging = False
+        
         self.setMouseTracking(True)
+        self.update()
 
         for proc in self.model.processes:
             if isinstance(proc, proc_models.SendModel):
@@ -178,10 +176,28 @@ class ProcessEditorView(QtWidgets.QFrame):
         self.update()
 
     def remove_process(self, view, model):
-        self.process_views.delete(view)
-        self.model.processes.remove(model)
+        if view in self.process_views:
+            self.process_views.remove(view)
+        if model in self.model.processes:
+            self.model.processes.remove(model)
         view.close()
         self.update()
+
+    def remove_selected_process(self):
+        for p in self.selected_processes:
+            self.remove_process(p, p.model)
+        self.selected_processes.clear()
+        
+    def select_all_processes(self):
+        self.selected_processes.clear()
+        for p in self.process_views:
+            self.process_views.append(p)
+            p.set_selected(True)
+
+    def deselect_all_processes(self):
+        for p in self.selected_processes:
+            p.set_selected(False)
+        self.selected_processes.clear()
 
     def paintEvent(self, event):
         super().paintEvent(event)
@@ -231,11 +247,19 @@ class ProcessEditorView(QtWidgets.QFrame):
         p.end()
 
     def mousePressEvent(self, event):
-        if event.buttons() & QtCore.Qt.RightButton:
+        if event.buttons() & QtCore.Qt.RightButton and not self.selecting:
             self.offset = event.pos()
             for view in self.process_views:
                 view.offset = event.pos()
             self.dragging = True
+
+        if event.buttons() & QtCore.Qt.LeftButton and not self.dragging:
+            pos = event.pos()
+            self.selection_box.show()
+            self.selection_box.raise_()
+            self.selection_box.setGeometry(pos.x(), pos.y(), 0, 0)
+            self.selecting = True
+            self.selection_pos = pos
 
     def mouseMoveEvent(self, event):
         self.mouse_pos = event.pos();
@@ -267,6 +291,16 @@ class ProcessEditorView(QtWidgets.QFrame):
                     self.snapped_connector = None;
             self.update()
 
+        if event.buttons() & QtCore.Qt.LeftButton and self.selecting:
+            mx = self.mouse_pos.x()
+            my = self.mouse_pos.y()
+            sx = self.selection_pos.x()
+            sy = self.selection_pos.y()
+            self.selection_box.setGeometry(sx if sx < mx else mx,
+                                           sy if sy < my else my,
+                                           abs(sx - mx),
+                                           abs(sy - my))
+
     def mouseReleaseEvent(self, event):
         if self.dragging:
             self.pos = self.pos + self.delta
@@ -275,6 +309,16 @@ class ProcessEditorView(QtWidgets.QFrame):
                 view.pos = view.pos + view.delta
                 view.delta = QtCore.QPoint(0, 0)
             self.dragging = False
+
+        if self.selecting:
+            self.deselect_all_processes()
+            self.selection_box.hide()
+            for view in self.process_views:
+                if self.selection_box.geometry().contains(view.geometry()):
+                    if view not in self.selected_processes:
+                        self.selected_processes.append(view)
+                        view.set_selected(True)
+            self.selecting = False
 
         # Connect two processes together
         if self.active_connector and self.snapped_connector:
@@ -288,6 +332,73 @@ class ProcessEditorView(QtWidgets.QFrame):
         self.snapped_connector = None
         self.active_connector = None
         self.update()
+
+
+class ProcessTextEditView(QtWidgets.QFrame):
+    def __init__(self, design_view, *args, **kwargs):
+        super(ProcessTextEditView, self).__init__()
+        self.design_view = design_view;
+        layout = QtWidgets.QGridLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        self.text_edit = QtWidgets.QTextEdit(*args, **kwargs)
+        self.text_edit.setPlaceholderText("Enter process query here")
+        self.cursor_pos = 0
+
+        self.submit_button = QtWidgets.QToolButton()
+        self.submit_button.setText("\uF0FE")
+        self.submit_button.setMinimumWidth(32)
+        self.submit_button.setMinimumHeight(32)
+        self.submit_button.setMaximumWidth(32)
+        self.submit_button.setMaximumHeight(32)
+        self.submit_button.clicked.connect(self.design_view.submit_input_text)
+
+        self.speech_button = QtWidgets.QToolButton()
+        self.speech_button.setText("\uF130")
+        self.speech_button.setMinimumWidth(32)
+        self.speech_button.setMinimumHeight(32)
+        self.speech_button.setMaximumWidth(32)
+        self.speech_button.setMaximumHeight(32)
+
+        layout.addWidget(self.text_edit, 0, 0, 3, 1)
+        layout.addWidget(self.speech_button, 2, 1)
+        layout.addWidget(self.submit_button, 1, 1)
+        layout.setColumnStretch(0, 1)
+        layout.setRowStretch(0, 1)
+        self.setLayout(layout)
+        self.text_edit.installEventFilter(self)
+        self.editing = None
+        
+    def save_cursor_pos(self):
+        self.cursor_pos = self.text_edit.textCursor().position()
+
+    def restore_cursor_pos(self):
+        self.set_cursor_pos(self.cursor_pos)
+
+    def set_cursor_pos(self, pos):
+        cursor = self.text_edit.textCursor()
+        cursor.setPosition(pos)
+        self.text_edit.setTextCursor(cursor)
+
+    def get_text(self):
+        return self.text_edit.toPlainText()
+
+    def edit_process(self, view, query):
+        self.text_edit.setFocus()
+        self.text_edit.setText(query)
+        self.text_edit.selectAll()
+        self.editing = view
+
+    def clear(self):
+        self.editing = None
+        return self.text_edit.clear()
+
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyPress and obj is self.text_edit:
+            if event.key() == QtCore.Qt.Key_Return and self.text_edit.hasFocus():
+                self.design_view.submit_input_text(self.editing)
+                return True
+        return super().eventFilter(obj, event)
 
 
 class ProcessConnector(QtWidgets.QToolButton):
@@ -345,7 +456,7 @@ class ProcessView(QtWidgets.QFrame):
         self.name = model.name
         self.model = model
 
-        layout = QtWidgets.QGridLayout()
+        self.layout = QtWidgets.QGridLayout()
 
         self.default_width = 260
         self.default_height = 320
@@ -356,11 +467,11 @@ class ProcessView(QtWidgets.QFrame):
         self.title.setMinimumHeight(24)
         self.title.setMaximumHeight(24)
 
-        layout.addWidget(self.title, 0, 0, 1, 1, QtCore.Qt.AlignCenter)
-        layout.addWidget(self.view,  1, 0, 1, 1)
-        layout.addWidget(QtWidgets.QLabel("Next"), 2, 0, 1, 1, QtCore.Qt.AlignRight)
+        self.layout.addWidget(self.title, 0, 0, 1, 1, QtCore.Qt.AlignCenter)
+        self.layout.addWidget(self.view,  1, 0, 1, 1)
+        self.layout.addWidget(QtWidgets.QLabel("Next"), 2, 0, 1, 1, QtCore.Qt.AlignRight)
 
-        self.setLayout(layout)
+        self.setLayout(self.layout)
         self.setGeometry(model.x, model.y, model.width, model.height)
 
         self.in_connector = ProcessConnector(self.process_editor, self, False)
@@ -380,9 +491,24 @@ class ProcessView(QtWidgets.QFrame):
         self.out_connector.move(self.pos.x() + self.delta.x() + self.width() - 8,
                                 self.pos.y() + self.delta.y() + self.height() - 27);
 
+    def close(self):
+        super(ProcessView, self).close()
+        self.in_connector.disconnect()
+        self.in_connector.close()
+        self.process_editor.in_connectors.remove(self.in_connector)
+
+        self.out_connector.disconnect()
+        self.out_connector.close()
+        self.process_editor.out_connectors.remove(self.out_connector)
+
+    def set_selected(self, selected):
+        self.setProperty("selected", selected)
+        self.style().unpolish(self)
+        self.style().polish(self)
+
     def contextMenuEvent(self, event):
         contextMenu = QtWidgets.QMenu(self)
-        # edit = contextMenu.addAction("Edit")
+        edit = contextMenu.addAction("Edit")
         # change_type = QMenu("Change type")
         # contextMenu.addMenu(change_type)
         # change_to_email = change_type.addAction("Send Email")
@@ -390,14 +516,17 @@ class ProcessView(QtWidgets.QFrame):
         # change_to_schedule = change_type.addAction("Schedule")
         delete = contextMenu.addAction("Delete")
         action = contextMenu.exec_(self.mapToGlobal(event.pos()))
-        # if action == edit:
-        # self.process_editor.process_text_edit.setText(self.query)
-        if action == delete:
-            self.process_editor.remove_process(self, self.model)
+        if action == edit:
+            self.process_editor.design_view.process_text_edit.edit_process(self, self.query)
+        elif action == delete:
+            self.process_editor.remove_selected_process()
         self.process_editor.update()
 
     def mousePressEvent(self, event):
         if event.buttons() & QtCore.Qt.LeftButton:
+            self.process_editor.deselect_all_processes()
+            self.set_selected(True)
+            self.process_editor.selected_processes.append(self)
             self.raise_()
             self.in_connector.raise_()
             self.out_connector.raise_()

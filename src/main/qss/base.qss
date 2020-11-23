@@ -4,8 +4,10 @@ QLabel#viewTitle {
 }
 
 QToolButton {
+    font-size: 24px;
     font-family: FontAwesome;
     border-style: none;
+    border-radius: 4px;
 }
 
 SideMenuBar {
