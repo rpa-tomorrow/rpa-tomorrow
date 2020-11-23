@@ -79,8 +79,8 @@ class Reminder(Module):
             self.followup_type = "body"
             return "\nFound no message body. What message should be sent"
 
-        when_delta = (when - datetime.now()).total_seconds()  # convert to difference in seconds
-        if when_delta < 0.0:
+        self.when_delta = (when - datetime.now()).total_seconds()  # convert to difference in seconds
+        if self.when_delta < 0.0:
             raise TimeIsInPastError(
                 when.strftime("%Y-%m-%d %H:%M:%S"),
                 "The specified time of the reminder is in the past and can not be scheduled",
@@ -93,11 +93,8 @@ class Reminder(Module):
                 + " it is currently not supported by the program",
             )
 
-        t = Timer(when_delta, lambda: self.notify(sys.platform, body))
-        self.timer = t
-
     def execute(self):
-        self.timer.start()
+        Timer(self.when_delta, lambda: self.notify(sys.platform, self.body)).start()
         return f"\nReminder scheduled for {self.when.strftime('%Y-%m-%d %H:%M:%S')}"
 
     def followup(self, answer: str) -> (str, str):
