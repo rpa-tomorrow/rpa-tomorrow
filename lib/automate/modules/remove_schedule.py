@@ -154,7 +154,7 @@ class RemoveSchedule(Module):
         for token in doc:
             if token.dep_ == "TO":
                 to.append(token.text)
-            elif token.dep_ == "WHEN":
+            elif token.dep_ == "START":
                 when.append(token.text)
             elif token.dep_ == "BODY":
                 body.append(token.text)
