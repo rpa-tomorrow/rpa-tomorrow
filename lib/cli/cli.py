@@ -3,6 +3,7 @@ import sys
 import commands
 import logging
 import spinner
+import warnings
 
 from config import load_settings_from_cli
 from lib.selector.selector import ModuleSelector  # noqa: E402
@@ -64,4 +65,5 @@ def cli(debug, verbose):
 
 
 if __name__ == "__main__":
+    warnings.filterwarnings("ignore", message=r"\[W008\]", category=UserWarning)
     plac.call(cli)
