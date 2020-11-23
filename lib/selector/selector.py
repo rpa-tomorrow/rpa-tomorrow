@@ -1,5 +1,6 @@
 import spacy
 import re
+import logging
 
 from lib.automate import Automate
 from lib.settings import SETTINGS
@@ -7,7 +8,10 @@ from lib.settings import SETTINGS
 ROOT_LABEL = "ROOT"
 SIMILARITY_MIN = 0.6
 # This only works for English right now
-FMT_ALLOWED_CHARS = "[^a-zA-Z0-9 .']"
+FMT_ALLOWED_CHARS = r"[^a-zA-Z0-9.'@\-: ]"
+
+# Module logger
+log = logging.getLogger(__name__)
 
 
 class ModuleSelector:
@@ -50,7 +54,7 @@ class ModuleSelector:
     def _format_sentence(self, text):
         fmtd = re.sub(FMT_ALLOWED_CHARS, "", text)
         # Remove possible end of sentence punctuation
-        return re.sub(r"[$.]", "", fmtd)
+        return fmtd.rstrip(".")
 
     def prepare(self, text):
         """
@@ -68,6 +72,7 @@ class ModuleSelector:
 
         for sentence in sentences:
             fmt_sentence = self._format_sentence(sentence)
+            log.debug("Preparing task for sentence: %s", fmt_sentence)
             task = self._prepare_task(fmt_sentence)
             prepared_tasks.append(task)
 
