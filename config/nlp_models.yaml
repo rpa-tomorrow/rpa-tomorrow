@@ -4,4 +4,6 @@ english:
     email: en_rpa_simple_email
     reminder: en_rpa_simple_reminder
     schedule: en_rpa_simple_calendar
-    spacy: en_core_web_md
+    spacy_md: en_core_web_md
+    spacy_sm: en_core_web_sm
+    ner: xx_ent_wiki_sm

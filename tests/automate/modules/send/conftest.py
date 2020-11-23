@@ -2,7 +2,6 @@ import pytest
 
 from lib.automate.modules.send import Send
 
-
 TEST_SETTINGS = {
     "contacts": {
         "First Last": {
@@ -32,7 +31,7 @@ TEST_SETTINGS = {
 @pytest.fixture
 def get_test_email(monkeypatch):
     def helper(name):
-        send = Send()
+        send = Send(None)
         monkeypatch.setattr("lib.automate.modules.send.SETTINGS", TEST_SETTINGS)
         return send.get_email(name)
 

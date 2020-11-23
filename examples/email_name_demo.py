@@ -4,11 +4,11 @@ sys.path.append(".")
 sys.path.append("..")
 
 from lib import Error  # noqa: E402
-from lib.nlp import nlp  # noqa: E402
+from lib.selector.selector import ModuleSelector  # noqa: E402
 from lib.settings import load_settings  # noqa: E402
 
 load_settings()
-n = nlp.NLP("en_rpa_simple", "en_core_web_md")
+n = ModuleSelector()
 
 # Enable the SMTP server before running the following
 try:

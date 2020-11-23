@@ -25,8 +25,8 @@ class Reminder(Module):
     verbs = ["remind", "reminder", "notify"]
     supported_os = ["linux"]
 
-    def __init__(self):
-        super(Reminder, self).__init__()
+    def __init__(self, model_pool):
+        super(Reminder, self).__init__(model_pool)
         self.nlp_model = None
 
     def notify(self, os, body):
@@ -74,10 +74,10 @@ class Reminder(Module):
 
         if not isinstance(when, datetime):
             self.followup_type = "when"
-            return "Could not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
+            return "\nCould not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
         elif not body:
             self.followup_type = "body"
-            return "Found no message body. What message should be sent"
+            return "\nFound no message body. What message should be sent"
 
         when_delta = (when - datetime.now()).total_seconds()  # convert to difference in seconds
         if when_delta < 0.0:
@@ -98,7 +98,7 @@ class Reminder(Module):
 
     def execute(self):
         self.timer.start()
-        return f"Reminder scheduled for {self.when.strftime('%Y-%m-%d %H:%M:%S')}"
+        return f"\nReminder scheduled for {self.when.strftime('%Y-%m-%d %H:%M:%S')}"
 
     def followup(self, answer: str) -> (str, str):
         """

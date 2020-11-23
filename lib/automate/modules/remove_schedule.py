@@ -1,6 +1,8 @@
 from __future__ import print_function
 import logging
 import spacy
+import asyncio
+import lib.utils.ner as ner
 
 from lib import Error
 from lib.utils import contacts
@@ -23,8 +25,8 @@ SCOPES = [
 class RemoveSchedule(Module):
     verbs = ["unschedule", "remove"]
 
-    def __init__(self):
-        super(RemoveSchedule, self).__init__()
+    def __init__(self, model_pool):
+        super(RemoveSchedule, self).__init__(model_pool)
         self.nlp_model = None
 
     def prepare(self, nlp_model_names, text, sender):
@@ -95,7 +97,7 @@ class RemoveSchedule(Module):
 
             return followup_str
         else:
-            raise NoEventFoundError("Could not find an event.")
+            raise NoEventFoundError("\nCould not find an event.")
 
         return self.prompt_remove_event()
 
@@ -107,7 +109,7 @@ class RemoveSchedule(Module):
 
         self.followup_type = "self_busy"
         return (
-            f"You have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
+            f"\nYou have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
             "Do you want to remove it? [Y/n]"
         )
 
@@ -128,7 +130,7 @@ class RemoveSchedule(Module):
                 return self.prepare_processed(self.to, self.when, self.body, self.sender)
 
             if choice < 0:
-                raise NoEventFoundError("No event was chosen for deletion")
+                raise NoEventFoundError("\nNo event was chosen for deletion")
 
             elif choice >= 0 and choice < len(self.events):
                 self.event = self.events[choice]
@@ -138,13 +140,16 @@ class RemoveSchedule(Module):
 
     def execute(self):
         self.calendar.delete_event(self.event["id"])
-        return f"'{self.event['summary']}' was removed from your calendar"
+        return f"\n'{self.event['summary']}' was removed from your calendar"
 
     def nlp(self, text):
         doc = self.nlp_model(text)
+        ner_model = asyncio.run(self.model_pool.acquire_model("xx_ent_wiki_sm"))
+
         to = []
         when = []
         body = []
+        persons = ner.get_persons(ner_model, text)
 
         for token in doc:
             if token.dep_ == "TO":
@@ -159,7 +164,10 @@ class RemoveSchedule(Module):
             if len(when) > 0:
                 time = tc.parse_time(when)
 
+        to = ner.cross_check_names(to, persons)
+        log.debug("Recipients: %s", ",".join(to))
         _body = " ".join(body)
+        self.model_pool.release_model(ner_model)
 
         return (to, time, _body)
 

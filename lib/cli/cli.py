@@ -2,9 +2,10 @@ import plac
 import sys
 import commands
 import logging
+import spinner
+
 from config import load_settings_from_cli
-from lib.settings import SETTINGS
-from lib.nlp import nlp  # noqa: E402
+from lib.selector.selector import ModuleSelector  # noqa: E402
 
 
 def setup_logger(level):
@@ -45,10 +46,12 @@ def cli(debug, verbose):
         setup_logger(logging.WARNING)
         print("WARNING: Could not parse debug flag. Using default log settings.")
 
-    load_settings_from_cli()
-    print("Loading...")
-    n = nlp.NLP(SETTINGS["nlp_models"]["basic"], SETTINGS["nlp_models"]["spacy"])
-    print("Ready!")
+    spin = spinner.Spinner()
+    spin.set_message("Loading settings and nlp models...")
+    with spin:
+        load_settings_from_cli()
+        n = ModuleSelector()
+        print("\nNatural language processing ready!")
 
     while True:
         txt = sys.stdin.readline().strip()
@@ -56,8 +59,8 @@ def cli(debug, verbose):
         if txt == "":
             continue
         else:
-            txtArr = txt.split(" ")
-            commands.commands(txtArr, n)
+            txt_arr = txt.split(" ")
+            commands.commands(txt_arr, n)
 
 
 if __name__ == "__main__":

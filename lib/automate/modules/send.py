@@ -2,6 +2,8 @@ import smtplib
 import spacy
 import lib.utils.tools.time_convert as tc
 import logging
+import lib.utils.ner as ner
+import asyncio
 
 from email.message import EmailMessage
 
@@ -19,13 +21,14 @@ log = logging.getLogger(__name__)
 class Send(Module):
     verbs = ["send", "mail", "e-mail", "email"]
 
-    def __init__(self):
-        super(Send, self).__init__()
+    def __init__(self, model_pool):
+        super(Send, self).__init__(model_pool)
         self.nlp_model = None
 
     def prepare(self, nlp_model_names, text, sender):
         if self.nlp_model is None:
             self.nlp_model = spacy.load(nlp_model_names["email"])
+            log.debug("Model loaded into memory")
         to, when, body = self.nlp(text)
         return self.prepare_processed(to, when, body, sender)
 
@@ -47,13 +50,13 @@ class Send(Module):
 
         if not to or len(to) == 0:
             self.followup_type = "to1"
-            return "Found no receiver. Please enter the name of the receiver"
+            return "\nFound no receiver. Please enter the name of the receiver"
         elif len(to) > 1:
             raise ToManyReceiversError("Can only handle one (1) receiver at this time")
 
         if not body:
             self.followup_type = "body"
-            return "Found no message body. What message should be sent"
+            return "\nFound no message body. What message should be sent"
 
         parsed_recipients = get_emails(self.to, sender)
         recipients = parsed_recipients["emails"]
@@ -64,7 +67,7 @@ class Send(Module):
 
             return prompt_contact_choice(name, candidates)
         for name in parsed_recipients["unknown"]:
-            raise NoContactFoundError("Could not find any contacts with name " + name)
+            raise NoContactFoundError("\nCould not find any contacts with name " + name)
 
     def execute(self):
         return self.send_email(self.settings, self.receiver, self.subject, self.content)
@@ -114,7 +117,7 @@ class Send(Module):
         elif self.followup_type == "to_uncertain":
             return followup_contact_choice(self, answer)
         else:
-            raise NotImplementedError("Did not find any valid followup question to answer.")
+            raise NotImplementedError("\nDid not find any valid followup question to answer.")
 
     def get_email(self, name: str) -> str:
         """
@@ -131,10 +134,12 @@ class Send(Module):
         Lets the reminder model work on the given text.
         """
         doc = self.nlp_model(text)
+        ner_model = asyncio.run(self.model_pool.acquire_model("xx_ent_wiki_sm"))
 
         to = []
         when = []
         body = []
+        persons = ner.get_persons(ner_model, text)
 
         for token in doc:
             if token.dep_ == "TO":
@@ -145,6 +150,9 @@ class Send(Module):
                 body.append(token.text)
             log.debug("%s %s", token.text, token.dep_)
 
+        to = ner.cross_check_names(to, persons)
+        log.debug("Recipients: %s", ",".join(to))
+
         time = datetime.now()
         if len(when) == 0:
             time = time + timedelta(seconds=5)
@@ -153,6 +161,7 @@ class Send(Module):
 
         _body = " ".join(body)
 
+        self.model_pool.release_model(ner_model)
         return (to, time, _body)
 
 

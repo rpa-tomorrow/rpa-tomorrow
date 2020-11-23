@@ -36,22 +36,22 @@ class TestGetEmails:
         Test that names that can be connected to multiple contacts returns all
         the candidates as uncertain
         """
-        names = ["hugo", "mark"]
+        names = ["hug", "mark"]
         res = get_emails(names)
 
         assert res["emails"] == ["mark@email.com"]
-        assert res["uncertain"] == [("hugo", [("hugo", "hugo@email.com"), ("hugotwo", "hugotwo@email.com")])]
+        assert res["uncertain"] == [("hug", [("hugotwo", "hugotwo@email.com"), ("hugo", "hugo@email.com")])]
         assert res["unknown"] == []
 
     def test_all(self, four_local_contacts):
         """
         Test that it correctly handles multiple names
         """
-        names = ["hej@gmail.com", "hugo", "aron", "mark", "gustav", "niklas"]
+        names = ["hej@gmail.com", "hug", "aron", "mark", "gustav", "niklas"]
         res = get_emails(names)
 
         assert res["emails"] == ["hej@gmail.com", "mark@email.com", "niklas@email.com"]
-        assert res["uncertain"] == [("hugo", [("hugo", "hugo@email.com"), ("hugotwo", "hugotwo@email.com")])]
+        assert res["uncertain"] == [("hug", [("hugotwo", "hugotwo@email.com"), ("hugo", "hugo@email.com")])]
         assert res["unknown"] == ["aron", "gustav"]
 
     def test_name_is_email(self, four_local_contacts):

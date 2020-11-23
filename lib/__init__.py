@@ -31,3 +31,11 @@ class OSNotSupportedError(Error):
 
     def __str__(self):
         return f"{self.message}, os={self.os}"
+
+
+class LanguageNotSupportedError(Error):
+    pass
+
+
+class MissingServiceAccountKeyError(Error):
+    pass
