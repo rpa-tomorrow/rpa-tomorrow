@@ -46,6 +46,10 @@ ProcessView {
     border-width: 1px;
 }
 
+ProcessTextEditView {
+    border-radius: 4px;
+}
+
 ProcessConnector {
     border-color: #1d8ac4;
     border-style: solid;
@@ -74,10 +78,10 @@ QDateTimeEdit {
 QTextEdit {
     border-style: none;
     border-radius: 4px;
-    padding-left: 6px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    padding-right: 6px
+    /* padding-left: 6px; */
+    /* padding-top: 8px; */
+    /* padding-bottom: 8px; */
+    /* padding-right: 6px */
 }
 
 QLineEdit {
@@ -180,4 +184,33 @@ QHeaderView::Section {
     border-bottom: none;
     border-right: none;
     margin-bottom: 6px;
+}
+
+QToolButton#runButton {
+    color: #3fd166;
+    margin-bottom: 2px;
+}
+
+QWidget#selectionBox {
+    background-color: rgba(30, 144, 255, 20);
+    border-style: solid;
+    border-color: dodgerblue;
+    border-width: 2px;
+    border-radius: 4px;
+}
+
+ProcessView[selected=true] {
+    border-color: dodgerblue;
+    border-width: 2px;
+}
+
+ProcessTextEditView[editing=true] {
+    border-style: solid;
+    border-color: orange;
+    border-width: 2px;
+}
+
+ProcessView[editing=true] {
+    border-color: orange;
+    border-width: 2px;
 }

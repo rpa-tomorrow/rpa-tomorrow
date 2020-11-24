@@ -85,26 +85,12 @@ ProcessView {
     border-color: #1c1f24;
 }
 
-ProcessView[selected=true] {
-    border-color: dodgerblue;
-    border-width: 2px;
-}
-
 ProcessTextEditView {
     background-color: #282c34;
-    border-radius: 4px;
 }
 
 BottomInfoBar {
     background-color: #1c1f24;
-}
-
-QWidget#selectionBox {
-    background-color: rgba(30, 144, 255, 20);
-    border-style: solid;
-    border-color: dodgerblue;
-    border-width: 2px;
-    border-radius: 4px;
 }
 
 QTextEdit {
@@ -132,11 +118,6 @@ QMenu {
     border-color: #1c1f24;
 }
 
-QToolButton#runButton {
-    color: #3fd166;
-    margin-bottom: 2px;
-}
-
 CurrentDirectoryView {
     background-color: #282c34;
     border-radius: 4px
@@ -146,6 +127,7 @@ ProcessEntryView {
     background-color: #343a45;
     border-radius: 4px;
 }
+
 MenuBarButton {
     background-color: dodgerblue;
 }
@@ -160,4 +142,9 @@ MenuBarButton:pressed {
 
 MenuBarButton:checked {
     background-color: #2879c9;
+}
+
+ProcessConnector:Hover {
+    background-color: #187aad;
+    border-color: #187aad;
 }

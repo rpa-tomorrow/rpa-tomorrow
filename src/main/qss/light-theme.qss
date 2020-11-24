@@ -1,3 +1,14 @@
+QToolButton {
+    background-color: white;
+}
+
+QToolButton:hover {
+    background-color: #e0e0e0;
+}
+
+QToolButton:pressed {
+    background-color: #d1d1d1;
+}
 
 ProcessEditorView {
     background-color: white;
@@ -26,4 +37,29 @@ QDateTimeEdit {
 
 QLineEdit {
     background-color: white;
+}
+
+ProcessConnector {
+    background-color: lightgray;
+}
+
+MenuBarButton {
+    background-color: dodgerblue;
+}
+
+MenuBarButton:hover {
+    background-color: #1774cf;
+}
+
+MenuBarButton:pressed {
+    background-color: #2879c9;
+}
+
+MenuBarButton:checked {
+    background-color: #2879c9;
+}
+
+ProcessConnector:Hover {
+    background-color: #187aad;
+    border-color: #187aad;
 }

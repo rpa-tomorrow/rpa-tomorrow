@@ -131,11 +131,11 @@ class BottomInfoBar(QtWidgets.QFrame):
         layout = QtWidgets.QHBoxLayout()
         # layout.setContentsMargins(8, 0, 8, )
         self.setMaximumHeight(32)
-        self.running_tasks_btn = QtWidgets.QToolButton()
-        self.running_tasks_btn.setText("\uf0ae")
+        # self.running_tasks_btn = QtWidgets.QToolButton()
+        # self.running_tasks_btn.setText("\uf0ae")
         self.info_label = QtWidgets.QLabel("Done!")
 
-        layout.addWidget(self.running_tasks_btn)
+        # layout.addWidget(self.running_tasks_btn)
         layout.addWidget(self.info_label)
         layout.addStretch(1)
 

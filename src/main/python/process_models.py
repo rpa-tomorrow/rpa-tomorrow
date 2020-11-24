@@ -1,5 +1,6 @@
 import yaml
 import datetime
+import uuid
 
 class Model:
     def __init__(self, filename, processes=None):
@@ -48,6 +49,7 @@ class Model:
 class ProcessModel:
     def __init__(self):
         self.classname = type(self).__name__
+        self.id = uuid.uuid4()
         self.name = "Unknown"
         self.query = ""
         self.x = 32  # NOTE(alexander): not really useful for automation part, but needed to recreate the GUI
@@ -59,6 +61,7 @@ class ProcessModel:
     def save(self):
         data = dict()
         data["classname"] = self.classname
+        data["id"] = self.id
         data["name"] = self.name
         data["query"] = self.query
         data["x"] = self.x
@@ -70,6 +73,7 @@ class ProcessModel:
 
     def load(self, data):
         self.name     = data["name"]     or "Unknown"
+        self.id       = data["id"]       or uuid.uuid4()
         self.query    = data["query"]    or ""
         self.x        = data["x"]        or 32
         self.y        = data["y"]        or 32
