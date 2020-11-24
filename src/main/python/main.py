@@ -8,8 +8,7 @@ import resources  # noqa: F401
 sys.path.append(".")
 from lib.settings import load_settings, SETTINGS  # noqa: E402
 
-import process_models as proc_model
-
+import process_models as proc_model  # noqa: E402
 from design_view import DesignView  # noqa: E402
 from file_view import FileView  # noqa: E402
 from play_view import PlayView  # noqa: E402

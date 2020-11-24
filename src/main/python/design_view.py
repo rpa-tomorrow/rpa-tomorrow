@@ -54,29 +54,29 @@ class DesignView(QtWidgets.QWidget):
 
         layout.addWidget(self.process_text_edit)
         layout.addWidget(self.process_editor)
-        
+
         self.setLayout(layout)
 
-        self.save_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+S'), self)
+        self.save_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+S"), self)
         self.save_shortcut.activated.connect(self.save_model)
-        
-        self.select_all_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+A'), self)
+
+        self.select_all_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+A"), self)
         self.select_all_shortcut.activated.connect(self.process_editor.select_all_processes)
 
-        self.copy_all_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+C'), self)
+        self.copy_all_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+C"), self)
         self.copy_all_shortcut.activated.connect(self.process_editor.copy_selection)
 
-        self.paste_all_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence('Ctrl+V'), self)
+        self.paste_all_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+V"), self)
         self.paste_all_shortcut.activated.connect(self.process_editor.paste_selection)
-        
-        self.delete_selected_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence('Delete'), self)
+
+        self.delete_selected_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Delete"), self)
         self.delete_selected_shortcut.activated.connect(self.process_editor.remove_selected_processes)
 
-        self.cancel_actions_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence('Escape'), self)
+        self.cancel_actions_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Escape"), self)
         self.cancel_actions_shortcut.activated.connect(self.cancel_actions)
 
     def save_model(self):
-        self.model.save();
+        self.model.save()
         self.main_window.set_info_message("Wrote " + self.model.absolute_path)
 
     def handle_response(self, task, followup):
@@ -95,8 +95,9 @@ class DesignView(QtWidgets.QWidget):
         self.process_text_edit.save_cursor_pos()
 
         query = self.process_text_edit.get_text()
-        if query == "": return
-        
+        if query == "":
+            return
+
         model = None
         view = None
 
@@ -142,12 +143,12 @@ class ProcessEditorView(QtWidgets.QFrame):
         self.design_view = design_view
         self.model = model
         self.process_views = []
-        
+
         self.in_connectors = []
         self.out_connectors = []
         self.snapped_connector = None
         self.active_connector = None
-        
+
         self.grid_size = 32
 
         self.selecting = False
@@ -164,7 +165,7 @@ class ProcessEditorView(QtWidgets.QFrame):
         self.offset = QtCore.QPoint(0, 0)
         self.mouse_pos = QtCore.QPoint(0, 0)
         self.dragging = False
-        
+
         self.setMouseTracking(True)
         self.update()
 
@@ -172,7 +173,7 @@ class ProcessEditorView(QtWidgets.QFrame):
             view = self.create_process_view(proc)
             self.process_views.append(view)
 
-    def create_process_view(self, model): # TODO(alexander): SendEmailView is temporary
+    def create_process_view(self, model):  # TODO(alexander): SendEmailView is temporary
         if isinstance(model, proc_models.SendModel):
             return ProcessView(self, SendEmailView(model), model)
         elif isinstance(model, proc_models.ReminderModel):
@@ -244,7 +245,8 @@ class ProcessEditorView(QtWidgets.QFrame):
             if isinstance(proc.model, proc_models.EntryPointModel):
                 continue
             new_model = copy.deepcopy(proc.model)
-            new_model.x += 32; new_model.y += 32;
+            new_model.x += 32
+            new_model.y += 32
             view = self.create_process_view(new_model)
             self.process_views.append(view)
             self.selected_processes.append(view)
@@ -277,27 +279,30 @@ class ProcessEditorView(QtWidgets.QFrame):
                 out_y = out_conn.y() + 7
                 in_x = out_conn.connected.x() + 7
                 in_y = out_conn.connected.y() + 7
-                p.drawLine(out_x,      out_y, out_x + 16, out_y)
-                p.drawLine(out_x + 16, out_y,  in_x - 16,  in_y)
-                p.drawLine( in_x - 16,  in_y,  in_x,       in_y)
-            
+                p.drawLine(out_x, out_y, out_x + 16, out_y)
+                p.drawLine(out_x + 16, out_y, in_x - 16, in_y)
+                p.drawLine(in_x - 16, in_y, in_x, in_y)
+
         if self.active_connector:
             out_x = self.active_connector.x() + 7
             out_y = self.active_connector.y() + 7
             in_x = self.mouse_pos.x()
             in_y = self.mouse_pos.y()
-            if self.snapped_connector: # snap to nearby connector
+            if self.snapped_connector:  # snap to nearby connector
                 in_x = self.snapped_connector.x() + 7
                 in_y = self.snapped_connector.y() + 7
 
-            if not self.active_connector.output: # swap connector position
-                temp_x = in_x; temp_y = in_y
-                in_x = out_x; in_y = out_y
-                out_x = temp_x; out_y = temp_y
+            if not self.active_connector.output:  # swap connector position
+                temp_x = in_x
+                temp_y = in_y
+                in_x = out_x
+                in_y = out_y
+                out_x = temp_x
+                out_y = temp_y
 
-            p.drawLine(out_x,      out_y, out_x + 16, out_y)
-            p.drawLine(out_x + 16, out_y,  in_x - 16,  in_y)
-            p.drawLine( in_x - 16,  in_y,  in_x,       in_y)
+            p.drawLine(out_x, out_y, out_x + 16, out_y)
+            p.drawLine(out_x + 16, out_y, in_x - 16, in_y)
+            p.drawLine(in_x - 16, in_y, in_x, in_y)
         p.end()
 
     def mousePressEvent(self, event):
@@ -317,7 +322,7 @@ class ProcessEditorView(QtWidgets.QFrame):
         self.setFocus()
 
     def mouseMoveEvent(self, event):
-        self.mouse_pos = event.pos();
+        self.mouse_pos = event.pos()
         if event.buttons() & QtCore.Qt.RightButton and self.dragging:
             self.delta = self.offset - event.pos()
             for view in self.process_views:
@@ -330,20 +335,21 @@ class ProcessEditorView(QtWidgets.QFrame):
 
             # Snapping to nearby connectors
             snapped = False
-            connectors = self.in_connectors if self.active_connector.output else self.out_connectors;
+            connectors = self.in_connectors if self.active_connector.output else self.out_connectors
             for in_conn in connectors:
-                if in_conn.view == self.active_connector.view: continue
+                if in_conn.view == self.active_connector.view:
+                    continue
                 rect = QtCore.QRect(QtCore.QPoint(in_conn.x() - 8, in_conn.y() - 8), QtCore.QSize(30, 30))
                 if rect.contains(self.mouse_pos):
-                    self.snapped_connector = in_conn;
+                    self.snapped_connector = in_conn
                     self.snapped_connector.setChecked(True)
                     snapped = True
                     break
-                
+
                 if not snapped:
                     if self.snapped_connector and not self.snapped_connector.connected:
                         self.snapped_connector.setChecked(False)
-                    self.snapped_connector = None;
+                    self.snapped_connector = None
             self.update()
 
         if event.buttons() & QtCore.Qt.LeftButton and self.selecting:
@@ -351,10 +357,7 @@ class ProcessEditorView(QtWidgets.QFrame):
             my = self.mouse_pos.y()
             sx = self.selection_pos.x()
             sy = self.selection_pos.y()
-            self.selection_box.setGeometry(sx if sx < mx else mx,
-                                           sy if sy < my else my,
-                                           abs(sx - mx),
-                                           abs(sy - my))
+            self.selection_box.setGeometry(sx if sx < mx else mx, sy if sy < my else my, abs(sx - mx), abs(sy - my))
 
     def mouseReleaseEvent(self, event):
         if self.dragging:
@@ -392,7 +395,7 @@ class ProcessEditorView(QtWidgets.QFrame):
 class ProcessTextEditView(QtWidgets.QFrame):
     def __init__(self, design_view, *args, **kwargs):
         super(ProcessTextEditView, self).__init__()
-        self.design_view = design_view;
+        self.design_view = design_view
         layout = QtWidgets.QGridLayout()
 
         self.text_edit = QtWidgets.QTextEdit(*args, **kwargs)
@@ -433,7 +436,7 @@ class ProcessTextEditView(QtWidgets.QFrame):
         self.setLayout(layout)
         self.text_edit.installEventFilter(self)
         self.editing = None
-        
+
     def save_cursor_pos(self):
         self.cursor_pos = self.text_edit.textCursor().position()
 
@@ -479,7 +482,7 @@ class ProcessTextEditView(QtWidgets.QFrame):
         self.setProperty("editing", True)
         self.style().unpolish(self)
         self.style().polish(self)
-        
+
         self.text_edit.setFocus()
         self.text_edit.setText(query)
         self.text_edit.selectAll()
@@ -503,7 +506,7 @@ class ProcessConnector(QtWidgets.QToolButton):
         self.process_editor = process_editor
         self.view = view
         self.output = output
-        self.connected = None;
+        self.connected = None
         self.setMinimumWidth(14)
         self.setMinimumHeight(14)
         self.setMaximumWidth(14)
@@ -526,10 +529,10 @@ class ProcessConnector(QtWidgets.QToolButton):
             self.connected.setChecked(False)
             self.connected.connected = None
             self.connected = None
-        
+
     def mouseMoveEvent(self, event):
         self.process_editor.mouseMoveEvent(event)
-        
+
     def mousePressEvent(self, event):
         if self.connected:
             self.connected.setChecked(False)
@@ -540,13 +543,13 @@ class ProcessConnector(QtWidgets.QToolButton):
 
     def mouseReleasedEvent(self, event):
         self.setChecked(False)
-        
+
 
 class ProcessView(QtWidgets.QFrame):
     def __init__(self, process_editor, view, model, accept_input=True):
         super(ProcessView, self).__init__(process_editor)
         self.process_editor = process_editor
-        self.accept_input = accept_input;
+        self.accept_input = accept_input
         self.view = view
         self.query = model.query
         self.name = model.name
@@ -564,7 +567,7 @@ class ProcessView(QtWidgets.QFrame):
         self.title.setMaximumHeight(24)
 
         self.layout.addWidget(self.title, 0, 0, 1, 1, QtCore.Qt.AlignCenter)
-        self.layout.addWidget(self.view,  1, 0, 1, 1)
+        self.layout.addWidget(self.view, 1, 0, 1, 1)
         self.layout.addWidget(QtWidgets.QLabel("Next"), 2, 0, 1, 1, QtCore.Qt.AlignRight)
 
         self.setLayout(self.layout)
@@ -582,10 +585,10 @@ class ProcessView(QtWidgets.QFrame):
         self.out_connector.show()
 
     def update_connectors(self):
-        self.in_connector.move(self.pos.x() + self.delta.x() - 7,
-                               self.pos.y() + self.delta.y() + 13);
-        self.out_connector.move(self.pos.x() + self.delta.x() + self.width() - 8,
-                                self.pos.y() + self.delta.y() + self.height() - 27);
+        self.in_connector.move(self.pos.x() + self.delta.x() - 7, self.pos.y() + self.delta.y() + 13)
+        self.out_connector.move(
+            self.pos.x() + self.delta.x() + self.width() - 8, self.pos.y() + self.delta.y() + self.height() - 27
+        )
 
     def close(self):
         super(ProcessView, self).close()
@@ -622,7 +625,7 @@ class ProcessView(QtWidgets.QFrame):
     def mousePressEvent(self, event):
         self.process_editor.setFocus()
         if event.buttons() & QtCore.Qt.LeftButton:
-            if not self in self.process_editor.selected_processes:
+            if self not in self.process_editor.selected_processes:
                 if not event.modifiers() & (QtCore.Qt.ShiftModifier | QtCore.Qt.ControlModifier):
                     self.process_editor.deselect_all_processes()
                 self.process_editor.selected_processes.append(self)
@@ -700,14 +703,14 @@ if __name__ == "__main__":
     model2.when = time_now
     model2.body = "Hello World"
     view2 = SendEmailView(model2)
-    
+
     model3 = proc_models.ScheduleModel()
     model3.query = "Schedule a meeting with John Doe Hello World"
     model3.recipients = "John Doe"
     model3.when = time_now
     model3.body = "Hello World"
     view3 = SendEmailView(model3)
-    
+
     editor.append_process(ProcessView(editor, view1, model1), model1)
     editor.append_process(ProcessView(editor, view2, model2), model2)
     editor.append_process(ProcessView(editor, view3, model3), model3)

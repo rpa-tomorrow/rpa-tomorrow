@@ -2,6 +2,7 @@ import yaml
 import datetime
 import uuid
 
+
 class Model:
     def __init__(self, filename, processes=None):
         self.filename = filename
@@ -34,16 +35,24 @@ class Model:
         self.absolute_path = filepath
         self.processes.clear()
         for proc in data["processes"]:
-            if proc["kind"] == INVALID_MODEL:
-                return  # TODO(Alexander): report error
-            if proc["kind"] == PROCESS_MODEL:
-                model = ProcessModel()
+            if proc["kind"].classname == "EntryPointModel":
+                model = EntryPointModel()
                 model.load(proc)
                 self.processes.append(model)
-            if proc["kind"] == SEND_EMAIL_MODEL:
+            elif proc["kind"].classname == "SendModel":
                 model = SendModel()
                 model.load(proc)
                 self.processes.append(model)
+            elif proc["kind"].classname == "ReminderModel":
+                model = ReminderModel()
+                model.load(proc)
+                self.processes.append(model)
+            elif proc["kind"].classname == "ScheduleModel":
+                model = ScheduleModel()
+                model.load(proc)
+                self.processes.append(model)
+            else:
+                return  # TODO(Alexander): report error
 
 
 class ProcessModel:
@@ -56,7 +65,7 @@ class ProcessModel:
         self.y = 32
         self.width = 260
         self.height = 320
-        self.out_next = -1 # NOTE(alexander): next process id, index into processes array in Model
+        self.out_next = -1  # NOTE(alexander): next process id, index into processes array in Model
 
     def save(self):
         data = dict()
@@ -72,14 +81,15 @@ class ProcessModel:
         return data
 
     def load(self, data):
-        self.name     = data["name"]     or "Unknown"
-        self.id       = data["id"]       or uuid.uuid4()
-        self.query    = data["query"]    or ""
-        self.x        = data["x"]        or 32
-        self.y        = data["y"]        or 32
-        self.width    = data["width"]    or 260
-        self.height   = data["height"]   or 320
+        self.name = data["name"] or "Unknown"
+        self.id = data["id"] or uuid.uuid4()
+        self.query = data["query"] or ""
+        self.x = data["x"] or 32
+        self.y = data["y"] or 32
+        self.width = data["width"] or 260
+        self.height = data["height"] or 320
         self.out_next = data["out_next"] or -1
+
 
 class EntryPointModel(ProcessModel):
     def __init__(self):
@@ -91,11 +101,11 @@ class EntryPointModel(ProcessModel):
     def save(self):
         return super(EntryPointModel, self).save()
 
-    def load(self):
+    def load(self, data):
         super(EntryPointModel, self).load(data)
 
 
-class BasicModel(ProcessModel): # NOTE(alexander): abstract model, should never be used directlye
+class BasicModel(ProcessModel):  # NOTE(alexander): abstract model, should never be used directlye
     def __init__(self):
         super(BasicModel, self).__init__()
         self.recipients = ""
@@ -104,7 +114,7 @@ class BasicModel(ProcessModel): # NOTE(alexander): abstract model, should never 
 
     def save(self):
         data = super(BasicModel, self).save()
-        data["recipients"] = [x.strip() for x in self.recipients.split(",")];
+        data["recipients"] = [x.strip() for x in self.recipients.split(",")]
         print(data["recipients"])
         data["when"] = str(self.when)
         data["body"] = str(self.body)
@@ -135,7 +145,7 @@ class SendModel(BasicModel):
     def save(self):
         return super(SendModel, self).save()
 
-    def load(self):
+    def load(self, data):
         super(SendModel, self).load(data)
 
 
@@ -147,7 +157,7 @@ class ReminderModel(BasicModel):
     def save(self):
         return super(ReminderModel, self).save()
 
-    def load(self):
+    def load(self, data):
         super(ReminderModel, self).load(data)
 
 
@@ -159,6 +169,5 @@ class ScheduleModel(BasicModel):
     def save(self):
         return super(ScheduleModel, self).save()
 
-    def load(self):
+    def load(self, data):
         super(ScheduleModel, self).load(data)
-
