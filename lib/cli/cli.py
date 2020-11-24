@@ -18,8 +18,9 @@ def cli(debug, verbose):
     spin = spinner.Spinner()
     load_prerequisites(spin, debug, verbose)
     n = load_selector(spin)
-    click.secho("\nType any task(s) and the robot will start working on it:", bold=True)
 
+    click.secho("\nType any task(s) and the robot will start working on it", bold=True)
+    click.secho("(or type 'help' to display all options):", bold=True)
     try:
         while True:
             txt = click.prompt("", prompt_suffix="> ").strip()
