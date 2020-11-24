@@ -20,14 +20,14 @@ class Spinner:
             self.delay = delay
 
     def spinner_task(self):
-        print(self.custom_message)
+        if self.custom_message:
+            print(self.custom_message)
         while self.busy:
             sys.stdout.write("---" + next(self.spinner_generator))
             sys.stdout.flush()
             time.sleep(self.delay)
             sys.stdout.write("\b")
             sys.stdout.flush()
-        print("\n")
 
     def __enter__(self):
         self.busy = True
