@@ -13,6 +13,9 @@ FMT_ALLOWED_CHARS = r"[^a-zA-Z0-9.'@\-: ]"
 # Module logger
 log = logging.getLogger(__name__)
 
+# Module logger
+log = logging.getLogger(__name__)
+
 
 class ModuleSelector:
     def __init__(self):
@@ -25,6 +28,7 @@ class ModuleSelector:
 
     def _check_similarities(self, word, verbs):
         doc_verb = self.general_model(word)
+        log.debug("VERBS: %s", verbs)
         for verb in verbs:
             doc_action = self.general_model(verb)
             similarity = doc_action.similarity(doc_verb)
