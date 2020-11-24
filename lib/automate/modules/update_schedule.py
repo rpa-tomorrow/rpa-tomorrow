@@ -58,8 +58,8 @@ class UpdateSchedule(Module):
             return self.prompt_update_event()
 
         # try to fetch the event by the summary
-        if body:
-            self.get_event_by_summary(body)
+        if body["summary"] != "":
+            self.get_event_by_summary(body["summary"])
 
         # if no event could be found using the summary try to do it with the user inputed time
         if (not self.event) and self.when:
@@ -139,7 +139,14 @@ class UpdateSchedule(Module):
             raise NotImplementedError("")
 
     def execute(self):
-        self.calendar.update_event(self.event["id"], {"summary": "Test Updated"})
+        start_time = datetime.fromisoformat(self.event["start"]["dateTime"])
+        end_time = datetime.fromisoformat(self.event["end"]["dateTime"])
+        duration =  end_time - start_time
+
+        # Parse Time
+        new_start_time = {"dateTime": tc.local_to_utc_time(self.body["new start"]).isoformat()}
+        new_end_time = {"dateTime": tc.local_to_utc_time(self.body["new start"] + duration).isoformat()}
+        self.calendar.update_event(self.event["id"], {"start": new_start_time, "end": new_end_time})
         return f"'{self.event['summary']}' was updated"
 
     def nlp(self, text):
@@ -147,29 +154,44 @@ class UpdateSchedule(Module):
         ner_model = asyncio.run(self.model_pool.acquire_model("xx_ent_wiki_sm"))
 
         to = []
-        when = []
+        start = []
         body = []
         persons = ner.get_persons(ner_model, text)
+
+        nstart = []
 
         for token in doc:
             if token.dep_ == "TO":
                 to.append(token.text)
-            elif token.dep_ == "WHEN":
-                when.append(token.text)
+            elif token.dep_ == "START":
+                start.append(token.text)
             elif token.dep_ == "BODY":
                 body.append(token.text)
+            elif token.dep_ == "NSTART":
+                nstart.append(token.text)
             log.debug("%s %s", token.text, token.dep_)
-
-            time = datetime.now() + timedelta(seconds=5)
-            if len(when) > 0:
-                time = tc.parse_time(when)
 
         to = ner.cross_check_names(to, persons)
         log.debug("Recipients: %s", ",".join(to))
-        _body = " ".join(body)
+
+        start_time = datetime.now()
+        if len(start) == 0:
+            start_time = start_time + timedelta(seconds=5)
+        else:
+            start_time = tc.parse_time(start)
+
+        new_start_time = datetime.now()
+        if len(nstart) == 0:
+            new_start_time = new_start_time + timedelta(seconds=5)
+        else:
+            new_start_time = tc.parse_time(nstart)
+
+        _body = {"summary": " ".join(body)}
+        _body["new start"] = new_start_time
         self.model_pool.release_model(ner_model)
 
-        return (to, time, _body)
+        return (to, start_time, _body)
+
 
     def get_event_by_timestamp(self, time: datetime):
         """
