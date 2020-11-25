@@ -117,7 +117,7 @@ class RemoveSchedule(Module):
         """ """
         if self.followup_type == "self_busy":
             # if the user answers "yes" on the followup question then remove the event from the calendar
-            if answer.lower() in ["y", "yes"]:
+            if answer.lower() in ["y", "yes", ""]:
                 return None
             else:
                 raise ActionInterruptedByUserError("Event Not removed.")
