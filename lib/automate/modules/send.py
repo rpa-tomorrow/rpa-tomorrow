@@ -134,12 +134,15 @@ class Send(Module):
         Lets the reminder model work on the given text.
         """
         doc = self.nlp_model(text)
-        ner_model = asyncio.run(self.model_pool.acquire_model("xx_ent_wiki_sm"))
 
         to = []
         when = []
         body = []
-        persons = ner.get_persons(ner_model, text)
+        persons = []
+
+        locked_ner_model = self.model_pool.get_shared_model("xx_ent_wiki_sm")
+        with locked_ner_model:
+            persons = ner.get_persons(locked_ner_model.acquire_model(), text)
 
         for token in doc:
             if token.dep_ == "TO":
@@ -161,7 +164,6 @@ class Send(Module):
 
         _body = " ".join(body)
 
-        self.model_pool.release_model(ner_model)
         return (to, time, _body)
 
 
