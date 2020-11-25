@@ -1,5 +1,6 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 import PyQt5.QtWidgets as QtWidgets
+import PyQt5.QtCore as QtCore
 import PyQt5.QtGui as QtGui
 import os
 import sys
@@ -8,7 +9,7 @@ import resources  # noqa: F401
 sys.path.append(".")
 from lib.settings import load_settings, SETTINGS  # noqa: E402
 
-from model import Model  # noqa: E402
+import process_models as proc_model  # noqa: E402
 from design_view import DesignView  # noqa: E402
 from file_view import FileView  # noqa: E402
 from play_view import PlayView  # noqa: E402
@@ -23,7 +24,7 @@ class MainWindow(QtWidgets.QMainWindow):
         layout = QtWidgets.QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.model = Model("untitled")
+        self.model = proc_model.Model("untitled")
 
         self.bottom = BottomInfoBar()
         self.menu = SideMenuBar(self)
@@ -78,15 +79,19 @@ class ContentFrame(QtWidgets.QFrame):
 
 
 class MenuBarButton(QtWidgets.QToolButton):
-    def __init__(self, parent, view_id, text, *args, **kwargs):
+    def __init__(self, parent, view_id, name, text, *args, **kwargs):
         super(MenuBarButton, self).__init__(*args, **kwargs)
-        self.setFixedSize(56, 56)
-        self.setMaximumHeight(56)
+        self.setFixedSize(84, 84)
+        self.setMaximumHeight(84)
         self.setText(text)
         self.setCheckable(True)
         self.parent = parent
         self.view_id = view_id
         self.clicked.connect(self.set_active_view)
+        self.label = QtWidgets.QLabel(name, self)
+        self.label.setMinimumWidth(84)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.move(0, 50)
 
     def set_active_view(self):
         self.parent.set_active_view(self, self.view_id)
@@ -96,18 +101,19 @@ class SideMenuBar(QtWidgets.QFrame):
     def __init__(self, parent, *args, **kwargs):
         super(SideMenuBar, self).__init__(*args, **kwargs)
         layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(4, 4, 0, 4)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         self.parent = parent
-        self.setMaximumWidth(48 + 12)
+        self.setMaximumWidth(84)
 
         self.items = []
-        self.items.append(MenuBarButton(self, 0, "\uf044"))
-        self.items.append(MenuBarButton(self, 1, "\uf0c7"))
-        self.items.append(MenuBarButton(self, 2, "\uf07c"))
-        self.items.append(MenuBarButton(self, 3, "\uf04b"))
-        self.items.append(MenuBarButton(self, 4, "\uf013"))
-        self.items.append(MenuBarButton(self, 5, "\uf05a"))
+        self.items.append(MenuBarButton(self, 0, "Design", "\uf044"))
+        self.items.append(MenuBarButton(self, 1, "Save", "\uf0c7"))
+        self.items.append(MenuBarButton(self, 2, "Load", "\uf115"))
+        self.items.append(MenuBarButton(self, 3, "Run", "\uf04b"))
+        self.items.append(MenuBarButton(self, 4, "Settings", "\uf013"))
+        self.items.append(MenuBarButton(self, 5, "Info", "\uf05a"))
 
         self.items[0].setChecked(True)
 
@@ -130,11 +136,11 @@ class BottomInfoBar(QtWidgets.QFrame):
         layout = QtWidgets.QHBoxLayout()
         # layout.setContentsMargins(8, 0, 8, )
         self.setMaximumHeight(32)
-        self.running_tasks_btn = QtWidgets.QToolButton()
-        self.running_tasks_btn.setText("\uf0ae")
+        # self.running_tasks_btn = QtWidgets.QToolButton()
+        # self.running_tasks_btn.setText("\uf0ae")
         self.info_label = QtWidgets.QLabel("Done!")
 
-        layout.addWidget(self.running_tasks_btn)
+        # layout.addWidget(self.running_tasks_btn)
         layout.addWidget(self.info_label)
         layout.addStretch(1)
 

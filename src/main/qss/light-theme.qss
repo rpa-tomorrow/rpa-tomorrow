@@ -1,3 +1,14 @@
+QToolButton {
+    background-color: white;
+}
+
+QToolButton:hover {
+    background-color: #e0e0e0;
+}
+
+QToolButton:pressed {
+    background-color: #d1d1d1;
+}
 
 ProcessEditorView {
     background-color: white;
@@ -16,15 +27,6 @@ ProcessView {
     border-color: #d1d1d1;
 }
 
-SideMenuBar {
-    background-color: dodgerblue;
-}
-
-MenuBarButton {
-    background-color: dodgerblue;
-    color: white;
-}
-
 QTextEdit {
     background-color: white;
 }
@@ -37,6 +39,18 @@ QLineEdit {
     background-color: white;
 }
 
+ProcessConnector {
+    background-color: lightgray;
+}
+
+MenuBarButton {
+    background-color: dodgerblue;
+}
+
+MenuBarButton > QLabel {
+    color: white;
+}
+
 MenuBarButton:hover {
     background-color: #1774cf;
 }
@@ -47,4 +61,9 @@ MenuBarButton:pressed {
 
 MenuBarButton:checked {
     background-color: #2879c9;
+}
+
+ProcessConnector:Hover {
+    background-color: #187aad;
+    border-color: #187aad;
 }

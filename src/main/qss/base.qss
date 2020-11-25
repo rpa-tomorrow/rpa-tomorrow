@@ -4,15 +4,40 @@ QLabel#viewTitle {
 }
 
 QToolButton {
+    font-size: 24px;
     font-family: FontAwesome;
     border-style: none;
+    border-radius: 4px;
+}
+
+SideMenuBar {
+    background-color: dodgerblue;
+    border-radius: 0;
 }
 
 MenuBarButton {
+    color: white;
+    background-color: dodgerblue;
     font-size: 32px;
-    border-radius: 6px;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
+    padding-bottom: 22px;
+    border-style: none;
+    border-radius: 0;
+}
+
+MenuBarButton > QLabel {
+    font-size: 12pt;
+}
+
+MenuBarButton:hover {
+    background-color: #1774cf;
+}
+
+MenuBarButton:pressed {
+    background-color: #2879c9;
+}
+
+MenuBarButton:checked {
+    background-color: #2879c9;
 }
 
 ProcessEditorView {
@@ -23,6 +48,26 @@ ProcessView {
     border-radius: 4px;
     border-style: solid;
     border-width: 1px;
+}
+
+ProcessTextEditView {
+    border-radius: 4px;
+}
+
+ProcessConnector {
+    border-color: #1d8ac4;
+    border-style: solid;
+    border-width: 2px;
+    border-radius: 7px;
+}
+
+ProcessConnector:Checked {
+    background-color: #1d8ac4;
+}
+
+ProcessConnector:Hover {
+    background-color: #187aad;
+    border-color: #187aad;
 }
 
 QDateTimeEdit {
@@ -37,10 +82,6 @@ QDateTimeEdit {
 QTextEdit {
     border-style: none;
     border-radius: 4px;
-    padding-left: 6px;
-    padding-top: 8px;
-    padding-bottom: 8px;
-    padding-right: 6px
 }
 
 QLineEdit {
@@ -143,4 +184,33 @@ QHeaderView::Section {
     border-bottom: none;
     border-right: none;
     margin-bottom: 6px;
+}
+
+QToolButton#runButton {
+    color: #3fd166;
+    margin-bottom: 2px;
+}
+
+QWidget#selectionBox {
+    background-color: rgba(30, 144, 255, 20);
+    border-style: solid;
+    border-color: dodgerblue;
+    border-width: 2px;
+    border-radius: 4px;
+}
+
+ProcessView[selected=true] {
+    border-color: dodgerblue;
+    border-width: 2px;
+}
+
+ProcessTextEditView[editing=true] {
+    border-style: solid;
+    border-color: orange;
+    border-width: 2px;
+}
+
+ProcessView[editing=true] {
+    border-color: orange;
+    border-width: 2px;
 }

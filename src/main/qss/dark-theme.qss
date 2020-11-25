@@ -3,79 +3,6 @@
     color: white;
 }
 
-MainWindow {
-    background-color: #2f333d;
-}
-
-ProcessEditorView {
-    background-color: #21252b;
-}
-
-ProcessView {
-    background-color: #343a45;
-    border-color: #1c1f24;
-}
-
-BottomInfoBar {
-    background-color: #1c1f24;
-}
-
-QTextEdit {
-    background-color: #282c34;
-}
-
-QDateTimeEdit {
-    background-color: #282c34;
-}
-
-QLineEdit {
-    background-color: #282c34;
-}
-
-SideMenuBar {
-    background-color: dodgerblue;
-}
-
-MenuBarButton {
-    background-color: dodgerblue;
-    color: white;
-}
-
-MenuBarButton:hover {
-    background-color: #1774cf;
-}
-
-MenuBarButton:pressed {
-    background-color: #2879c9;
-}
-
-MenuBarButton:checked {
-    background-color: #2879c9;
-}
-
-QComboBox {
-    background-color: #282c34;
-}
-
-QComboBox::drop-down {
-    background-color: #282c34;
-}
-
-QMenu {
-    background-color: #21252b;
-    border-color: #1c1f24;
-}
-
-QToolButton#runButton {
-    color: #3fd166;
-    margin-bottom: 2px;
-}
-
-CurrentDirectoryView {
-    background-color: #282c34;
-    border-radius: 4px
-}
-
 QPushButton {
     background-color: #282c34;
 }
@@ -85,6 +12,18 @@ QPushButton:hover {
 }
 
 QPushButton:pressed {
+    background-color: #535d70;
+}
+
+QToolButton {
+    background-color: #282c34;
+}
+
+QToolButton:hover {
+    background-color: #343a45;
+}
+
+QToolButton:pressed {
     background-color: #535d70;
 }
 
@@ -131,4 +70,81 @@ QTreeView::branch:open:has-children:!has-siblings,
 QTreeView::branch:open:has-children:has-siblings  {
     border-image: none;
     image: url(branch-open.png);
+}
+
+MainWindow {
+    background-color: #2f333d;
+}
+
+ProcessEditorView {
+    background-color: #21252b;
+}
+
+ProcessView {
+    background-color: #343a45;
+    border-color: #1c1f24;
+}
+
+ProcessTextEditView {
+    background-color: #282c34;
+}
+
+BottomInfoBar {
+    background-color: #1c1f24;
+}
+
+QTextEdit {
+    background-color: #282c34;
+}
+
+QDateTimeEdit {
+    background-color: #282c34;
+}
+
+QLineEdit {
+    background-color: #282c34;
+}
+
+QComboBox {
+    background-color: #282c34;
+}
+
+QComboBox::drop-down {
+    background-color: #282c34;
+}
+
+QMenu {
+    background-color: #21252b;
+    border-color: #1c1f24;
+}
+
+CurrentDirectoryView {
+    background-color: #282c34;
+    border-radius: 4px
+}
+
+ProcessEntryView {
+    background-color: #343a45;
+    border-radius: 4px;
+}
+
+MenuBarButton {
+    background-color: dodgerblue;
+}
+
+MenuBarButton:hover {
+    background-color: #1774cf;
+}
+
+MenuBarButton:pressed {
+    background-color: #2879c9;
+}
+
+MenuBarButton:checked {
+    background-color: #2879c9;
+}
+
+ProcessConnector:Hover {
+    background-color: #187aad;
+    border-color: #187aad;
 }
