@@ -62,10 +62,10 @@ class RemoveSchedule(Module):
             self.get_event_by_summary(body)
 
         # if no event could be found using the summary try to do it with the user inputed time
-        if (not self.event) and self.when:
+        if (not self.events) and self.when:
             self.get_event_by_timestamp(self.when)
 
-        if (not self.event) and self.to:
+        if (not self.events) and self.to:
             # get emails of participants where only the name was entered
             attendees = []
             parsed_attendees = contacts.get_emails(self.to)
@@ -203,9 +203,19 @@ class RemoveSchedule(Module):
         the method only looks for events in the future
         """
         events = self.calendar.get_events()
-        events = fuzzy.extractBests(summary, events, score_cutoff=50)
+        event_summaries = list(map(lambda e: e["summary"], events))
 
-        self.events = list(filter(lambda e: e[0], events))
+        # find the best matches for the event
+        event_summaries = fuzzy.extractBests(summary, event_summaries, score_cutoff=50)
+
+        # remove duplicate summaries,
+        # the loop will find all occurances of events with the same summary
+        event_summaries = list(set(event_summaries))
+        filtered_events = []
+        for s in event_summaries:
+            filtered_events += list(filter(lambda e: e["summary"] == s[0], events))
+
+        self.events = filtered_events
 
     def get_event_by_participants(self, participants: [str]):
         """
