@@ -127,13 +127,13 @@ class BasicModel(ProcessModel):  # NOTE(alexander): abstract model, should never
         self.when = data["when"]
         self.body = data["body"]
 
-    def setRecipients(self, text):
+    def set_recipients(self, text):
         self.recipients = text
 
-    def setWhen(self, date):
+    def set_when(self, date):
         self.when = date
 
-    def setBody(self, text):
+    def set_body(self, text):
         self.body = text
 
 

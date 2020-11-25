@@ -742,7 +742,7 @@ class SendEmailView(QtWidgets.QFrame):
 
         self.recipients = QtWidgets.QLineEdit(model.recipients)
         self.recipients.setPlaceholderText("Recipient1, Recipient2, ...")
-        self.recipients.textChanged.connect(model.setRecipients)
+        self.recipients.textChanged.connect(model.set_recipients)
 
         self.when = QtWidgets.QDateTimeEdit()
         try:
@@ -754,11 +754,11 @@ class SendEmailView(QtWidgets.QFrame):
             dt = datetime.datetime.now()
             self.when.setDateTime(QtCore.QDateTime(dt))
             model.when = str(dt)
-        self.when.dateTimeChanged.connect(self.setWhen)
+        self.when.dateTimeChanged.connect(self.set_when)
 
         self.body = QtWidgets.QTextEdit(model.body)
         self.body.setPlaceholderText("Enter the body...")
-        self.body.textChanged.connect(model.setBody)
+        self.body.textChanged.connect(self.set_body)
 
         layout.addWidget(self.recipients)
         layout.addWidget(self.when)
@@ -766,8 +766,11 @@ class SendEmailView(QtWidgets.QFrame):
 
         self.setLayout(layout)
 
-    def setWhen(self, dt):
-        self.model.setWhen(dt.toPyDateTime())
+    def set_when(self, dt):
+        self.model.set_when(dt.toPyDateTime())
+
+    def set_body(self):
+        self.model.set_body(self.body.toPlainText())
 
 
 # NOTE(alexander): DEV mode entry point only!!!
