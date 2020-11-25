@@ -7,7 +7,7 @@ class Model:
     def __init__(self, filename, processes=None):
         self.filename = filename
         self.absolute_path = None  # TODO(alexander): maybe add default path in settings
-        self.processes = processes or []
+        self.processes = processes or dict()
 
     def save(self, filepath=None):
         path = filepath or self.absolute_path
@@ -20,7 +20,7 @@ class Model:
         data["filename"] = self.filename
         data["processes"] = list()
         for proc in self.processes:
-            data["processes"].append(proc.save())
+            data["processes"][proc.id] = proc.save()
 
         with open(path, "w") as fh:
             yaml.dump(data, fh, default_flow_style=False)
@@ -35,24 +35,25 @@ class Model:
         self.absolute_path = filepath
         self.processes.clear()
         for proc in data["processes"]:
+            model = None
             if proc["kind"].classname == "EntryPointModel":
                 model = EntryPointModel()
-                model.load(proc)
-                self.processes.append(model)
             elif proc["kind"].classname == "SendModel":
                 model = SendModel()
-                model.load(proc)
-                self.processes.append(model)
             elif proc["kind"].classname == "ReminderModel":
                 model = ReminderModel()
-                model.load(proc)
-                self.processes.append(model)
             elif proc["kind"].classname == "ScheduleModel":
                 model = ScheduleModel()
-                model.load(proc)
-                self.processes.append(model)
-            else:
+            if not model:
                 return  # TODO(Alexander): report error
+            model.load(proc)
+            self.append_process(model)
+
+    def append_process(self, model):
+        self.processes[model.id] = model
+
+    def remove_process(self, model):
+        del self.processes[model.id]
 
 
 class ProcessModel:
@@ -61,11 +62,11 @@ class ProcessModel:
         self.id = uuid.uuid4()
         self.name = "Unknown"
         self.query = ""
-        self.x = 32  # NOTE(alexander): not really useful for automation part, but needed to recreate the GUI
+        self.x = 32  # NOTE(alexander): not useful for automation part, but needed to recreate the GUI
         self.y = 32
         self.width = 260
         self.height = 320
-        self.out_next = -1  # NOTE(alexander): next process id, index into processes array in Model
+        self.out_next = -1  # NOTE(alexander): next process uuid into processes array in Model
 
     def save(self):
         data = dict()

@@ -1,5 +1,6 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
 import PyQt5.QtWidgets as QtWidgets
+import PyQt5.QtCore as QtCore
 import PyQt5.QtGui as QtGui
 import os
 import sys
@@ -78,15 +79,19 @@ class ContentFrame(QtWidgets.QFrame):
 
 
 class MenuBarButton(QtWidgets.QToolButton):
-    def __init__(self, parent, view_id, text, *args, **kwargs):
+    def __init__(self, parent, view_id, name, text, *args, **kwargs):
         super(MenuBarButton, self).__init__(*args, **kwargs)
-        self.setFixedSize(56, 56)
-        self.setMaximumHeight(56)
+        self.setFixedSize(64, 64)
+        self.setMaximumHeight(64)
         self.setText(text)
         self.setCheckable(True)
         self.parent = parent
         self.view_id = view_id
         self.clicked.connect(self.set_active_view)
+        self.label = QtWidgets.QLabel(name, self)
+        self.label.setMinimumWidth(64)
+        self.label.setAlignment(QtCore.Qt.AlignCenter)
+        self.label.move(0, 42)
 
     def set_active_view(self):
         self.parent.set_active_view(self, self.view_id)
@@ -97,17 +102,18 @@ class SideMenuBar(QtWidgets.QFrame):
         super(SideMenuBar, self).__init__(*args, **kwargs)
         layout = QtWidgets.QVBoxLayout()
         layout.setContentsMargins(4, 4, 0, 4)
+        layout.setSpacing(12)
 
         self.parent = parent
-        self.setMaximumWidth(48 + 12)
+        self.setMaximumWidth(64 + 12)
 
         self.items = []
-        self.items.append(MenuBarButton(self, 0, "\uf044"))
-        self.items.append(MenuBarButton(self, 1, "\uf0c7"))
-        self.items.append(MenuBarButton(self, 2, "\uf115"))
-        self.items.append(MenuBarButton(self, 3, "\uf04b"))
-        self.items.append(MenuBarButton(self, 4, "\uf013"))
-        self.items.append(MenuBarButton(self, 5, "\uf05a"))
+        self.items.append(MenuBarButton(self, 0, "Design", "\uf044"))
+        self.items.append(MenuBarButton(self, 1, "Save", "\uf0c7"))
+        self.items.append(MenuBarButton(self, 2, "Load", "\uf115"))
+        self.items.append(MenuBarButton(self, 3, "Run", "\uf04b"))
+        self.items.append(MenuBarButton(self, 4, "Settings", "\uf013"))
+        self.items.append(MenuBarButton(self, 5, "Info", "\uf05a"))
 
         self.items[0].setChecked(True)
 

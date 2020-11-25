@@ -49,7 +49,7 @@ class DesignView(QtWidgets.QWidget):
         self.process_text_edit.setMaximumHeight(180)
 
         self.main_process = proc_models.EntryPointModel()
-        self.model.processes.append(self.main_process)
+        self.model.append_process(self.main_process)
         self.process_editor = ProcessEditorView(self, self.model)
 
         layout.addWidget(self.process_text_edit)
@@ -129,7 +129,7 @@ class DesignView(QtWidgets.QWidget):
             proc_view.view.close()
             if view.model in self.model.processes:
                 self.model.processes.remove(view.model)
-            self.model.processes.append(model)
+            self.model.append_process(model)
             proc_view.model = model
             self.update()
 
@@ -169,7 +169,7 @@ class ProcessEditorView(QtWidgets.QFrame):
         self.setMouseTracking(True)
         self.update()
 
-        for proc in self.model.processes:
+        for proc in self.model.processes.values():
             view = self.create_process_view(proc)
             self.process_views.append(view)
 
@@ -197,7 +197,7 @@ class ProcessEditorView(QtWidgets.QFrame):
             out_conn.connect(view.in_connector)
 
         self.process_views.append(view)
-        self.model.processes.append(model)
+        self.model.append_process(model)
         view.setGeometry(model.x, model.y, model.width, model.height)
         view.pos = QtCore.QPoint(model.x, model.y)
         view.show()
@@ -210,7 +210,7 @@ class ProcessEditorView(QtWidgets.QFrame):
         if view in self.process_views:
             self.process_views.remove(view)
         if model in self.model.processes:
-            self.model.processes.remove(model)
+            self.model.remove_process(model)
         view.close()
         self.update()
         return True
@@ -410,14 +410,6 @@ class ProcessTextEditView(QtWidgets.QFrame):
         self.speech_button.setMaximumHeight(32)
         self.speech_button.clicked.connect(self.record_speech)
 
-        self.cancel_button = QtWidgets.QToolButton()
-        self.cancel_button.setText("\uF00D")
-        self.cancel_button.setMinimumWidth(32)
-        self.cancel_button.setMinimumHeight(32)
-        self.cancel_button.setMaximumWidth(32)
-        self.cancel_button.setMaximumHeight(32)
-        self.cancel_button.clicked.connect(self.cancel_editing)
-
         self.submit_button = QtWidgets.QToolButton()
         self.submit_button.setText("\uF00C")
         self.submit_button.setMinimumWidth(32)
@@ -426,10 +418,18 @@ class ProcessTextEditView(QtWidgets.QFrame):
         self.submit_button.setMaximumHeight(32)
         self.submit_button.clicked.connect(self.design_view.submit_input_text)
 
+        self.cancel_button = QtWidgets.QToolButton()
+        self.cancel_button.setText("\uF00D")
+        self.cancel_button.setMinimumWidth(32)
+        self.cancel_button.setMinimumHeight(32)
+        self.cancel_button.setMaximumWidth(32)
+        self.cancel_button.setMaximumHeight(32)
+        self.cancel_button.clicked.connect(self.cancel_editing)
+
         layout.addWidget(self.text_edit, 0, 0, 1, 4)
         layout.addWidget(self.speech_button, 1, 0)
-        layout.addWidget(self.cancel_button, 1, 1)
-        layout.addWidget(self.submit_button, 1, 2)
+        layout.addWidget(self.submit_button, 1, 1)
+        layout.addWidget(self.cancel_button, 1, 2)
         self.cancel_button.hide()
         layout.setColumnStretch(3, 1)
         layout.setRowStretch(0, 1)
