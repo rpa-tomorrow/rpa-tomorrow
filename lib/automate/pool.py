@@ -20,10 +20,10 @@ class SharedModel:
     exception occurs the model will be automatically unlocked. E.g.
     ```
     s = SharedModel("en_core_web_sm", "en_core_web_sm")
+    # `s` Locks when calling the code below
     with s:
-        # Locks when calling the code below
-        model = s.get_model()
-    # SharedModel is unlocked here even during exception
+        model = s.acquire_model()
+    # `s` is unlocked here even during exception
 
     ```
     """
