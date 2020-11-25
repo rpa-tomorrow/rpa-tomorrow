@@ -62,10 +62,10 @@ class UpdateSchedule(Module):
             self.events = self.calendar.get_event_by_summary(body["summary"])
 
         # if no event could be found using the summary try to do it with the user inputed time
-        if (not self.event) and self.when:
+        if (not self.events) and self.when:
             self.events = self.calendar.get_event_by_timestamp(self.when)
 
-        if (not self.event) and self.to:
+        if (not self.events) and self.to:
             # get emails of participants where only the name was entered
             attendees = []
             parsed_attendees = contacts.get_emails(self.to)
@@ -117,7 +117,7 @@ class UpdateSchedule(Module):
         """ """
         if self.followup_type == "self_busy":
             # if the user answers "yes" on the followup question then update the event from the calendar
-            if answer.lower() in ["y", "yes"]:
+            if answer.lower() in ["y", "yes", ""]:
                 return None
             else:
                 raise ActionInterruptedByUserError("Event Not Updated.")
