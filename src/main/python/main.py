@@ -81,17 +81,17 @@ class ContentFrame(QtWidgets.QFrame):
 class MenuBarButton(QtWidgets.QToolButton):
     def __init__(self, parent, view_id, name, text, *args, **kwargs):
         super(MenuBarButton, self).__init__(*args, **kwargs)
-        self.setFixedSize(64, 64)
-        self.setMaximumHeight(64)
+        self.setFixedSize(84, 84)
+        self.setMaximumHeight(84)
         self.setText(text)
         self.setCheckable(True)
         self.parent = parent
         self.view_id = view_id
         self.clicked.connect(self.set_active_view)
         self.label = QtWidgets.QLabel(name, self)
-        self.label.setMinimumWidth(64)
+        self.label.setMinimumWidth(84)
         self.label.setAlignment(QtCore.Qt.AlignCenter)
-        self.label.move(0, 42)
+        self.label.move(0, 50)
 
     def set_active_view(self):
         self.parent.set_active_view(self, self.view_id)
@@ -101,11 +101,11 @@ class SideMenuBar(QtWidgets.QFrame):
     def __init__(self, parent, *args, **kwargs):
         super(SideMenuBar, self).__init__(*args, **kwargs)
         layout = QtWidgets.QVBoxLayout()
-        layout.setContentsMargins(4, 4, 0, 4)
-        layout.setSpacing(12)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
         self.parent = parent
-        self.setMaximumWidth(64 + 12)
+        self.setMaximumWidth(84)
 
         self.items = []
         self.items.append(MenuBarButton(self, 0, "Design", "\uf044"))

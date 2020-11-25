@@ -18,12 +18,12 @@ class Model:
 
         data = dict()
         data["filename"] = self.filename
-        data["processes"] = list()
-        for proc in self.processes:
+        data["processes"] = dict()
+        for proc in self.processes.values():
             data["processes"][proc.id] = proc.save()
 
         with open(path, "w") as fh:
-            yaml.dump(data, fh, default_flow_style=False)
+            yaml.dump(data, fh)
 
     def load(self, filepath):
         data = None
@@ -34,15 +34,15 @@ class Model:
         self.filename = data["filename"]
         self.absolute_path = filepath
         self.processes.clear()
-        for proc in data["processes"]:
+        for proc in data["processes"].values():
             model = None
-            if proc["kind"].classname == "EntryPointModel":
+            if proc["classname"] == "EntryPointModel":
                 model = EntryPointModel()
-            elif proc["kind"].classname == "SendModel":
+            elif proc["classname"] == "SendModel":
                 model = SendModel()
-            elif proc["kind"].classname == "ReminderModel":
+            elif proc["classname"] == "ReminderModel":
                 model = ReminderModel()
-            elif proc["kind"].classname == "ScheduleModel":
+            elif proc["classname"] == "ScheduleModel":
                 model = ScheduleModel()
             if not model:
                 return  # TODO(Alexander): report error
@@ -59,7 +59,7 @@ class Model:
 class ProcessModel:
     def __init__(self):
         self.classname = type(self).__name__
-        self.id = uuid.uuid4()
+        self.id = str(uuid.uuid4())
         self.name = "Unknown"
         self.query = ""
         self.x = 32  # NOTE(alexander): not useful for automation part, but needed to recreate the GUI
@@ -116,14 +116,13 @@ class BasicModel(ProcessModel):  # NOTE(alexander): abstract model, should never
     def save(self):
         data = super(BasicModel, self).save()
         data["recipients"] = [x.strip() for x in self.recipients.split(",")]
-        print(data["recipients"])
         data["when"] = str(self.when)
         data["body"] = str(self.body)
         return data
 
     def load(self, data):
         super(BasicModel, self).load(data)
-        self.recipients = ", ".join(str(data["recipients"])).strip()
+        self.recipients = ", ".join(data["recipients"]).strip()
         self.when = data["when"]
         self.body = data["body"]
 

@@ -19,13 +19,13 @@ MenuBarButton {
     color: white;
     background-color: dodgerblue;
     font-size: 32px;
-    padding-bottom: 14px;
-    border-radius: 6px;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
+    padding-bottom: 22px;
+    border-style: none;
+    border-radius: 0;
 }
+
 MenuBarButton > QLabel {
-    font-size: 11pt;
+    font-size: 12pt;
 }
 
 MenuBarButton:hover {

@@ -47,6 +47,10 @@ MenuBarButton {
     background-color: dodgerblue;
 }
 
+MenuBarButton > QLabel {
+    color: white;
+}
+
 MenuBarButton:hover {
     background-color: #1774cf;
 }

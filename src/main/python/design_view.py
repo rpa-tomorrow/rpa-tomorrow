@@ -7,6 +7,7 @@ import sys
 import datetime
 import copy
 import pyaudio
+import datetime
 
 import process_models as proc_models
 
@@ -60,6 +61,9 @@ class DesignView(QtWidgets.QWidget):
         self.save_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+S"), self)
         self.save_shortcut.activated.connect(self.save_model)
 
+        self.load_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+F"), self)
+        self.load_shortcut.activated.connect(self.DEBUG_load_model)
+
         self.select_all_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+A"), self)
         self.select_all_shortcut.activated.connect(self.process_editor.select_all_processes)
 
@@ -79,6 +83,29 @@ class DesignView(QtWidgets.QWidget):
         self.model.save()
         self.main_window.set_info_message("Wrote " + self.model.absolute_path)
 
+    # TODO(alexander): temporary load model only for development and testing
+    def DEBUG_load_model(self):
+        for view in self.process_editor.process_views.values():
+            view.close()
+        self.process_editor.process_views.clear()
+        
+        self.model.load("untitled.yaml")
+        
+        for id, proc in self.model.processes.items():
+            view = self.process_editor.create_process_view(proc)
+            self.process_editor.process_views[id] = view
+            view.show()
+
+        for view in self.process_editor.process_views.values():
+            try:
+                other_view = self.process_editor.process_views[view.model.out_next]
+                view.out_connector.connect(other_view.in_connector)
+            except Exception:
+                pass 
+            
+        self.update()
+        self.main_window.set_info_message("Loaded " + self.model.absolute_path)
+        
     def handle_response(self, task, followup):
         self.main_window.set_info_message(str(followup).replace("\n", ". ") + ".")
         return task
@@ -106,13 +133,24 @@ class DesignView(QtWidgets.QWidget):
             # TODO(alexander): use different models, but they are all similar atm.
             if isinstance(task, Send):
                 model = proc_models.SendModel()
+                model.recipient = ", ".join(task.to)
+                model.when = str(task.when)
+                model.body = str(task.body)
             elif isinstance(task, Reminder):
                 model = proc_models.ReminderModel()
+                model.recipient = ", ".join(task.to)
+                model.when = str(task.when)
+                model.body = str(task.body)
             elif isinstance(task, Schedule):
                 model = proc_models.ScheduleModel()
+                model.recipient = ", ".join(task.to)
+                model.when = str(task.when)
+                model.body = str(task.body)
             else:
                 display_error_message("Failed to understand what task you wanted to perform.")
                 return
+            if model:
+                model.query = query
             view = SendEmailView(model)
         except Exception:
             traceback.print_exc()
@@ -125,6 +163,7 @@ class DesignView(QtWidgets.QWidget):
             proc_view.show()
             self.process_editor.append_process(proc_view, model)
         else:
+            proc_view.title.setText(model.name)
             proc_view.layout.replaceWidget(proc_view.view, view)
             proc_view.view.close()
             if view.model in self.model.processes:
@@ -142,7 +181,7 @@ class ProcessEditorView(QtWidgets.QFrame):
         super(ProcessEditorView, self).__init__()
         self.design_view = design_view
         self.model = model
-        self.process_views = []
+        self.process_views = dict()
 
         self.in_connectors = []
         self.out_connectors = []
@@ -169,9 +208,10 @@ class ProcessEditorView(QtWidgets.QFrame):
         self.setMouseTracking(True)
         self.update()
 
-        for proc in self.model.processes.values():
+        for id, proc in self.model.processes.items():
             view = self.create_process_view(proc)
-            self.process_views.append(view)
+            self.process_views[id] = view
+            
 
     def create_process_view(self, model):  # TODO(alexander): SendEmailView is temporary
         if isinstance(model, proc_models.SendModel):
@@ -185,9 +225,18 @@ class ProcessEditorView(QtWidgets.QFrame):
         else:
             return ProcessView(self, QtWidgets.QFrame(), model)
 
+    def get_entry_point(self):
+        if len(self.process_views) == 0:
+            return None
+
+        for view in self.process_views.values():
+            if isinstance(view.model, proc_models.EntryPointModel):
+                return view
+        return None
+
     def append_process(self, view, model):
-        if len(self.process_views) > 0:
-            prev_view = self.process_views[0]
+        prev_view = self.get_entry_point()
+        if prev_view:
             out_conn = prev_view.out_connector
             while out_conn.connected:
                 prev_view = out_conn.connected.view
@@ -196,7 +245,7 @@ class ProcessEditorView(QtWidgets.QFrame):
             model.y = prev_view.y()
             out_conn.connect(view.in_connector)
 
-        self.process_views.append(view)
+        self.process_views[model.id] = view
         self.model.append_process(model)
         view.setGeometry(model.x, model.y, model.width, model.height)
         view.pos = QtCore.QPoint(model.x, model.y)
@@ -204,13 +253,13 @@ class ProcessEditorView(QtWidgets.QFrame):
         view.update_connectors()
         self.update()
 
-    def remove_process(self, view, model):
-        if isinstance(model, proc_models.EntryPointModel):
+    def remove_process(self, view):
+        if isinstance(view.model, proc_models.EntryPointModel):
             return False
-        if view in self.process_views:
-            self.process_views.remove(view)
-        if model in self.model.processes:
-            self.model.remove_process(model)
+        if view in self.process_views.values():
+            del self.process_views[view.model.id]
+        if view.model in self.model.processes:
+            self.model.remove_process(view.model)
         view.close()
         self.update()
         return True
@@ -219,7 +268,7 @@ class ProcessEditorView(QtWidgets.QFrame):
         i = 0
         while i < len(self.selected_processes):
             p = self.selected_processes[i]
-            if self.remove_process(p, p.model):
+            if self.remove_process(p):
                 self.selected_processes.remove(p)
             else:
                 i += 1
@@ -227,7 +276,7 @@ class ProcessEditorView(QtWidgets.QFrame):
 
     def select_all_processes(self):
         self.selected_processes.clear()
-        for p in self.process_views:
+        for p in self.process_views.values():
             self.selected_processes.append(p)
             p.set_selected(True)
 
@@ -248,7 +297,7 @@ class ProcessEditorView(QtWidgets.QFrame):
             new_model.x += 32
             new_model.y += 32
             view = self.create_process_view(new_model)
-            self.process_views.append(view)
+            self.process_views[view.model.id] = view
             self.selected_processes.append(view)
             view.setGeometry(new_model.x, new_model.y, new_model.width, new_model.height)
             view.show()
@@ -308,7 +357,7 @@ class ProcessEditorView(QtWidgets.QFrame):
     def mousePressEvent(self, event):
         if event.buttons() & QtCore.Qt.RightButton and not self.selecting:
             self.offset = event.pos()
-            for view in self.process_views:
+            for view in self.process_views.values():
                 view.offset = event.pos()
             self.dragging = True
 
@@ -325,7 +374,7 @@ class ProcessEditorView(QtWidgets.QFrame):
         self.mouse_pos = event.pos()
         if event.buttons() & QtCore.Qt.RightButton and self.dragging:
             self.delta = self.offset - event.pos()
-            for view in self.process_views:
+            for view in self.process_views.values():
                 view.delta = event.pos() - view.offset
                 view.move(view.pos + view.delta)
                 view.update_connectors()
@@ -363,7 +412,7 @@ class ProcessEditorView(QtWidgets.QFrame):
         if self.dragging:
             self.pos = self.pos + self.delta
             self.delta = QtCore.QPoint(0, 0)
-            for view in self.process_views:
+            for view in self.process_views.values():
                 view.pos = view.pos + view.delta
                 view.delta = QtCore.QPoint(0, 0)
             self.dragging = False
@@ -371,7 +420,7 @@ class ProcessEditorView(QtWidgets.QFrame):
         if self.selecting:
             self.deselect_all_processes()
             self.selection_box.hide()
-            for view in self.process_views:
+            for view in self.process_views.values():
                 if self.selection_box.geometry().contains(view.geometry()):
                     if view not in self.selected_processes:
                         self.selected_processes.append(view)
@@ -521,12 +570,16 @@ class ProcessConnector(QtWidgets.QToolButton):
                 if other_conn.view.accept_input or other_conn.output:
                     self.connected = other_conn
                     self.setChecked(True)
+                    self.view.connection_changed(self, other_conn.view.model.id)
                     other_conn.connected = self
                     other_conn.setChecked(True)
+                    other_conn.view.connection_changed(other_conn, self.view.model.id)
 
     def disconnect(self):
         if self.connected:
             self.connected.setChecked(False)
+            self.view.connection_changed(self, -1)
+            self.connected.view.connection_changed(self.connected, -1)
             self.connected.connected = None
             self.connected = None
 
@@ -534,11 +587,7 @@ class ProcessConnector(QtWidgets.QToolButton):
         self.process_editor.mouseMoveEvent(event)
 
     def mousePressEvent(self, event):
-        if self.connected:
-            self.connected.setChecked(False)
-            self.connected.connected = None
-            self.connected = None
-            self.setChecked(False)
+        self.disconnect()
         self.process_editor.active_connector = self
 
     def mouseReleasedEvent(self, event):
@@ -589,6 +638,10 @@ class ProcessView(QtWidgets.QFrame):
         self.out_connector.move(
             self.pos.x() + self.delta.x() + self.width() - 8, self.pos.y() + self.delta.y() + self.height() - 27
         )
+
+    def connection_changed(self, connector, other_id):
+        if connector == self.out_connector:
+            self.model.out_next = other_id
 
     def close(self):
         super(ProcessView, self).close()
@@ -662,8 +715,17 @@ class SendEmailView(QtWidgets.QFrame):
         self.recipients = QtWidgets.QLineEdit(model.recipients)
         self.recipients.setPlaceholderText("Recipient1, Recipient2, ...")
         self.recipients.textChanged.connect(model.setRecipients)
-
-        self.when = QtWidgets.QDateTimeEdit(QtCore.QDateTime(model.when))
+        
+        self.when = QtWidgets.QDateTimeEdit()
+        try:
+            dt = model.when
+            if isinstance(model.when, str):
+                dt = datetime.datetime.fromisoformat(model.when)
+            self.when.setDateTime(QtCore.QDateTime(dt))
+        except Exception:
+            dt = datetime.datetime.now()
+            self.when.setDateTime(QtCore.QDateTime(dt))
+            model.when = str(dt)
         self.when.dateTimeChanged.connect(self.setWhen)
 
         self.body = QtWidgets.QTextEdit(model.body)
