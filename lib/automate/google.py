@@ -110,7 +110,12 @@ class Calendar:
         Does not return past events that has already ended
         """
         now = dt.now()
-        return self.service.events().list(calendarId="primary", timeMin=(now.isoformat() + "Z")).execute()["items"]
+        events = (
+            self.service.events()
+            .list(calendarId="primary", timeMin=(now.astimezone(now.tzinfo).isoformat()))
+            .execute()["items"]
+        )
+        return events
 
     def delete_event(self, eventId: str):
         self.service.events().delete(calendarId="primary", eventId=eventId).execute()
