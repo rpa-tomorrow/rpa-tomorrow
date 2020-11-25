@@ -59,11 +59,11 @@ class UpdateSchedule(Module):
 
         # try to fetch the event by the summary
         if body["summary"] != "":
-            self.get_event_by_summary(body["summary"])
+            self.events = self.calendar.get_event_by_summary(body["summary"])
 
         # if no event could be found using the summary try to do it with the user inputed time
         if (not self.event) and self.when:
-            self.get_event_by_timestamp(self.when)
+            self.events = self.calendar.get_event_by_timestamp(self.when)
 
         if (not self.event) and self.to:
             # get emails of participants where only the name was entered
@@ -79,7 +79,7 @@ class UpdateSchedule(Module):
             contacts.get_emails(self.to)
 
             if len(attendees) > 0:
-                self.get_event_by_participants(attendees)
+                self.events = self.calendar.get_event_by_participants(attendees)
 
         if len(self.events) == 1:
             self.event = self.events[0]
@@ -191,56 +191,6 @@ class UpdateSchedule(Module):
         self.model_pool.release_model(ner_model)
 
         return (to, start_time, _body)
-
-
-    def get_event_by_timestamp(self, time: datetime):
-        """
-        takes a ISO formated time and fetches an event from the calendar where the given time is between
-        the start and end time of the event, the method only looks for events happening in the future
-        NOTE: as of now this does not handle multiple events occuring at the same time
-        """
-        # ensure that the given time uses the same timezone as the computer
-        now = datetime.now()
-        time = time.astimezone(now.tzinfo)
-
-        events = self.calendar.get_events()
-        filtered_events = []
-        # find the wanted event
-        for e in events:
-            event_start = next(v for k, v in e["start"].items() if "date" in k)
-            event_start = datetime.fromisoformat(event_start).astimezone(now.tzinfo)
-
-            event_end = next(v for k, v in e["end"].items() if "date" in k)
-            event_end = datetime.fromisoformat(event_end).astimezone(now.tzinfo)
-
-            # check if the given time is between the start and end of an event
-            if time >= event_start and time <= event_end:
-                filtered_events.append(e)
-        self.events = filtered_events
-
-    def get_event_by_summary(self, summary: str):
-        """
-        try to find a event based on the event summary
-        the method only looks for events in the future
-        """
-        events = self.calendar.get_events()
-        events = fuzzy.extractBests(summary, events, score_cutoff=50)
-
-        self.events = list(filter(lambda e: e[0], events))
-
-    def get_event_by_participants(self, participants: [str]):
-        """
-        Try to find an event based on the participants of the event
-        """
-        events = self.calendar.get_events()
-        events = list(filter(lambda e: "attendees" in e.keys(), events))
-        filtered_events = []
-        for e in events:
-            for attendee in e["attendees"]:
-                if attendee["email"] in participants:
-                    filtered_events.append(e)
-
-        self.events = filtered_events
 
 
 class NoEventFoundError(Error):
