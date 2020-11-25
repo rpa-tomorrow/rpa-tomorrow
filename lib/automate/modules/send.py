@@ -3,15 +3,12 @@ import spacy
 import lib.utils.tools.time_convert as tc
 import logging
 import lib.utils.ner as ner
-import asyncio
 
 from email.message import EmailMessage
-
 from lib.automate.modules import Module, NoSenderError
 from lib import Error
 from lib.settings import SETTINGS
 from datetime import datetime, timedelta
-
 from lib.utils.contacts import get_emails, prompt_contact_choice, NoContactFoundError, followup_contact_choice
 
 # Module logger

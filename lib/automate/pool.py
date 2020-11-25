@@ -27,6 +27,7 @@ class SharedModel:
 
     ```
     """
+
     def __init__(self, name, model):
         self._name = name
         self._model = model
