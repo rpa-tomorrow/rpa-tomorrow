@@ -7,7 +7,7 @@ import sys
 import datetime
 import copy
 import pyaudio
-import datetime
+import uuid
 
 import process_models as proc_models
 
@@ -88,9 +88,9 @@ class DesignView(QtWidgets.QWidget):
         for view in self.process_editor.process_views.values():
             view.close()
         self.process_editor.process_views.clear()
-        
+
         self.model.load("untitled.yaml")
-        
+
         for id, proc in self.model.processes.items():
             view = self.process_editor.create_process_view(proc)
             self.process_editor.process_views[id] = view
@@ -101,11 +101,11 @@ class DesignView(QtWidgets.QWidget):
                 other_view = self.process_editor.process_views[view.model.out_next]
                 view.out_connector.connect(other_view.in_connector)
             except Exception:
-                pass 
-            
+                pass
+
         self.update()
         self.main_window.set_info_message("Loaded " + self.model.absolute_path)
-        
+
     def handle_response(self, task, followup):
         self.main_window.set_info_message(str(followup).replace("\n", ". ") + ".")
         return task
@@ -133,17 +133,17 @@ class DesignView(QtWidgets.QWidget):
             # TODO(alexander): use different models, but they are all similar atm.
             if isinstance(task, Send):
                 model = proc_models.SendModel()
-                model.recipient = ", ".join(task.to)
+                model.recipients = ", ".join(task.to)
                 model.when = str(task.when)
                 model.body = str(task.body)
             elif isinstance(task, Reminder):
                 model = proc_models.ReminderModel()
-                model.recipient = ", ".join(task.to)
+                model.recipients = ", ".join(task.to)
                 model.when = str(task.when)
                 model.body = str(task.body)
             elif isinstance(task, Schedule):
                 model = proc_models.ScheduleModel()
-                model.recipient = ", ".join(task.to)
+                model.recipients = ", ".join(task.to)
                 model.when = str(task.when)
                 model.body = str(task.body)
             else:
@@ -166,8 +166,9 @@ class DesignView(QtWidgets.QWidget):
             proc_view.title.setText(model.name)
             proc_view.layout.replaceWidget(proc_view.view, view)
             proc_view.view.close()
-            if view.model in self.model.processes:
-                self.model.processes.remove(view.model)
+            proc_view.view = view
+
+            self.model.remove_process(proc_view.model)
             self.model.append_process(model)
             proc_view.model = model
             self.update()
@@ -208,10 +209,18 @@ class ProcessEditorView(QtWidgets.QFrame):
         self.setMouseTracking(True)
         self.update()
 
+        # Create process views from provided model
         for id, proc in self.model.processes.items():
             view = self.create_process_view(proc)
             self.process_views[id] = view
-            
+
+        # Connect views
+        for view in self.process_views.values():
+            try:
+                other_view = self.process_views[view.model.out_next]
+                view.out_connector.connect(other_view.in_connector)
+            except Exception:
+                pass
 
     def create_process_view(self, model):  # TODO(alexander): SendEmailView is temporary
         if isinstance(model, proc_models.SendModel):
@@ -258,8 +267,7 @@ class ProcessEditorView(QtWidgets.QFrame):
             return False
         if view in self.process_views.values():
             del self.process_views[view.model.id]
-        if view.model in self.model.processes:
-            self.model.remove_process(view.model)
+        self.model.remove_process(view.model)
         view.close()
         self.update()
         return True
@@ -290,18 +298,35 @@ class ProcessEditorView(QtWidgets.QFrame):
 
     def paste_selection(self):
         self.deselect_all_processes()
+        id_translation = dict()  # NOTE(alexander): translates old ids to new model ids
         for proc in self.clipboard:
             if isinstance(proc.model, proc_models.EntryPointModel):
                 continue
             new_model = copy.deepcopy(proc.model)
             new_model.x += 32
             new_model.y += 32
+            new_model.id = str(uuid.uuid4())
+            id_translation[proc.model.id] = new_model.id
             view = self.create_process_view(new_model)
-            self.process_views[view.model.id] = view
+            self.process_views[new_model.id] = view
             self.selected_processes.append(view)
+            self.model.append_process(new_model)
             view.setGeometry(new_model.x, new_model.y, new_model.width, new_model.height)
             view.show()
             view.set_selected(True)
+
+        for proc in self.clipboard:
+            if isinstance(proc.model, proc_models.EntryPointModel):
+                continue
+            out_next = proc.model.out_next
+            try:
+                out_view = self.process_views[id_translation[out_next]]
+                if out_view:
+                    view = self.process_views[id_translation[proc.model.id]]
+                    view.out_connector.connect(out_view.in_connector)
+            except Exception:
+                pass
+
         self.clipboard = copy.copy(self.selected_processes)
 
     def paintEvent(self, event):
@@ -465,7 +490,7 @@ class ProcessTextEditView(QtWidgets.QFrame):
         self.submit_button.setMinimumHeight(32)
         self.submit_button.setMaximumWidth(32)
         self.submit_button.setMaximumHeight(32)
-        self.submit_button.clicked.connect(self.design_view.submit_input_text)
+        self.submit_button.clicked.connect(self.submit_editing)
 
         self.cancel_button = QtWidgets.QToolButton()
         self.cancel_button.setText("\uF00D")
@@ -512,6 +537,9 @@ class ProcessTextEditView(QtWidgets.QFrame):
         except Exception:
             traceback.print_exc()
             display_error_message(str(sys.exc_info()[1]) + ".")
+
+    def submit_editing(self):
+        self.design_view.submit_input_text(self.editing)
 
     def cancel_editing(self):
         if self.editing:
@@ -600,7 +628,6 @@ class ProcessView(QtWidgets.QFrame):
         self.process_editor = process_editor
         self.accept_input = accept_input
         self.view = view
-        self.query = model.query
         self.name = model.name
         self.model = model
 
@@ -670,7 +697,7 @@ class ProcessView(QtWidgets.QFrame):
         action = contextMenu.exec_(self.mapToGlobal(event.pos()))
         if action == edit:
             self.set_editing(True)
-            self.process_editor.design_view.process_text_edit.edit_process(self, self.query)
+            self.process_editor.design_view.process_text_edit.edit_process(self, self.model.query)
         elif action == delete:
             self.process_editor.remove_selected_processes()
         self.process_editor.update()
@@ -682,6 +709,7 @@ class ProcessView(QtWidgets.QFrame):
                 if not event.modifiers() & (QtCore.Qt.ShiftModifier | QtCore.Qt.ControlModifier):
                     self.process_editor.deselect_all_processes()
                 self.process_editor.selected_processes.append(self)
+
             for v in self.process_editor.selected_processes:
                 v.set_selected(True)
                 v.raise_()
@@ -715,7 +743,7 @@ class SendEmailView(QtWidgets.QFrame):
         self.recipients = QtWidgets.QLineEdit(model.recipients)
         self.recipients.setPlaceholderText("Recipient1, Recipient2, ...")
         self.recipients.textChanged.connect(model.setRecipients)
-        
+
         self.when = QtWidgets.QDateTimeEdit()
         try:
             dt = model.when

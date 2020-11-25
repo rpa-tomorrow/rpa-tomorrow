@@ -53,7 +53,8 @@ class Model:
         self.processes[model.id] = model
 
     def remove_process(self, model):
-        del self.processes[model.id]
+        if model.id in self.processes.keys():
+            del self.processes[model.id]
 
 
 class ProcessModel:
