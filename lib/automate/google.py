@@ -117,17 +117,17 @@ class Calendar:
         )
         return events
 
-    def delete_event(self, eventId: str):
-        self.service.events().delete(calendarId="primary", eventId=eventId).execute()
-    
-    def update_event(self, eventId: str, event_body: dict):
-        return self.service.events().patch(calendarId="primary", eventId=eventId, body=event_body).execute()
+    def delete_event(self, event_id: str):
+        self.service.events().delete(calendarId="primary", eventId=event_id).execute()
+
+    def update_event(self, event_id: str, event_body: dict):
+        return self.service.events().patch(calendarId="primary", eventId=event_id, body=event_body).execute()
 
     def get_event_by_summary(self, summary: str):
         """
         Try to find events based on the event summary
-        Does not return past events that has already ended 
-        
+        Does not return past events that has already ended
+
         Returns a list of events from the primary calendar
         """
         events = self.get_events()
@@ -148,8 +148,8 @@ class Calendar:
     def get_event_by_participants(self, participants: [str]):
         """
         Try to find an event based on the participants of the event
-        Does not return past events that has already ended 
-        
+        Does not return past events that has already ended
+
         Returns a list of events from the primary calendar
         """
         events = self.get_events()
@@ -161,14 +161,14 @@ class Calendar:
                     filtered_events.append(e)
 
         return filtered_events
-    
+
     def get_event_by_timestamp(self, time: dt):
         """
         takes a ISO formated time and fetches events from the calendar where the given time is between
         the start and end time of the event, the method only looks for events happening in the future
 
         Returns a list of events from the primary calendar
-        
+
         NOTE: as of now this does not handle multiple events occuring at the same time
         """
         # ensure that the given time uses the same timezone as the computer

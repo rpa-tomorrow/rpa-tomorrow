@@ -10,7 +10,6 @@ from lib.automate.google import Google
 from lib.automate.modules import Module
 import lib.utils.tools.time_convert as tc
 from datetime import datetime, timedelta
-from fuzzywuzzy import process as fuzzy
 from lib.utils.contacts import prompt_contact_choice, followup_contact_choice
 
 log = logging.getLogger(__name__)
@@ -170,7 +169,6 @@ class RemoveSchedule(Module):
         self.model_pool.release_model(ner_model)
 
         return (to, time, _body)
-
 
 
 class NoEventFoundError(Error):

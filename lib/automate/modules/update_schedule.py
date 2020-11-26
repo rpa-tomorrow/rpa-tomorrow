@@ -10,7 +10,6 @@ from lib.automate.google import Google
 from lib.automate.modules import Module
 import lib.utils.tools.time_convert as tc
 from datetime import datetime, timedelta
-from fuzzywuzzy import process as fuzzy
 from lib.utils.contacts import prompt_contact_choice, followup_contact_choice
 
 log = logging.getLogger(__name__)
@@ -141,7 +140,7 @@ class UpdateSchedule(Module):
     def execute(self):
         start_time = datetime.fromisoformat(self.event["start"]["dateTime"])
         end_time = datetime.fromisoformat(self.event["end"]["dateTime"])
-        duration =  end_time - start_time
+        duration = end_time - start_time
 
         # Parse Time
         new_start_time = {"dateTime": tc.local_to_utc_time(self.body["new start"]).isoformat()}

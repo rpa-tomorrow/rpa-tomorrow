@@ -17,4 +17,4 @@ try:
 
     print(response)
 except Error as err:
-    print(err, file=sys.stdout) 
+    print(err, file=sys.stdout)
