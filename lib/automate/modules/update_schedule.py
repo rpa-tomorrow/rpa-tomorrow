@@ -1,7 +1,6 @@
 from __future__ import print_function
 import logging
 import spacy
-import asyncio
 import lib.utils.ner as ner
 
 from lib import Error
@@ -150,14 +149,16 @@ class UpdateSchedule(Module):
 
     def nlp(self, text):
         doc = self.nlp_model(text)
-        ner_model = asyncio.run(self.model_pool.acquire_model("xx_ent_wiki_sm"))
 
         to = []
         start = []
         body = []
-        persons = ner.get_persons(ner_model, text)
-
+        persons = []
         nstart = []
+
+        locked_ner_model = self.model_pool.get_shared_model("xx_ent_wiki_sm")
+        with locked_ner_model:
+            persons = ner.get_persons(locked_ner_model.acquire_model(), text)
 
         for token in doc:
             if token.dep_ == "TO":
@@ -187,7 +188,6 @@ class UpdateSchedule(Module):
 
         _body = {"summary": " ".join(body)}
         _body["new start"] = new_start_time
-        self.model_pool.release_model(ner_model)
 
         return (to, start_time, _body)
 
