@@ -117,8 +117,78 @@ class Calendar:
         )
         return events
 
-    def delete_event(self, eventId: str):
-        self.service.events().delete(calendarId="primary", eventId=eventId).execute()
+    def delete_event(self, event_id: str):
+        self.service.events().delete(calendarId="primary", eventId=event_id).execute()
+
+    def update_event(self, event_id: str, event_body: dict):
+        return self.service.events().patch(calendarId="primary", eventId=event_id, body=event_body).execute()
+
+    def get_event_by_summary(self, summary: str):
+        """
+        Try to find events based on the event summary
+        Does not return past events that has already ended
+
+        Returns a list of events from the primary calendar
+        """
+        events = self.get_events()
+        event_summaries = list(map(lambda e: e["summary"], events))
+
+        # find the best matches for the event
+        event_summaries = fuzzy.extractBests(summary, event_summaries, score_cutoff=50)
+
+        # remove duplicate summaries,
+        # the loop will find all occurances of events with the same summary
+        event_summaries = list(set(event_summaries))
+        filtered_events = []
+        for s in event_summaries:
+            filtered_events += list(filter(lambda e: e["summary"] == s[0], events))
+
+        return filtered_events
+
+    def get_event_by_participants(self, participants: [str]):
+        """
+        Try to find an event based on the participants of the event
+        Does not return past events that has already ended
+
+        Returns a list of events from the primary calendar
+        """
+        events = self.get_events()
+        events = list(filter(lambda e: "attendees" in e.keys(), events))
+        filtered_events = []
+        for e in events:
+            for attendee in e["attendees"]:
+                if attendee["email"] in participants:
+                    filtered_events.append(e)
+
+        return filtered_events
+
+    def get_event_by_timestamp(self, time: dt):
+        """
+        takes a ISO formated time and fetches events from the calendar where the given time is between
+        the start and end time of the event, the method only looks for events happening in the future
+
+        Returns a list of events from the primary calendar
+
+        NOTE: as of now this does not handle multiple events occuring at the same time
+        """
+        # ensure that the given time uses the same timezone as the computer
+        now = dt.now()
+        time = time.astimezone(now.tzinfo)
+
+        events = self.get_events()
+        filtered_events = []
+        # find the wanted event
+        for e in events:
+            event_start = next(v for k, v in e["start"].items() if "date" in k)
+            event_start = dt.fromisoformat(event_start).astimezone(now.tzinfo)
+
+            event_end = next(v for k, v in e["end"].items() if "date" in k)
+            event_end = dt.fromisoformat(event_end).astimezone(now.tzinfo)
+
+            # check if the given time is between the start and end of an event
+            if time >= event_start and time <= event_end:
+                filtered_events.append(e)
+        return filtered_events
 
 
 class People:

@@ -10,6 +10,7 @@ def load_settings():
     load_nlp_models_config(SETTINGS["user"]["language"], SETTINGS["user"]["language_version"])
     load_local_contacts()
     load_editor_preferences()
+    load_meeting_settings()
 
 
 def load_editor_preferences():
