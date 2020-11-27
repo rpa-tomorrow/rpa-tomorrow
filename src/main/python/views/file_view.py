@@ -1,6 +1,8 @@
 import PyQt5.QtWidgets as QtWidgets
 import PyQt5.QtCore as QtCore
 
+
+from views.current_directory_view import CurrentDirectory
 from functools import partial
 import os
 import sys
@@ -21,7 +23,7 @@ class FileView(QtWidgets.QWidget):
         self.files_view.setRootIndex(self.file_system_model.index(os.getcwd()))
         self.files_view.doubleClicked.connect(self.enter_directory_index)
 
-        self.current_dir_view = CurrentDirectoryView(self.files_view, self.file_system_model)
+        self.current_dir_view = CurrentDirectory(self.files_view, self.file_system_model)
 
         self.filename_view = QtWidgets.QLineEdit(self.model.filename)
 
@@ -35,42 +37,6 @@ class FileView(QtWidgets.QWidget):
     def enter_directory_index(self, index):
         self.files_view.setRootIndex(index)
         self.current_dir_view.set_current_directory_index(index)
-
-
-class CurrentDirectoryView(QtWidgets.QFrame):
-    def __init__(self, files_view, file_system_model, *args, **kwargs):
-        super(CurrentDirectoryView, self).__init__(*args, **kwargs)
-        self.files_view = files_view
-        self.file_system_model = file_system_model
-        self.layout = QtWidgets.QHBoxLayout()
-        self.layout.setContentsMargins(2, 2, 2, 2)
-        self.set_current_directory_index(self.files_view.rootIndex())
-        self.setLayout(self.layout)
-
-    def set_current_directory_index(self, index):
-        child = self.layout.takeAt(0)
-        while child:
-            self.layout.removeWidget(child.widget())
-            del child
-            child = self.layout.takeAt(0)
-
-        while index and index.isValid():
-            btn = QtWidgets.QPushButton(str(index.data()))
-            btn.index = index
-            btn.clicked.connect(partial(self.directory_button_clicked, index))
-            self.layout.insertWidget(0, btn)
-            index = index.parent()
-            if index and index.isValid():
-                self.layout.insertWidget(0, QtWidgets.QLabel(">"))
-
-        self.layout.addStretch(1)
-        self.update()
-
-    def directory_button_clicked(self, index):
-        if index and index.isValid():
-            self.files_view.setRootIndex(index)
-            self.update()
-
 
 # NOTE(alexander): DEV mode entry point only!!!
 if __name__ == "__main__":

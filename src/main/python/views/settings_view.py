@@ -2,7 +2,6 @@ import PyQt5.QtWidgets as QtWidgets
 
 from lib.settings import SETTINGS
 
-
 class SettingsView(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         super(SettingsView, self).__init__(*args, **kwargs)

@@ -4,16 +4,16 @@ import PyQt5.QtCore as QtCore
 import PyQt5.QtGui as QtGui
 import os
 import sys
-import resources  # noqa: F401
+import utils.resources  # noqa: F401
 
 sys.path.append(".")
 from lib.settings import load_settings, SETTINGS  # noqa: E402
 
 import process_models as proc_model  # noqa: E402
 from design_view import DesignView  # noqa: E402
-from file_view import FileView  # noqa: E402
+from views.file_view import FileView  # noqa: E402
 from play_view import PlayView  # noqa: E402
-from settings_view import SettingsView  # noqa: E402
+from views.settings_view import SettingsView  # noqa: E402
 
 
 class MainWindow(QtWidgets.QMainWindow):
