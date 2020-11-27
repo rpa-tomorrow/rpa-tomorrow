@@ -21,9 +21,10 @@ def cli(debug, verbose):
 
     click.secho("\nType any task(s) and the robot will start working on it", bold=True)
     click.secho("(or type 'help' to display all options):", bold=True)
+    suffix = click.style(">>> ", bold=True, fg="bright_cyan")
     try:
         while True:
-            txt = click.prompt("", prompt_suffix="> ").strip()
+            txt = click.prompt("", prompt_suffix=suffix).strip()
 
             if txt == "":
                 continue
