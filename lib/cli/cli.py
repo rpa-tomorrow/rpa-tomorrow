@@ -17,7 +17,7 @@ def cli(debug, verbose):
 
     spin = spinner.Spinner()
     load_prerequisites(spin, debug, verbose)
-    n = load_selector(spin)
+    module_selector = load_selector(spin)
 
     click.secho("\nType any task(s) and the robot will start working on it", bold=True)
     click.secho("(or type 'help' to display all options):", bold=True)
@@ -29,7 +29,7 @@ def cli(debug, verbose):
                 continue
             else:
                 txt_arr = txt.split(" ")
-                commands.commands(txt_arr, n)
+                commands.commands(txt_arr, module_selector)
     except Exception:
         click.secho("\nGood bye!", fg="green", bold=True)
         click.clear()
@@ -52,12 +52,12 @@ def load_prerequisites(spinner, debug, verbose):
 def load_selector(spinner):
     click.secho("· Loading models... ", bold=True)
     with spinner:
-        n = ModuleSelector()
+        module_selector = ModuleSelector()
     print("", end="\x1b[1K\r")
     click.secho("---> DONE", fg="green", bold=True)
     click.secho("· Natural language processing ready!", bold=True)
 
-    return n
+    return module_selector
 
 
 def setup_logger(debug, verbose):

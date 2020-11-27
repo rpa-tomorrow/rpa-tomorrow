@@ -15,7 +15,7 @@ from lib.settings import SETTINGS, get_model_languages, update_settings, get_lan
 from lib.speech.transcribe import transcribe  # noqa: E402
 
 
-def commands(arr, selector):
+def commands(arr, module_selector):
     """
     Commands supported by the CLI
     """
@@ -46,12 +46,12 @@ def commands(arr, selector):
         audio_interface.terminate()
         ans = input(f"This is what I heard:\n    {transcribed_input}\nExecute? [Y/n]: ").lower()
         if ans == "y" or ans == "yes" or ans == "":
-            run_selector(transcribed_input, selector)
+            run_selector(transcribed_input, module_selector)
         else:
             click.echo("Canceled.")
     else:
         text = " ".join(map(str, arr))
-        run_selector(text, selector)
+        run_selector(text, module_selector)
 
 
 def help_output():
@@ -61,9 +61,9 @@ def help_output():
     print(f.read())
 
 
-def run_selector(input, selector):
+def run_selector(input, module_selector):
     try:
-        responses = selector.run(input)
+        responses = module_selector.run(input)
         for response in responses:
             click.echo(response + "\n")
     except Exception as e:
