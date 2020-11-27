@@ -5,9 +5,10 @@ import logging
 import lib.utils.ner as ner
 
 from lib import Error
+from lib.automate.followup import StringFollowup, BooleanFollowup
 from lib.automate.google import Google
 from lib.automate.modules import Module, NoSenderError
-from lib.utils.contacts import get_emails, prompt_contact_choice, followup_contact_choice
+from lib.utils.contacts import get_emails, prompt_contact_choice
 from datetime import datetime, timedelta
 from lib.settings import SETTINGS
 
@@ -42,12 +43,27 @@ class Schedule(Module):
             raise NoSenderError("No sender found!")
 
         if not isinstance(self.when["start"], datetime):
-            self.followup_type = "when"
-            return "\nCould not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
+
+            def callback(followup):
+                try:
+                    start = datetime.fromisoformat(followup.answer)
+                    end = start + timedelta(minutes=self.get_meeting_duration())
+                    self.when = {"start": start, "end": end}
+                except Exception:
+                    self.when = {"start": None, "end": None}
+                return self.prepare_processed(self.to, self.when, self.body, self.sender)
+
+            question = "\nCould not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
+            return StringFollowup(question, callback)
 
         if not body:
-            self.followup_type = "body"
-            return "\nFound no event summary. What is the event about"
+
+            def callback(followup):
+                self.body = followup.answer
+                return self.prepare_processed(self.to, self.when, self.body, self.sender)
+
+            question = "\nFound no event summary. What is the event about"
+            return StringFollowup(question, callback)
 
         settings = sender["email"]
         username = settings.get("username")
@@ -61,13 +77,20 @@ class Schedule(Module):
         attendees = parsed_attendees["emails"]
         for (name, candidates) in parsed_attendees["uncertain"]:
             self.uncertain_attendee = (name, candidates)
-            self.followup_type = "to_uncertain"
-            return prompt_contact_choice(name, candidates)
+            return prompt_contact_choice(name, candidates, self)
 
         for name in parsed_attendees["unknown"]:
-            self.followup_type = "to_unknown"
             self.unknown_attendee = name
-            return f"\nFound no contact named {name}. Do you want to continue scheduling the meeting anyway? [Y/n]"
+
+            def callback(followup):
+                if followup.answer:
+                    self.to.remove(self.unknown_attendee)
+                    return self.prepare_processed(self.to, self.when, self.body, self.sender)
+                else:
+                    raise ActionInterruptedByUserError("\nInterrupted due to unknown attendee.")
+
+            question = f"\nFound no contact named {name}. Do you want to continue scheduling the meeting anyway?"
+            return BooleanFollowup(question, callback, default_answer=True)
 
         attendees = [settings["address"]] + attendees
         event = calendar.event(self.when["start"], self.when["end"], attendees, self.body)
@@ -78,51 +101,25 @@ class Schedule(Module):
         to_busy = calendar.freebusy(self.when["start"], self.when["end"], to)
         other = f"{', '.join(to_busy[:-1])} and {to_busy[-1]}" if len(to_busy) > 1 else "".join(to_busy)
         if me_busy and to_busy:
-            self.followup_type = "both_busy"
-            return f"\nYou as well as {other} seem to be busy. Do you want to book the meeting anyway? [Y/n]"
+            question = f"\nYou as well as {other} seem to be busy. Do you want to book the meeting anyway?"
+            return self.busy_prompt(question)
         elif me_busy:
-            self.followup_type = "self_busy"
-            return "\nYou seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
+            question = "\nYou seem to be busy during this meeting. Do you want to book it anyway?"
+            return self.busy_prompt(question)
         elif to_busy:
-            self.followup_type = "to_busy"
-            return f"\n{other} seem to be busy during this meeting. Do you want to book it anyway? [Y/n]"
+            question = f"\n{other} seem to be busy during this meeting. Do you want to book it anyway?"
+            return self.busy_prompt(question)
 
     def execute(self):
         event = self.calendar.send_event(self.event)
         return "\rEvent created, see link: %s" % (event.get("htmlLink"))
 
-    def followup(self, answer):
-        """
-        Follow up method after the module have had to ask a question to clarify some parameter, or just
-        want to check that it interpreted everything correctly.
-        """
-        if self.followup_type == "when":
-            try:
-                self.when = {"start": datetime.fromisoformat(answer), "end": None}
-            except Exception:
-                self.when = None
-            return self.prepare_processed(self.to, self.when, self.body, self.sender)
-        elif self.followup_type == "body":
-            return self.prepare_processed(self.to, self.when, answer, self.sender)
-        elif self.followup_type == "self_busy" or self.followup_type == "both_busy" or self.followup_type == "to_busy":
-            if answer == "" or answer.lower() == "y" or answer.lower() == "yes":
-                return None
-            elif answer.lower() == "n" or answer.lower() == "no":
+    def busy_prompt(self, question):
+        def callback(followup):
+            if not followup.answer:
                 raise ActionInterruptedByUserError("\nInterrupted due to busy attendees.")
-            else:
-                return self.prepare_processed(self.to, self.when, self.body, self.sender)
-        elif self.followup_type == "to_uncertain":
-            return followup_contact_choice(self, answer)
-        elif self.followup_type == "to_unknown":
-            if answer == "" or answer.lower() == "y" or answer.lower() == "yes":
-                self.to.remove(self.unknown_attendee)
-                return self.prepare_processed(self.to, self.when, self.body, self.sender)
-            elif answer.lower() == "n" or answer.lower() == "no":
-                raise ActionInterruptedByUserError("\nInterrupted due to unknown attendee.")
-            else:
-                return self.prepare_processed(self.to, self.when, self.body, self.sender)
-        else:
-            raise NotImplementedError("\nDid not find any valid followup question to answer.")
+
+        return BooleanFollowup(question, callback, default_answer=True)
 
     def nlp(self, text):
         doc = self.nlp_model(text)

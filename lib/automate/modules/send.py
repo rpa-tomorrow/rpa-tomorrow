@@ -5,11 +5,12 @@ import logging
 import lib.utils.ner as ner
 
 from email.message import EmailMessage
+from lib.automate.followup import StringFollowup
 from lib.automate.modules import Module, NoSenderError
 from lib import Error
 from lib.settings import SETTINGS
 from datetime import datetime, timedelta
-from lib.utils.contacts import get_emails, prompt_contact_choice, NoContactFoundError, followup_contact_choice
+from lib.utils.contacts import get_emails, prompt_contact_choice, NoContactFoundError
 
 # Module logger
 log = logging.getLogger(__name__)
@@ -46,23 +47,34 @@ class Send(Module):
         self.content = body + f"\n\nRegards,\n{sender['name']}"
 
         if not to or len(to) == 0:
-            self.followup_type = "to1"
-            return "\nFound no receiver. Please enter the name of the receiver"
+
+            def callback(followup):
+                if not followup.answer:
+                    return self.prepare_processed(None, self.when, self.body, self.sender)
+                else:
+                    return self.prepare_processed([followup.answer], self.when, self.body, self.sender)
+
+            question = "\nFound no receiver. Please enter the name of the receiver"
+            return StringFollowup(question, callback)
+
         elif len(to) > 1:
             raise ToManyReceiversError("Can only handle one (1) receiver at this time")
 
         if not body:
-            self.followup_type = "body"
-            return "\nFound no message body. What message should be sent"
+
+            def callback(followup):
+                return self.prepare_processed(self.to, self.when, followup.answer, self.sender)
+
+            question = "\nFound no message body. What message should be sent"
+            return StringFollowup(question, callback)
 
         parsed_recipients = get_emails(self.to, sender)
         recipients = parsed_recipients["emails"]
         self.receiver = recipients
         for (name, candidates) in parsed_recipients["uncertain"]:
             self.uncertain_attendee = (name, candidates)
-            self.followup_type = "to_uncertain"
 
-            return prompt_contact_choice(name, candidates)
+            return prompt_contact_choice(name, candidates, self)
         for name in parsed_recipients["unknown"]:
             raise NoContactFoundError("\nCould not find any contacts with name " + name)
 
@@ -96,25 +108,6 @@ class Send(Module):
         )
 
         return response
-
-    def followup(self, answer: str) -> (str, str):
-        """
-        Follow up method after the module have had to ask a question to clarify some parameter, or just
-        want to check that it interpreted everything correctly.
-        """
-        if self.followup_type == "to1":
-            if not answer:
-                return self.prepare_processed(None, self.when, self.body, self.sender)
-            else:
-                return self.prepare_processed([answer], self.when, self.body, self.sender)
-
-        elif self.followup_type == "body":
-            return self.prepare_processed(self.to, self.when, answer, self.sender)
-
-        elif self.followup_type == "to_uncertain":
-            return followup_contact_choice(self, answer)
-        else:
-            raise NotImplementedError("\nDid not find any valid followup question to answer.")
 
     def get_email(self, name: str) -> str:
         """
