@@ -1,5 +1,6 @@
 from fuzzywuzzy import process as fuzzy
 
+from lib.automate.followup import BooleanFollowup, MultiFollowup
 from lib.automate.google import Google, ContactBookInterruptedByUserError
 from lib.settings import SETTINGS, load_local_contacts
 from lib.utils.email import is_email
@@ -81,34 +82,35 @@ def get_emails(names, sender=None):
     }
 
 
-def prompt_contact_choice(name: str, candidates) -> str:
+def prompt_contact_choice(name: str, candidates, module) -> str:
     followup_str = ""
     if len(candidates) == 1:
-        followup_str = f"Found a contact with the name {name}\n"
+
+        def callback(followup):
+            if followup.answer is not None:
+                module.to.remove(c_name)  # update to so recursive call continues resolving new attendees
+                module.to.append(candidates[followup.answer][1])  # add email of chosen attendee
+                return module.prepare_processed(module.to, module.when, module.body, module.sender)
+            else:
+                raise NoContactFoundError("No contact with name " + name + " was found")
+
         c_name, c_email = candidates[0]
-        followup_str += f"[1] {c_name} - {c_email}\n"
-        followup_str += "\n[0] Not the right one \nPlease choose one (0-1)"
+        followup_str = f"Found one contact with the name {name}, {c_name} - {c_email}.\n"
+        followup_str += "Use this contact?"
+
+        return BooleanFollowup(followup_str, callback, default_answer=True)
     else:
-        followup_str = f"Found multiple contacts with the name {name}\n"
-        for i in range(len(candidates)):
-            c_name, c_email = candidates[i]
-            followup_str += f"[{i+1}] {c_name} - {c_email}\n"
-        followup_str += f"\n[0] None of the above \nPlease choose one (0-{len(candidates)})"
-    return followup_str
 
+        def callback(followup):
+            if followup.answer is not None:
+                module.to.remove(name)  # update to so recursive call continues resolving new attendees
+                module.to.append(followup.answer)  # add email of chosen attendee
+                return module.prepare_processed(module.to, module.when, module.body, module.sender)
+            else:
+                raise NoContactFoundError("No contact with name " + name + " was found")
 
-def followup_contact_choice(module, answer):
-    try:
-        choice = int(answer) - 1
-    except Exception:
-        return module.prepare_processed(module.to, module.when, module.body, module.sender)
-    name, candidates = module.uncertain_attendee
-    if choice < 0:
-        raise NoContactFoundError("No contact with name " + name + " was found")
-    elif choice >= 0 and choice < len(candidates):
-        module.to.remove(name)  # update to so recursive call continues resolving new attendees
-        module.to.append(candidates[choice][1])  # add email of chosen attendee
-    return module.prepare_processed(module.to, module.when, module.body, module.sender)
+        followup_str = f"Found multiple contacts with the name {name}"
+        return MultiFollowup(followup_str, candidates, callback, True)
 
 
 class NoContactFoundError(Error):
