@@ -1,8 +1,9 @@
 import pytest
 from datetime import datetime, timedelta
+from lib.automate.google import Google, Calendar
 
 
-class CalendarMock:
+class CalendarMock(Calendar):
     """
     A calendar mock where event creation just returns the parameters of the
     event
@@ -49,7 +50,7 @@ class CalendarNeverBusyMock(CalendarMock):
         return []
 
 
-class GoogleMock:
+class GoogleMock(Google):
     def __init__(self, username):
         self.username = username
 
