@@ -41,29 +41,10 @@ class Schedule(Module):
 
         if not sender:
             raise NoSenderError("No sender found!")
-
         if not isinstance(self.when["start"], datetime):
-
-            def callback(followup):
-                try:
-                    start = datetime.fromisoformat(followup.answer)
-                    end = start + timedelta(minutes=self.get_meeting_duration())
-                    self.when = {"start": start, "end": end}
-                except Exception:
-                    self.when = {"start": None, "end": None}
-                return self.prepare_processed(self.to, self.when, self.body, self.sender)
-
-            question = "\nCould not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
-            return StringFollowup(question, callback)
-
+            return self.prompt_date()
         if not body:
-
-            def callback(followup):
-                self.body = followup.answer
-                return self.prepare_processed(self.to, self.when, self.body, self.sender)
-
-            question = "\nFound no event summary. What is the event about"
-            return StringFollowup(question, callback)
+            return self.prompt_body()
 
         settings = sender["email"]
         username = settings.get("username")
@@ -81,16 +62,7 @@ class Schedule(Module):
 
         for name in parsed_attendees["unknown"]:
             self.unknown_attendee = name
-
-            def callback(followup):
-                if followup.answer:
-                    self.to.remove(self.unknown_attendee)
-                    return self.prepare_processed(self.to, self.when, self.body, self.sender)
-                else:
-                    raise ActionInterruptedByUserError("\nInterrupted due to unknown attendee.")
-
-            question = f"\nFound no contact named {name}. Do you want to continue scheduling the meeting anyway?"
-            return BooleanFollowup(question, callback, default_answer=True)
+            return self.prompt_unknown_contact(name)
 
         attendees = [settings["address"]] + attendees
         event = calendar.event(self.when["start"], self.when["end"], attendees, self.body)
@@ -119,6 +91,38 @@ class Schedule(Module):
             if not followup.answer:
                 raise ActionInterruptedByUserError("\nInterrupted due to busy attendees.")
 
+        return BooleanFollowup(question, callback, default_answer=True)
+
+    def prompt_body(self):
+        def callback(followup):
+            self.body = followup.answer
+            return self.prepare_processed(self.to, self.when, self.body, self.sender)
+
+        question = "\nFound no event summary. What is the event about"
+        return StringFollowup(question, callback)
+
+    def prompt_date(self):
+        def callback(followup):
+            try:
+                start = datetime.fromisoformat(followup.answer)
+                end = start + timedelta(minutes=self.get_meeting_duration())
+                self.when = {"start": start, "end": end}
+            except Exception:
+                self.when = {"start": None, "end": None}
+            return self.prepare_processed(self.to, self.when, self.body, self.sender)
+
+        question = "\nCould not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
+        return StringFollowup(question, callback)
+
+    def prompt_unknown_contact(self, name):
+        def callback(followup):
+            if followup.answer:
+                self.to.remove(self.unknown_attendee)
+                return self.prepare_processed(self.to, self.when, self.body, self.sender)
+            else:
+                raise ActionInterruptedByUserError("\nInterrupted due to unknown attendee.")
+
+        question = f"\nFound no contact named {name}. Do you want to continue scheduling the meeting anyway?"
         return BooleanFollowup(question, callback, default_answer=True)
 
     def nlp(self, text):

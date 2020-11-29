@@ -14,7 +14,8 @@ class MultiFollowup(Followup):
         self.question = question
         self.answer = None
         self.options = options
-        self.callback = callback
+        self.callback_ = callback
+        self.callback = lambda: self.callback_(self)
         self.enable_none = enable_none
 
     def handle_cli(self):
@@ -33,13 +34,14 @@ class MultiFollowup(Followup):
         if choice < -1 or choice >= len(self.options):
             return self.handle_cli()
         self.answer = self.options[choice][0]
-        return self.callback(self)
+        return self.callback()
 
 
 class StringFollowup(Followup):
     def __init__(self, question: str, callback, default_answer: str = None):
         self.question = question
-        self.callback = callback
+        self.callback_ = callback
+        self.callback = lambda: self.callback_(self)
         self.answer = default_answer
         self.default_answer = default_answer
 
@@ -50,13 +52,14 @@ class StringFollowup(Followup):
             self.answer = input_str
         elif self.default_answer is None:
             return self.handle_cli()
-        return self.callback(self)
+        return self.callback()
 
 
 class BooleanFollowup(Followup):
     def __init__(self, question: str, callback, default_answer: bool = None):
         self.question = question
-        self.callback = callback
+        self.callback_ = callback
+        self.callback = lambda: self.callback_(self)
         self.answer = default_answer
         self.default_answer = default_answer
 
@@ -77,4 +80,4 @@ class BooleanFollowup(Followup):
             self.answer = False
         else:
             return self.handle_cli()
-        return self.callback(self)
+        return self.callback()
