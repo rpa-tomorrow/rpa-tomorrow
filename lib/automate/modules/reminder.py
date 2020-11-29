@@ -74,26 +74,9 @@ class Reminder(Module):
         self.followup_type = None
 
         if not isinstance(when, datetime):
-
-            def callback(followup):
-                try:
-                    when = datetime.fromisoformat(followup.answer)
-                except Exception:
-                    when = None
-                return self.prepare_processed(self.to, when, self.body, self.sender)
-
-            question = "\nCould not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
-            followup = StringFollowup(question, callback)
-            return followup
-
+            return self.prompt_date()
         elif not body:
-
-            def callback(followup):
-                return self.prepare_processed(self.to, self.when, followup.answer, self.sender)
-
-            question = "\nFound no message body. What message should be sent"
-            followup = StringFollowup(question, callback)
-            return followup
+            return self.prompt_body()
 
         when_delta = (when - datetime.now()).total_seconds()  # convert to difference in seconds
         if when_delta < 0.0:
@@ -144,3 +127,23 @@ class Reminder(Module):
         _body = " ".join(body)
 
         return (to, time, _body)
+
+    def prompt_date(self):
+        def callback(followup):
+            try:
+                when = datetime.fromisoformat(followup.answer)
+            except Exception:
+                when = None
+            return self.prepare_processed(self.to, when, self.body, self.sender)
+
+        question = "\nCould not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
+        followup = StringFollowup(question, callback)
+        return followup
+
+    def prompt_body(self):
+        def callback(followup):
+            return self.prepare_processed(self.to, self.when, followup.answer, self.sender)
+
+        question = "\nFound no message body. What message should be sent"
+        followup = StringFollowup(question, callback)
+        return followup

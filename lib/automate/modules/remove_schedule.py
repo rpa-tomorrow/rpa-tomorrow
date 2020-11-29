@@ -82,28 +82,30 @@ class RemoveSchedule(Module):
         if len(self.events) == 1:
             self.event = self.events[0]
         elif len(self.events) > 1:
-
-            def callback(followup):
-                if followup.answer is not None:
-                    self.event = followup.answer
-                    return self.prepare_processed(self.to, self.when, self.body, self.sender)
-                else:
-                    raise NoEventFoundError("\nNo event was chosen for deletion")
-
-            followup_str = "Found multiple events: \n"
-            alternatives = []
-            for event in self.events:
-                start_time = event["start"]["dateTime"]
-                start_time = datetime.fromisoformat(start_time)
-                formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
-                alternatives.append((event, f"{event['summary']} at {formated_time}\n"))
-
-            followup = MultiFollowup(followup_str, alternatives, callback, True)
-            return followup
+            return self.prompt_multiple()
         else:
             raise NoEventFoundError("\nCould not find an event.")
 
         return self.prompt_remove_event()
+
+    def prompt_multiple(self):
+        def callback(followup):
+            if followup.answer is not None:
+                self.event = followup.answer
+                return self.prepare_processed(self.to, self.when, self.body, self.sender)
+            else:
+                raise NoEventFoundError("\nNo event was chosen for deletion")
+
+        followup_str = "Found multiple events: \n"
+        alternatives = []
+        for event in self.events:
+            start_time = event["start"]["dateTime"]
+            start_time = datetime.fromisoformat(start_time)
+            formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
+            alternatives.append((event, f"{event['summary']} at {formated_time}\n"))
+
+        followup = MultiFollowup(followup_str, alternatives, callback, True)
+        return followup
 
     def prompt_remove_event(self):
         """ Prompt the user about deleting an event"""

@@ -47,26 +47,11 @@ class Send(Module):
         self.content = body + f"\n\nRegards,\n{sender['name']}"
 
         if not to or len(to) == 0:
-
-            def callback(followup):
-                if not followup.answer:
-                    return self.prepare_processed(None, self.when, self.body, self.sender)
-                else:
-                    return self.prepare_processed([followup.answer], self.when, self.body, self.sender)
-
-            question = "\nFound no receiver. Please enter the name of the receiver"
-            return StringFollowup(question, callback)
-
+            return self.prompt_receiver()
         elif len(to) > 1:
             raise ToManyReceiversError("Can only handle one (1) receiver at this time")
-
         if not body:
-
-            def callback(followup):
-                return self.prepare_processed(self.to, self.when, followup.answer, self.sender)
-
-            question = "\nFound no message body. What message should be sent"
-            return StringFollowup(question, callback)
+            return self.prompt_body()
 
         parsed_recipients = get_emails(self.to, sender)
         recipients = parsed_recipients["emails"]
@@ -155,6 +140,23 @@ class Send(Module):
         _body = " ".join(body)
 
         return (to, time, _body)
+
+    def prompt_receiver(self):
+        def callback(followup):
+            if not followup.answer:
+                return self.prepare_processed(None, self.when, self.body, self.sender)
+            else:
+                return self.prepare_processed([followup.answer], self.when, self.body, self.sender)
+
+        question = "\nFound no receiver. Please enter the name of the receiver"
+        return StringFollowup(question, callback)
+
+    def prompt_body(self):
+        def callback(followup):
+            return self.prepare_processed(self.to, self.when, followup.answer, self.sender)
+
+        question = "\nFound no message body. What message should be sent"
+        return StringFollowup(question, callback)
 
 
 class ToManyReceiversError(Error):
