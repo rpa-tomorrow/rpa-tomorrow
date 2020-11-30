@@ -164,7 +164,7 @@ class DesignView(QtWidgets.QWidget):
                 model.query = proc_query
             # FIXME(alexander): uses same views for all tasks!!!
             view = SendEmailView(model)
-            
+
             if not proc_view:
                 proc_view = ProcessView(self.process_editor, view, model)
                 proc_view.show()
