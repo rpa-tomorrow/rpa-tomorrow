@@ -4,12 +4,13 @@ import spacy
 import lib.utils.ner as ner
 
 from lib import Error
+from lib.automate.followup import MultiFollowup, BooleanFollowup
 from lib.utils import contacts
 from lib.automate.google import Google
 from lib.automate.modules import Module
 import lib.utils.tools.time_convert as tc
 from datetime import datetime, timedelta
-from lib.utils.contacts import prompt_contact_choice, followup_contact_choice
+from lib.utils.contacts import prompt_contact_choice
 
 log = logging.getLogger(__name__)
 
@@ -71,7 +72,6 @@ class UpdateSchedule(Module):
                 attendees.append(email)
             for (name, candidates) in parsed_attendees["uncertain"]:
                 self.uncertain_attendee = (name, candidates)
-                self.followup_type = "to_uncertain"
                 return prompt_contact_choice(name, candidates)
 
             contacts.get_emails(self.to)
@@ -82,22 +82,30 @@ class UpdateSchedule(Module):
         if len(self.events) == 1:
             self.event = self.events[0]
         elif len(self.events) > 1:
-            self.followup_type = "to_many_events"
-
-            followup_str = "Found multiple events: \n"
-            for n in range(len(self.events)):
-                event = self.events[n]
-                start_time = event["start"]["dateTime"]
-                start_time = datetime.fromisoformat(start_time)
-                formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
-                followup_str += f"[{n+1}] {event['summary']} at {formated_time}\n"
-            followup_str += f"\n[0] None of the above \nPlease choose one (0-{len(self.events)})"
-
-            return followup_str
+            return self.prompt_multiple()
         else:
             raise NoEventFoundError("Could not find an event.")
 
         return self.prompt_update_event()
+
+    def prompt_multiple(self):
+        def callback(followup):
+            if followup.answer is not None:
+                self.event = followup.answer
+                return self.prepare_processed(self.to, self.when, self.body, self.sender)
+            else:
+                raise NoEventFoundError("\nCould not find an event")
+
+        followup_str = "Found multiple events: \n"
+        alternatives = []
+        for event in self.events:
+            start_time = event["start"]["dateTime"]
+            start_time = datetime.fromisoformat(start_time)
+            formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
+            alternatives.append((event, f"{event['summary']} at {formated_time}"))
+
+        followup = MultiFollowup(followup_str, alternatives, callback, True)
+        return followup
 
     def prompt_update_event(self):
         """ Prompt the user about updating an event"""
@@ -105,36 +113,17 @@ class UpdateSchedule(Module):
         start_time = datetime.fromisoformat(start_time)
         formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
 
-        self.followup_type = "self_busy"
-        return (
-            f"You have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
-            "Do you want to update it? [Y/n]"
-        )
-
-    def followup(self, answer):
-        """ """
-        if self.followup_type == "self_busy":
-            # if the user answers "yes" on the followup question then update the event from the calendar
-            if answer.lower() in ["y", "yes", ""]:
+        def callback(followup):
+            if followup.answer:
                 return None
             else:
-                raise ActionInterruptedByUserError("Event Not Updated.")
-        elif self.followup_type == "to_uncertain":
-            return followup_contact_choice(self, answer)
-        elif self.followup_type == "to_many_events":
-            try:
-                choice = int(answer) - 1
-            except Exception:
-                return self.prepare_processed(self.to, self.when, self.body, self.sender)
+                raise ActionInterruptedByUserError("Event Not removed.")
 
-            if choice < 0:
-                raise NoEventFoundError("No event was chosen for deletion")
-
-            elif choice >= 0 and choice < len(self.events):
-                self.event = self.events[choice]
-                return self.prepare_processed(self.to, self.when, self.body, self.sender)
-        else:
-            raise NotImplementedError("")
+        question = (
+            f"You have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
+            "Do you want to update it?"
+        )
+        return BooleanFollowup(question, callback, default_answer=True)
 
     def execute(self):
         start_time = datetime.fromisoformat(self.event["start"]["dateTime"])

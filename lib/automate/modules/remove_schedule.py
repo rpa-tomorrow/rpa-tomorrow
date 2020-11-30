@@ -102,7 +102,7 @@ class RemoveSchedule(Module):
             start_time = event["start"]["dateTime"]
             start_time = datetime.fromisoformat(start_time)
             formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
-            alternatives.append((event, f"{event['summary']} at {formated_time}\n"))
+            alternatives.append((event, f"{event['summary']} at {formated_time}"))
 
         followup = MultiFollowup(followup_str, alternatives, callback, True)
         return followup
