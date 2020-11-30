@@ -1,7 +1,5 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
-import PyQt5.QtWidgets as QtWidgets
-import PyQt5.QtCore as QtCore
-import PyQt5.QtGui as QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 import os
 import sys
 import resources  # noqa: F401
@@ -42,6 +40,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def set_active_view(self, view):
         self.content.set_active_view(view)
+        self.menu.set_active_view(view)
         self.update()
 
     def set_info_message(self, msg):
@@ -60,8 +59,8 @@ class ContentFrame(QtWidgets.QFrame):
 
         self.main_window = main_window
         self.design_view = DesignView(main_window)
-        self.save_view = FileView(main_window, self.main_window.model)
-        self.load_view = FileView(main_window, self.main_window.model)
+        self.save_view = FileView(main_window, self.design_view, self.main_window.model, True)
+        self.load_view = FileView(main_window, self.design_view, self.main_window.model, False)
         self.play_view = PlayView(main_window, self.design_view.process_editor)
         self.settings_view = SettingsView()
         self.info_view = QtWidgets.QFrame()
@@ -94,7 +93,8 @@ class MenuBarButton(QtWidgets.QToolButton):
         self.label.move(0, 50)
 
     def set_active_view(self):
-        self.parent.set_active_view(self, self.view_id)
+        self.parent.set_active_view(self.view_id)
+        self.parent.parent.set_active_view(self.view_id)
 
 
 class SideMenuBar(QtWidgets.QFrame):
@@ -123,11 +123,13 @@ class SideMenuBar(QtWidgets.QFrame):
 
         self.setLayout(layout)
 
-    def set_active_view(self, target, view):
-        for item in self.items:
-            item.setChecked(False)
-        target.setChecked(True)
-        self.parent.set_active_view(view)
+    def set_active_view(self, view):
+        for i in range(0, len(self.items)):
+            item = self.items[i]
+            if i == view:
+                item.setChecked(True)
+            else:
+                item.setChecked(False)
 
 
 class BottomInfoBar(QtWidgets.QFrame):

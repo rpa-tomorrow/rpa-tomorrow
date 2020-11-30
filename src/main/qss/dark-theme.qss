@@ -27,6 +27,11 @@ QToolButton:pressed {
     background-color: #535d70;
 }
 
+QToolButton:disabled {
+    background-color: #22262e;
+    color: #adadad;
+}
+
 ProcessEntryView {
     background-color: #343a45;
     border-radius: 4px;
@@ -46,30 +51,6 @@ QHeaderView {
 
 QHeaderView::section {
     background-color: #21252b;
-}
-
-QTreeView::branch:has-siblings:!adjoins-item {
-    border-image: url(vline.png) 0;
-}
-
-QTreeView::branch:has-siblings:adjoins-item {
-    border-image: url(branch-more.png) 0;
-}
-
-QTreeView::branch:!has-children:!has-siblings:adjoins-item {
-    border-image: url(branch-end.png) 0;
-}
-
-QTreeView::branch:has-children:!has-siblings:closed,
-QTreeView::branch:closed:has-children:has-siblings {
-    border-image: none;
-    image: url(branch-closed.png);
-}
-
-QTreeView::branch:open:has-children:!has-siblings,
-QTreeView::branch:open:has-children:has-siblings  {
-    border-image: none;
-    image: url(branch-open.png);
 }
 
 MainWindow {

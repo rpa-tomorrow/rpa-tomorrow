@@ -12,7 +12,7 @@ class Model:
     def save(self, filepath=None):
         path = filepath or self.absolute_path
         if not path:
-            path = self.filename + ".yaml"
+            path = self.filename + ".rpa"
         if not self.absolute_path:
             self.absolute_path = path
 
