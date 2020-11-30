@@ -52,7 +52,6 @@ class MainWindow(QtWidgets.QMainWindow):
         if self.settings_view:
             self.settings_view = SettingsView()
 
-
 class ContentFrame(QtWidgets.QFrame):
     def __init__(self, main_window, *args, **kwargs):
         super(ContentFrame, self).__init__(*args, **kwargs)
@@ -134,17 +133,24 @@ class BottomInfoBar(QtWidgets.QFrame):
     def __init__(self, *args, **kwargs):
         super(BottomInfoBar, self).__init__(*args, **kwargs)
         layout = QtWidgets.QHBoxLayout()
-        # layout.setContentsMargins(8, 0, 8, )
+        layout.setContentsMargins(8, 0, 8, 0)
         self.setMaximumHeight(32)
         # self.running_tasks_btn = QtWidgets.QToolButton()
         # self.running_tasks_btn.setText("\uf0ae")
         self.info_label = QtWidgets.QLabel("Done!")
+        self.info_label.setMinimumHeight(32)
+        self.info_label.setMaximumHeight(32)
 
         # layout.addWidget(self.running_tasks_btn)
         layout.addWidget(self.info_label)
-        layout.addStretch(1)
+        # layout.addStretch(1)
 
         self.setLayout(layout)
+
+    def set_info_label_text(text):
+        metrics = QFontMetrics(label.font());
+        elided_text = metrics.elidedText(text, QtCore.Qt.ElideRight, label.width());
+        label.setText(elided_text);
 
 
 def exit_program():
@@ -152,6 +158,9 @@ def exit_program():
 
 
 def initialize_app():
+    if hasattr(QtCore.Qt, "AA_EnableHighDpiScaling"):
+        QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+
     load_settings()
     appctxt = ApplicationContext()
     window = MainWindow()
@@ -191,6 +200,7 @@ def initialize_app():
     window.setStyleSheet(stylesheet)
     window.resize(1200, 800)
     window.show()
+    window.set_info_message("Hello welcome to RPA Tomorrow! Start by creating your first automation task by writing something at the top of the window.")
     return appctxt, window
 
 

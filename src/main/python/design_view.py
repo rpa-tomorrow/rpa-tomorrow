@@ -122,15 +122,26 @@ class DesignView(QtWidgets.QWidget):
         self.process_text_edit.save_cursor_pos()
 
         query = self.process_text_edit.get_text()
+        query_parts = query.split(".")
         if query == "":
             return
 
-        model = None
-        view = None
+        tasks = []
 
         try:
-            task = self.nlp.prepare(query)[0]
-            # TODO(alexander): use different models, but they are all similar atm.
+            tasks = self.nlp.prepare(query)
+        except Exception:
+            traceback.print_exc()
+            self.process_text_edit.restore_cursor_pos()
+            display_error_message(str(sys.exc_info()[1]) + ".")
+            return
+
+        for i, task in enumerate(tasks):
+            model = None
+            view = None
+            proc_query = ""
+            if len(query_parts) > i:
+                proc_query = query_parts[i].strip()
             if isinstance(task, Send):
                 model = proc_models.SendModel()
                 model.recipients = ", ".join(task.to)
@@ -150,28 +161,24 @@ class DesignView(QtWidgets.QWidget):
                 display_error_message("Failed to understand what task you wanted to perform.")
                 return
             if model:
-                model.query = query
+                model.query = proc_query
+            # FIXME(alexander): uses same views for all tasks!!!
             view = SendEmailView(model)
-        except Exception:
-            traceback.print_exc()
-            self.process_text_edit.restore_cursor_pos()
-            display_error_message(str(sys.exc_info()[1]) + ".")
-            return
-
-        if not proc_view:
-            proc_view = ProcessView(self.process_editor, view, model)
-            proc_view.show()
-            self.process_editor.append_process(proc_view, model)
-        else:
-            proc_view.title.setText(model.name)
-            proc_view.layout.replaceWidget(proc_view.view, view)
-            proc_view.view.close()
-            proc_view.view = view
-
-            self.model.remove_process(proc_view.model)
-            self.model.append_process(model)
-            proc_view.model = model
-            self.update()
+            
+            if not proc_view:
+                proc_view = ProcessView(self.process_editor, view, model)
+                proc_view.show()
+                self.process_editor.append_process(proc_view, model)
+                proc_view = None
+            else:
+                proc_view.title.setText(model.name)
+                proc_view.layout.replaceWidget(proc_view.view, view)
+                proc_view.view.close()
+                proc_view.view = view
+                self.model.remove_process(proc_view.model)
+                self.model.append_process(model)
+                proc_view.model = model
+        self.update()
 
         self.process_text_edit.set_cursor_pos(0)
         self.process_text_edit.clear()
