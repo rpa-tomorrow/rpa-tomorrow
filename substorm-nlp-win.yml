@@ -73,6 +73,11 @@ dependencies:
     - altgraph==0.17
     - beautifulsoup4==4.9.3
     - cachetools==4.1.1
+    - en-core-web-md==2.3.1
+    - en-rpa-simple==0.0.1
+    - en-rpa-simple-calendar==0.0.3
+    - en-rpa-simple-email==0.0.1
+    - en-rpa-simple-reminder==0.0.1
     - fbs==0.9.0
     - future==0.18.2
     - fuzzywuzzy==0.18.0
@@ -96,16 +101,20 @@ dependencies:
     - pyasn1==0.4.8
     - pyasn1-modules==0.2.8
     - pyinstaller==3.4
+    - pypiwin32==223
     - pyqt5==5.15.1
     - pyqt5-sip==12.8.1
     - python-levenshtein==0.12.0
     - pytz==2020.4
+    - pywin32==300
     - pywin32-ctypes==0.2.0
     - requests-oauthlib==1.3.0
     - rsa==4.6
     - soupsieve==2.0.1
     - typing-inspect==0.6.0
     - uritemplate==3.0.1
+    - win10toast==0.9
     - word2number==1.1
+    - xx-ent-wiki-sm==2.3.0
 prefix: C:\Users\alexa\anaconda3\envs\substorm-nlp-win
 
