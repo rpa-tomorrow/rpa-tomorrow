@@ -120,8 +120,7 @@ class UpdateSchedule(Module):
                 raise ActionInterruptedByUserError("Event Not removed.")
 
         question = (
-            f"You have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
-            "Do you want to update it?"
+            f"You have the event '{self.event['summary']}' scheduled at {formated_time}.\n" "Do you want to update it?"
         )
         return BooleanFollowup(question, callback, default_answer=True)
 
