@@ -20,11 +20,11 @@ SCOPES = [
 ]
 
 
-class RemoveSchedule(Module):
-    verbs = ["unschedule", "remove"]
+class UpdateSchedule(Module):
+    verbs = ["reschedule", "update"]
 
     def __init__(self, model_pool):
-        super(RemoveSchedule, self).__init__(model_pool)
+        super(UpdateSchedule, self).__init__(model_pool)
         self.nlp_model = None
 
     def prepare(self, nlp_model_names, text, sender):
@@ -53,11 +53,11 @@ class RemoveSchedule(Module):
 
         # if the event has already been found then just prompt the user
         if self.event:
-            return self.prompt_remove_event()
+            return self.prompt_update_event()
 
         # try to fetch the event by the summary
-        if body:
-            self.events = self.calendar.get_event_by_summary(body)
+        if body["summary"] != "":
+            self.events = self.calendar.get_event_by_summary(body["summary"])
 
         # if no event could be found using the summary try to do it with the user inputed time
         if (not self.events) and self.when:
@@ -95,30 +95,30 @@ class RemoveSchedule(Module):
 
             return followup_str
         else:
-            raise NoEventFoundError("\nCould not find an event.")
+            raise NoEventFoundError("Could not find an event.")
 
-        return self.prompt_remove_event()
+        return self.prompt_update_event()
 
-    def prompt_remove_event(self):
-        """ Prompt the user about deleting an event"""
+    def prompt_update_event(self):
+        """ Prompt the user about updating an event"""
         start_time = self.event["start"]["dateTime"]
         start_time = datetime.fromisoformat(start_time)
         formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
 
         self.followup_type = "self_busy"
         return (
-            f"\nYou have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
-            "Do you want to remove it? [Y/n]"
+            f"You have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
+            "Do you want to update it? [Y/n]"
         )
 
     def followup(self, answer):
         """ """
         if self.followup_type == "self_busy":
-            # if the user answers "yes" on the followup question then remove the event from the calendar
+            # if the user answers "yes" on the followup question then update the event from the calendar
             if answer.lower() in ["y", "yes", ""]:
                 return None
             else:
-                raise ActionInterruptedByUserError("Event Not removed.")
+                raise ActionInterruptedByUserError("Event Not Updated.")
         elif self.followup_type == "to_uncertain":
             return followup_contact_choice(self, answer)
         elif self.followup_type == "to_many_events":
@@ -128,7 +128,7 @@ class RemoveSchedule(Module):
                 return self.prepare_processed(self.to, self.when, self.body, self.sender)
 
             if choice < 0:
-                raise NoEventFoundError("\nNo event was chosen for deletion")
+                raise NoEventFoundError("No event was chosen for deletion")
 
             elif choice >= 0 and choice < len(self.events):
                 self.event = self.events[choice]
@@ -137,16 +137,24 @@ class RemoveSchedule(Module):
             raise NotImplementedError("")
 
     def execute(self):
-        self.calendar.delete_event(self.event["id"])
-        return f"\n'{self.event['summary']}' was removed from your calendar"
+        start_time = datetime.fromisoformat(self.event["start"]["dateTime"])
+        end_time = datetime.fromisoformat(self.event["end"]["dateTime"])
+        duration = end_time - start_time
+
+        # Parse Time
+        new_start_time = {"dateTime": tc.local_to_utc_time(self.body["new start"]).isoformat()}
+        new_end_time = {"dateTime": tc.local_to_utc_time(self.body["new start"] + duration).isoformat()}
+        self.calendar.update_event(self.event["id"], {"start": new_start_time, "end": new_end_time})
+        return f"'{self.event['summary']}' was updated"
 
     def nlp(self, text):
         doc = self.nlp_model(text)
 
         to = []
-        when = []
+        start = []
         body = []
         persons = []
+        nstart = []
 
         locked_ner_model = self.model_pool.get_shared_model("xx_ent_wiki_sm")
         with locked_ner_model:
@@ -156,20 +164,32 @@ class RemoveSchedule(Module):
             if token.dep_ == "TO":
                 to.append(token.text)
             elif token.dep_ == "START":
-                when.append(token.text)
+                start.append(token.text)
             elif token.dep_ == "BODY":
                 body.append(token.text)
+            elif token.dep_ == "NSTART":
+                nstart.append(token.text)
             log.debug("%s %s", token.text, token.dep_)
-
-            time = datetime.now() + timedelta(seconds=5)
-            if len(when) > 0:
-                time = tc.parse_time(when)
 
         to = ner.cross_check_names(to, persons)
         log.debug("Recipients: %s", ",".join(to))
-        _body = " ".join(body)
 
-        return (to, time, _body)
+        start_time = datetime.now()
+        if len(start) == 0:
+            start_time = start_time + timedelta(seconds=5)
+        else:
+            start_time = tc.parse_time(start)
+
+        new_start_time = datetime.now()
+        if len(nstart) == 0:
+            new_start_time = new_start_time + timedelta(seconds=5)
+        else:
+            new_start_time = tc.parse_time(nstart)
+
+        _body = {"summary": " ".join(body)}
+        _body["new start"] = new_start_time
+
+        return (to, start_time, _body)
 
 
 class NoEventFoundError(Error):

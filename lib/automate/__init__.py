@@ -13,6 +13,7 @@ class Automate:
             import_module("lib.automate.modules.send").Send,
             import_module("lib.automate.modules.schedule").Schedule,
             import_module("lib.automate.modules.remove_schedule").RemoveSchedule,
+            import_module("lib.automate.modules.update_schedule").UpdateSchedule,
             import_module("lib.automate.modules.reminder").Reminder,
         ]
         self.response_callback = None

@@ -57,8 +57,8 @@ def commands(arr, selector):
 def help_output():
     dirname = os.path.dirname(__file__)
     filename = os.path.join(dirname, "helpprompt.txt")
-    f = open(filename, "r")
-    print(f.read())
+    with click.open_file(filename, "r") as f:
+        click.echo(f.read())
 
 
 def run_selector(input, selector):
@@ -66,5 +66,8 @@ def run_selector(input, selector):
         responses = selector.run(input)
         for response in responses:
             click.echo(response + "\n")
+    except (KeyboardInterrupt, EOFError):
+        click.echo("Task aborted. \n")
     except Exception as e:
-        print("Failed to execute action.\n", e, file=sys.stderr)
+        click.echo("Failed to execute action.")
+        click.echo(str(e) + "\n")
