@@ -1,4 +1,5 @@
 QToolButton {
+    color: #343a45;
     background-color: white;
 }
 
@@ -7,6 +8,18 @@ QToolButton:hover {
 }
 
 QToolButton:pressed {
+    background-color: #d1d1d1;
+}
+
+QPushButton {
+    background-color: white;
+}
+
+QPushButton:hover {
+    background-color: #e0e0e0;
+}
+
+QPushButton:pressed {
     background-color: #d1d1d1;
 }
 
@@ -44,6 +57,7 @@ ProcessConnector {
 }
 
 MenuBarButton {
+    color: white;
     background-color: dodgerblue;
 }
 
@@ -66,4 +80,13 @@ MenuBarButton:checked {
 ProcessConnector:Hover {
     background-color: #187aad;
     border-color: #187aad;
+}
+
+CurrentDirectoryView {
+    background-color: white;
+    border-radius: 4px
+}
+
+QListView#fileView {
+    background-color: white;
 }

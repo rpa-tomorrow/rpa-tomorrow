@@ -1,6 +1,4 @@
-import PyQt5.QtWidgets as QtWidgets
-import PyQt5.QtGui as QtGui
-import PyQt5.QtCore as QtCore
+from PyQt5 import QtWidgets, QtGui, QtCore
 
 import traceback
 import sys
@@ -62,7 +60,7 @@ class DesignView(QtWidgets.QWidget):
         self.save_shortcut.activated.connect(self.save_model)
 
         self.load_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+F"), self)
-        self.load_shortcut.activated.connect(self.DEBUG_load_model)
+        self.load_shortcut.activated.connect(self.load_model)
 
         self.select_all_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+A"), self)
         self.select_all_shortcut.activated.connect(self.process_editor.select_all_processes)
@@ -80,16 +78,23 @@ class DesignView(QtWidgets.QWidget):
         self.cancel_actions_shortcut.activated.connect(self.cancel_actions)
 
     def save_model(self):
-        self.model.save()
-        self.main_window.set_info_message("Wrote " + self.model.absolute_path)
+        if self.model.absolute_path:
+            self.model.save()
+            self.main_window.set_info_message("Wrote " + self.model.absolute_path)
+        else:
+            self.main_window.content.save_view.filename_view.setFocus()
+            self.main_window.content.save_view.filename_view.selectAll()
+            self.main_window.set_active_view(1)
 
-    # TODO(alexander): temporary load model only for development and testing
-    def DEBUG_load_model(self):
+    def load_model(self):
+        self.main_window.content.load_view.filename_view.setFocus()
+        self.main_window.content.load_view.filename_view.selectAll()
+        self.main_window.set_active_view(2)
+
+    def rebuild_from_loaded_model(self):
         for view in self.process_editor.process_views.values():
             view.close()
         self.process_editor.process_views.clear()
-
-        self.model.load("untitled.yaml")
 
         for id, proc in self.model.processes.items():
             view = self.process_editor.create_process_view(proc)
