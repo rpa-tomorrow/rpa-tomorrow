@@ -110,7 +110,12 @@ def prompt_contact_choice(name: str, candidates, module) -> str:
                 raise NoContactFoundError("No contact with name " + name + " was found")
 
         followup_str = f"Found multiple contacts with the name {name}"
-        return MultiFollowup(followup_str, candidates, callback, True)
+        # the  MultiFollowup takes a list of tuples (the options variable) where the first element in
+        # the tuple is the actuall choice to be made, in this case the email of the wanted contact
+        # the second element in the tuple is what's to be outputted to the screen,
+        # in this case it should be "Contact Name - Contact Email" to give enough information to the user
+        options = list(map(lambda c: (c[1], c[0] + " - " + c[1]), candidates))
+        return MultiFollowup(followup_str, options, callback, True)
 
 
 class NoContactFoundError(Error):
