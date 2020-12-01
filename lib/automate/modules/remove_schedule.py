@@ -4,7 +4,7 @@ import spacy
 import lib.utils.ner as ner
 
 from lib import Error
-from lib.automate.followup import BooleanFollowup, MultiFollowup
+from lib.automate.followup import MultiFollowup
 from lib.utils import contacts
 from lib.automate.google import Google
 from lib.automate.modules import Module
@@ -55,10 +55,7 @@ class RemoveSchedule(Module):
 
         # if the event has already been found then just prompt the user
         if self.event:
-            start_time = self.event["start"]["dateTime"]
-            start_time = datetime.fromisoformat(start_time)
-            formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
-            self.description = f"\nYou have the event '{self.event['summary']}' scheduled at {formated_time}.\nDo you want to remove it?"
+            self.description = self.get_task_description(self.event)
             return None
 
         # try to fetch the event by the summary
@@ -86,11 +83,7 @@ class RemoveSchedule(Module):
 
         if len(self.events) == 1:
             self.event = self.events[0]
-
-            start_time = self.event["start"]["dateTime"]
-            start_time = datetime.fromisoformat(start_time)
-            formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
-            self.description = f"\nYou have the event '{self.event['summary']}' scheduled at {formated_time}.\nDo you want to remove it?"
+            self.description = self.get_task_description(self.event)
         elif len(self.events) > 1:
             return self.prompt_multiple()
         else:
@@ -149,6 +142,14 @@ class RemoveSchedule(Module):
         _body = " ".join(body)
 
         return (to, time, _body)
+
+    def get_task_description(self, event):
+        start_time = self.event["start"]["dateTime"]
+        start_time = datetime.fromisoformat(start_time)
+        formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
+        return (
+            f"\nYou have the event '{self.event['summary']}' scheduled at {formated_time}.\nDo you want to remove it?"
+        )
 
 
 class NoEventFoundError(Error):
