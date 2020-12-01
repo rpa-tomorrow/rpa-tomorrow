@@ -27,6 +27,8 @@ class Schedule(Module):
         if self.nlp_model is None:
             self.nlp_model = spacy.load(nlp_model_names["schedule"])
         to, when, body = self.nlp(text)
+
+        self.description = ""
         return self.prepare_processed(to, when, body, sender)
 
     def prepare_processed(self, to, when, body, sender):
@@ -67,6 +69,7 @@ class Schedule(Module):
         attendees = [settings["address"]] + attendees
         event = calendar.event(self.when["start"], self.when["end"], attendees, self.body)
         self.event = event
+        self.description = f"The event {self.body} at {self.when['start'].strftime('%H:%M, %A, %d. %B %Y')} was prepared\nDo you want to book it?"
 
         # Check if we are busy
         me_busy = calendar.freebusy(self.when["start"], self.when["end"], ["primary"])

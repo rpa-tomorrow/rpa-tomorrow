@@ -42,6 +42,7 @@ class UpdateSchedule(Module):
 
         self.events = []
         self.event = None
+        self.description = ""
 
         return self.prepare_processed(to, when, body, sender)
 
@@ -54,7 +55,14 @@ class UpdateSchedule(Module):
 
         # if the event has already been found then just prompt the user
         if self.event:
-            return self.prompt_update_event()
+            start_time = self.event["start"]["dateTime"]
+            start_time = datetime.fromisoformat(start_time)
+            formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
+            self.description = (
+                f"You have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
+                "Do you want to update it?"
+            )
+            return None
 
         # try to fetch the event by the summary
         if body["summary"] != "":
@@ -86,7 +94,12 @@ class UpdateSchedule(Module):
         else:
             raise NoEventFoundError("Could not find an event.")
 
-        return self.prompt_update_event()
+        start_time = self.event["start"]["dateTime"]
+        start_time = datetime.fromisoformat(start_time)
+        formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
+        self.description = (
+            f"You have the event '{self.event['summary']}' scheduled at {formated_time}.\n" "Do you want to update it?"
+        )
 
     def prompt_multiple(self):
         def callback(followup):
@@ -106,23 +119,6 @@ class UpdateSchedule(Module):
 
         followup = MultiFollowup(followup_str, alternatives, callback, True)
         return followup
-
-    def prompt_update_event(self):
-        """ Prompt the user about updating an event"""
-        start_time = self.event["start"]["dateTime"]
-        start_time = datetime.fromisoformat(start_time)
-        formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
-
-        def callback(followup):
-            if followup.answer:
-                return None
-            else:
-                raise ActionInterruptedByUserError("Event Not removed.")
-
-        question = (
-            f"You have the event '{self.event['summary']}' scheduled at {formated_time}.\n" "Do you want to update it?"
-        )
-        return BooleanFollowup(question, callback, default_answer=True)
 
     def execute(self):
         start_time = datetime.fromisoformat(self.event["start"]["dateTime"])

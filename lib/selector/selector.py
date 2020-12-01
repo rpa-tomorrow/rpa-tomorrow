@@ -4,6 +4,7 @@ import logging
 
 from lib.automate import Automate
 from lib.settings import SETTINGS
+from lib.automate.followup import BooleanFollowup
 
 ROOT_LABEL = "ROOT"
 SIMILARITY_MIN = 0.6
@@ -92,8 +93,23 @@ class ModuleSelector:
         responses = []
         for task in tasks:
             if task is not None:
-                response = task.execute()
-                responses.append(response)
+
+                def callback(followup):
+                    if followup.answer:
+                        response = task.execute()
+                        responses.append(response)
+                    else:
+                        responses.append("Task aborted.")
+
+                # prompt the user with the description of the task before executing it
+                if task.description:
+                    followup = BooleanFollowup(task.description, callback, default_answer=False)
+                    followup.handle_cli()
+                else:
+                    # some tasks might not need prompting before execution,
+                    # thus if there isn't a description of the task then execute it without prompt
+                    response = task.execute()
+                    responses.append(response)
             else:
                 responses.append("I did not understand")
 

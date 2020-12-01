@@ -42,6 +42,7 @@ class RemoveSchedule(Module):
 
         self.events = []
         self.event = None
+        self.description = ""
 
         return self.prepare_processed(to, when, body, sender)
 
@@ -54,7 +55,11 @@ class RemoveSchedule(Module):
 
         # if the event has already been found then just prompt the user
         if self.event:
-            return self.prompt_remove_event()
+            start_time = self.event["start"]["dateTime"]
+            start_time = datetime.fromisoformat(start_time)
+            formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
+            self.description = f"\nYou have the event '{self.event['summary']}' scheduled at {formated_time}.\nDo you want to remove it?"
+            return None
 
         # try to fetch the event by the summary
         if body:
@@ -81,12 +86,15 @@ class RemoveSchedule(Module):
 
         if len(self.events) == 1:
             self.event = self.events[0]
+
+            start_time = self.event["start"]["dateTime"]
+            start_time = datetime.fromisoformat(start_time)
+            formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
+            self.description = f"\nYou have the event '{self.event['summary']}' scheduled at {formated_time}.\nDo you want to remove it?"
         elif len(self.events) > 1:
             return self.prompt_multiple()
         else:
             raise NoEventFoundError("\nCould not find an event.")
-
-        return self.prompt_remove_event()
 
     def prompt_multiple(self):
         def callback(followup):
@@ -105,25 +113,6 @@ class RemoveSchedule(Module):
             alternatives.append((event, f"{event['summary']} at {formated_time}"))
 
         followup = MultiFollowup(followup_str, alternatives, callback, True)
-        return followup
-
-    def prompt_remove_event(self):
-        """ Prompt the user about deleting an event"""
-        start_time = self.event["start"]["dateTime"]
-        start_time = datetime.fromisoformat(start_time)
-        formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
-
-        def callback(followup):
-            if followup.answer:
-                return None
-            else:
-                raise ActionInterruptedByUserError("Event Not removed.")
-
-        question = (
-            f"\nYou have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
-            "Do you want to remove it?"
-        )
-        followup = BooleanFollowup(question, callback, default_answer=True)
         return followup
 
     def execute(self):
