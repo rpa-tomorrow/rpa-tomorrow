@@ -102,7 +102,7 @@ class ModuleSelector:
                         responses.append("Task aborted.")
 
                 # prompt the user with the description of the task before executing it
-                if task.description:
+                if task.description is not None:
                     followup = BooleanFollowup(task.description, callback, default_answer=False)
                     followup.handle_cli()
                 else:

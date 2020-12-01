@@ -27,14 +27,14 @@ class CalendarMock(Calendar):
             {
                 "summary": "test",
                 "attendees": [{"email": "niklas@email.com"}],
-                "start": {"date": start_time_1.isoformat(), "dateTime": start_time_1.time()},
-                "end": {"date": end_time_1.isoformat(), "dateTime": end_time_1.time()},
+                "start": {"date": start_time_1.isoformat(), "dateTime": start_time_1.isoformat()},
+                "end": {"date": end_time_1.isoformat(), "dateTime": end_time_1.isoformat()},
             },
             {
                 "summary": "another one",
                 "attendees": [{"email": "hugo@email.com"}],
-                "start": {"date": start_time_2.isoformat(), "dateTime": start_time_2.time()},
-                "end": {"date": end_time_2.isoformat(), "dateTime": end_time_2.time()},
+                "start": {"date": start_time_2.isoformat(), "dateTime": start_time_2.isoformat()},
+                "end": {"date": end_time_2.isoformat(), "dateTime": end_time_2.isoformat()},
             },
         ]
 
@@ -71,8 +71,13 @@ def calendar_not_busy(monkeypatch):
     def mock_execute(self):
         return self.event
 
+    def mock_handle_cli(self):
+        self.answer = "y"
+        self.callback()
+
     monkeypatch.setattr("lib.automate.modules.schedule.Google", GoogleNeverBusyMock)
     monkeypatch.setattr("lib.automate.modules.schedule.Schedule.execute", mock_execute)
+    monkeypatch.setattr("lib.automate.followup.BooleanFollowup.handle_cli", mock_handle_cli)
 
 
 @pytest.fixture
@@ -85,7 +90,12 @@ def send_email(monkeypatch):
     def mock_send_email(self, settings, receiver, subject, content):
         return {"settings": settings, "receiver": receiver, "subject": subject, "content": content}
 
+    def mock_handle_cli(self):
+        self.answer = "y"
+        self.callback()
+
     monkeypatch.setattr("lib.automate.modules.send.Send.send_email", mock_send_email)
+    monkeypatch.setattr("lib.automate.followup.BooleanFollowup.handle_cli", mock_handle_cli)
 
 
 @pytest.fixture
@@ -96,14 +106,12 @@ def calendar_with_events(monkeypatch):
     get_events.
     """
 
-    def mock_prompt_remove_event(self):
-        """ Dont ask user for confirmation to delete during test """
-        pass
+    def mock_handle_cli(self):
+        self.answer = "y"
+        self.callback()
 
     monkeypatch.setattr("lib.automate.modules.remove_schedule.Google", GoogleMock)
-    monkeypatch.setattr(
-        "lib.automate.modules.remove_schedule.RemoveSchedule.prompt_remove_event", mock_prompt_remove_event
-    )
+    monkeypatch.setattr("lib.automate.followup.BooleanFollowup.handle_cli", mock_handle_cli)
 
 
 @pytest.fixture
