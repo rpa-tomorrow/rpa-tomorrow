@@ -73,11 +73,6 @@ dependencies:
     - altgraph==0.17
     - beautifulsoup4==4.9.3
     - cachetools==4.1.1
-    - en-core-web-md==2.3.1
-    - en-rpa-simple==0.0.1
-    - en-rpa-simple-calendar==0.0.3
-    - en-rpa-simple-email==0.0.1
-    - en-rpa-simple-reminder==0.0.1
     - fbs==0.9.0
     - future==0.18.2
     - fuzzywuzzy==0.18.0
@@ -115,6 +110,5 @@ dependencies:
     - uritemplate==3.0.1
     - win10toast==0.9
     - word2number==1.1
-    - xx-ent-wiki-sm==2.3.0
 prefix: C:\Users\alexa\anaconda3\envs\substorm-nlp-win
 
