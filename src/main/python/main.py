@@ -136,16 +136,12 @@ class BottomInfoBar(QtWidgets.QFrame):
     def __init__(self, *args, **kwargs):
         super(BottomInfoBar, self).__init__(*args, **kwargs)
         layout = QtWidgets.QHBoxLayout()
-        # layout.setContentsMargins(8, 0, 8, )
+        layout.setContentsMargins(8, 0, 8, 0)
         self.setMaximumHeight(32)
-        # self.running_tasks_btn = QtWidgets.QToolButton()
-        # self.running_tasks_btn.setText("\uf0ae")
         self.info_label = QtWidgets.QLabel("Done!")
-
-        # layout.addWidget(self.running_tasks_btn)
+        self.info_label.setMinimumHeight(32)
+        self.info_label.setMaximumHeight(32)
         layout.addWidget(self.info_label)
-        layout.addStretch(1)
-
         self.setLayout(layout)
 
 
@@ -193,6 +189,10 @@ def initialize_app():
     window.setStyleSheet(stylesheet)
     window.resize(1200, 800)
     window.show()
+    window.set_info_message(
+        "Hello welcome to RPA Tomorrow! Start by creating your "
+        + "first automation task by writing something at the top of the window."
+    )
     return appctxt, window
 
 

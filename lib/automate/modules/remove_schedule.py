@@ -4,12 +4,13 @@ import spacy
 import lib.utils.ner as ner
 
 from lib import Error
+from lib.automate.followup import BooleanFollowup, MultiFollowup
 from lib.utils import contacts
 from lib.automate.google import Google
 from lib.automate.modules import Module
 import lib.utils.tools.time_convert as tc
 from datetime import datetime, timedelta
-from lib.utils.contacts import prompt_contact_choice, followup_contact_choice
+from lib.utils.contacts import prompt_contact_choice
 
 log = logging.getLogger(__name__)
 
@@ -71,8 +72,7 @@ class RemoveSchedule(Module):
                 attendees.append(email)
             for (name, candidates) in parsed_attendees["uncertain"]:
                 self.uncertain_attendee = (name, candidates)
-                self.followup_type = "to_uncertain"
-                return prompt_contact_choice(name, candidates)
+                return prompt_contact_choice(name, candidates, self)
 
             contacts.get_emails(self.to)
 
@@ -82,22 +82,30 @@ class RemoveSchedule(Module):
         if len(self.events) == 1:
             self.event = self.events[0]
         elif len(self.events) > 1:
-            self.followup_type = "to_many_events"
-
-            followup_str = "Found multiple events: \n"
-            for n in range(len(self.events)):
-                event = self.events[n]
-                start_time = event["start"]["dateTime"]
-                start_time = datetime.fromisoformat(start_time)
-                formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
-                followup_str += f"[{n+1}] {event['summary']} at {formated_time}\n"
-            followup_str += f"\n[0] None of the above \nPlease choose one (0-{len(self.events)})"
-
-            return followup_str
+            return self.prompt_multiple()
         else:
             raise NoEventFoundError("\nCould not find an event.")
 
         return self.prompt_remove_event()
+
+    def prompt_multiple(self):
+        def callback(followup):
+            if followup.answer is not None:
+                self.event = followup.answer
+                return self.prepare_processed(self.to, self.when, self.body, self.sender)
+            else:
+                raise NoEventFoundError("\nNo event was chosen for deletion")
+
+        followup_str = "Found multiple events: \n"
+        alternatives = []
+        for event in self.events:
+            start_time = event["start"]["dateTime"]
+            start_time = datetime.fromisoformat(start_time)
+            formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
+            alternatives.append((event, f"{event['summary']} at {formated_time}"))
+
+        followup = MultiFollowup(followup_str, alternatives, callback, True)
+        return followup
 
     def prompt_remove_event(self):
         """ Prompt the user about deleting an event"""
@@ -105,36 +113,18 @@ class RemoveSchedule(Module):
         start_time = datetime.fromisoformat(start_time)
         formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
 
-        self.followup_type = "self_busy"
-        return (
-            f"\nYou have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
-            "Do you want to remove it? [Y/n]"
-        )
-
-    def followup(self, answer):
-        """ """
-        if self.followup_type == "self_busy":
-            # if the user answers "yes" on the followup question then remove the event from the calendar
-            if answer.lower() in ["y", "yes", ""]:
+        def callback(followup):
+            if followup.answer:
                 return None
             else:
                 raise ActionInterruptedByUserError("Event Not removed.")
-        elif self.followup_type == "to_uncertain":
-            return followup_contact_choice(self, answer)
-        elif self.followup_type == "to_many_events":
-            try:
-                choice = int(answer) - 1
-            except Exception:
-                return self.prepare_processed(self.to, self.when, self.body, self.sender)
 
-            if choice < 0:
-                raise NoEventFoundError("\nNo event was chosen for deletion")
-
-            elif choice >= 0 and choice < len(self.events):
-                self.event = self.events[choice]
-                return self.prepare_processed(self.to, self.when, self.body, self.sender)
-        else:
-            raise NotImplementedError("")
+        question = (
+            f"\nYou have the event '{self.event['summary']}' scheduled at {formated_time}.\n"
+            "Do you want to remove it?"
+        )
+        followup = BooleanFollowup(question, callback, default_answer=True)
+        return followup
 
     def execute(self):
         self.calendar.delete_event(self.event["id"])

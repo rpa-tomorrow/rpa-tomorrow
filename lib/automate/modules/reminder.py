@@ -10,6 +10,7 @@ from datetime import datetime, timedelta
 from threading import Timer
 from subprocess import run
 from lib import OSNotSupportedError, TimeIsInPastError
+from lib.automate.followup import StringFollowup
 from lib.automate.modules import Module
 
 
@@ -73,11 +74,9 @@ class Reminder(Module):
         self.followup_type = None
 
         if not isinstance(when, datetime):
-            self.followup_type = "when"
-            return "\nCould not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
+            return self.prompt_date()
         elif not body:
-            self.followup_type = "body"
-            return "\nFound no message body. What message should be sent"
+            return self.prompt_body()
 
         when_delta = (when - datetime.now()).total_seconds()  # convert to difference in seconds
         if when_delta < 0.0:
@@ -99,23 +98,6 @@ class Reminder(Module):
     def execute(self):
         self.timer.start()
         return f"\nReminder scheduled for {self.when.strftime('%Y-%m-%d %H:%M:%S')}"
-
-    def followup(self, answer: str) -> (str, str):
-        """
-        Follow up method after the module have had to ask a question to clarify some parameter, or just
-        want to check that it interpreted everything correctly.
-        """
-        if self.followup_type == "when":
-            try:
-                when = datetime.fromisoformat(answer)
-            except Exception:
-                when = None
-            return self.prepare_processed(self.to, when, self.body, self.sender)
-
-        elif self.followup_type == "body":
-            return self.prepare_processed(self.to, self.when, answer, self.sender)
-        else:
-            raise NotImplementedError("Did not find any valid followup question to answer.")
 
     def nlp(self, text):
         """
@@ -145,3 +127,23 @@ class Reminder(Module):
         _body = " ".join(body)
 
         return (to, time, _body)
+
+    def prompt_date(self):
+        def callback(followup):
+            try:
+                when = datetime.fromisoformat(followup.answer)
+            except Exception:
+                when = None
+            return self.prepare_processed(self.to, when, self.body, self.sender)
+
+        question = "\nCould not parse date to schedule to.\nPlease enter date in YYYYMMDD HH:MM format"
+        followup = StringFollowup(question, callback)
+        return followup
+
+    def prompt_body(self):
+        def callback(followup):
+            return self.prepare_processed(self.to, self.when, followup.answer, self.sender)
+
+        question = "\nFound no message body. What message should be sent"
+        followup = StringFollowup(question, callback)
+        return followup

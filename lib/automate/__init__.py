@@ -76,8 +76,7 @@ class Automate:
 
         def handle_response(response):
             if response:
-                print(response, end=": ", flush=True)
-                return handle_response(instance.followup(input()))
+                return handle_response(response.handle_cli())
             else:
                 return instance
 
@@ -85,9 +84,8 @@ class Automate:
 
         followup = instance.prepare(SETTINGS["nlp_models"], text, sender)
         if self.response_callback:
-            return self.response_callback(instance, followup)
-        else:
-            return handle_response(followup)
+            return self.response_callback(instance, followup.question)
+        return handle_response(followup)
 
 
 class NoResponseError(Error):
