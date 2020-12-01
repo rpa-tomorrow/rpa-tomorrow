@@ -75,7 +75,7 @@ dependencies:
     - cachetools==4.1.1
     - en-core-web-md==2.3.1
     - en-rpa-simple==0.0.1
-    - en-rpa-simple-calendar==0.0.3
+    - en-rpa-simple-calendar==0.0.4
     - en-rpa-simple-email==0.0.1
     - en-rpa-simple-reminder==0.0.1
     - fbs==0.9.0
@@ -117,4 +117,3 @@ dependencies:
     - word2number==1.1
     - xx-ent-wiki-sm==2.3.0
 prefix: C:\Users\alexa\anaconda3\envs\substorm-nlp-win
-
