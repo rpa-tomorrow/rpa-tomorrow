@@ -45,6 +45,10 @@ QListView {
     background-color: #282c34;
 }
 
+QListView::item:disabled {
+    color: #adadad;
+}
+
 QHeaderView {
     background-color: #282c34;
 }

@@ -16,16 +16,6 @@ from lib.automate.modules.reminder import Reminder
 from lib.selector.selector import ModuleSelector
 from lib.settings import SETTINGS
 
-
-def display_error_message(message, title="Error"):
-    msg = QtWidgets.QMessageBox()
-    msg.setIcon(QtWidgets.QMessageBox.Critical)
-    msg.setText(message)
-    msg.setWindowTitle(title)
-    msg.resize(360, 280)
-    msg.exec_()
-
-
 class DesignView(QtWidgets.QWidget):
     def __init__(self, main_window, *args, **kwargs):
         super(DesignView, self).__init__(*args, **kwargs)

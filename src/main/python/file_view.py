@@ -87,7 +87,7 @@ class FileView(QtWidgets.QWidget):
     @QtCore.pyqtSlot(QtCore.QModelIndex)
     def on_treeView_clicked(self, index):
         index = self.file_system_model.index(index.row(), 0, index.parent())
-        if not index.child(0, 0).isValid():
+        if not self.file_system_model.index(0, 0, index.parent()).isValid():
             filename = self.file_system_model.fileName(index)
             filename = ".".join(filename.split(".")[:-1])
             filepath = self.file_system_model.filePath(index)
@@ -96,7 +96,7 @@ class FileView(QtWidgets.QWidget):
     @QtCore.pyqtSlot(QtCore.QModelIndex)
     def on_treeView_double_clicked(self, index):
         index = self.file_system_model.index(index.row(), 0, index.parent())
-        if index.child(0, 0).isValid():
+        if self.file_system_model.index(0, 0, index).isValid():
             self.enter_directory_index(index)
         else:
             filepath = self.file_system_model.filePath(index)
