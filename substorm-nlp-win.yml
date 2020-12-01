@@ -111,4 +111,3 @@ dependencies:
     - win10toast==0.9
     - word2number==1.1
 prefix: C:\Users\alexa\anaconda3\envs\substorm-nlp-win
-
