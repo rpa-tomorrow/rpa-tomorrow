@@ -242,6 +242,10 @@ QScrollBar::handle:vertical {
     min-height: 20px;
 }
 
+QWidget#modalBackground {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
 /* QScrollBar::add-line:vertical { */
 /*     border-style: none; */
 /*     background-color: white; */
