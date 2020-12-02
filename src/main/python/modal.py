@@ -121,7 +121,9 @@ class ModalMessageWindow(ModalWindow):
 
 class ModalYesNoQuestionWindow(ModalMessageWindow):
     def __init__(self, parent, message, title):
-        super(ModalMessageWindow, self).__init__(parent, message, title, MSG_QUESTION)
+        super(ModalYesNoQuestionWindow, self).__init__(parent, message, title, MSG_QUESTION)
+        self.yes_callback = None
+        self.no_callback = None
 
     def build_bottom_layout(self):
         bottom_layout = QtWidgets.QHBoxLayout()
@@ -130,15 +132,25 @@ class ModalYesNoQuestionWindow(ModalMessageWindow):
 
         yes_button = QtWidgets.QToolButton()
         yes_button.setText("Yes")
-        yes_button.clicked.connect(self.close_window)
-        no_button = QtWidgets.QPushButton()
+        yes_button.clicked.connect(self.answer_yes)
+        no_button = QtWidgets.QToolButton()
         no_button.setText("No")
-        no_button.clicked.connect(self.close_window)
+        no_button.clicked.connect(self.answer_no)
         
         bottom_layout.addStretch(1)
-        bottom_layout.addWidget(close_button)
-        bottom_layout.addWidget(close_button)
+        bottom_layout.addWidget(yes_button)
+        bottom_layout.addWidget(no_button)
         return bottom_layout
+
+    def answer_yes(self):
+        if self.yes_callback:
+            self.yes_callback()
+        self.close_window()
+        
+    def answer_no(self):
+        if self.no_callback:
+            self.no_callback()
+        self.close_window()
     
 # NOTE(alexander): DEV mode entry point only!!!
 if __name__ == "__main__":
