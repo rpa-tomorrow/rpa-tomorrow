@@ -17,6 +17,7 @@ from lib.automate.modules.reminder import Reminder
 from lib.selector.selector import ModuleSelector
 from lib.settings import SETTINGS
 
+
 class DesignView(QtWidgets.QWidget):
     def __init__(self, main_window, *args, **kwargs):
         super(DesignView, self).__init__(*args, **kwargs)
@@ -130,8 +131,8 @@ class DesignView(QtWidgets.QWidget):
             traceback.print_exc()
             self.process_text_edit.restore_cursor_pos()
             modal.ModalMessageWindow(
-                self.main_window,
-                str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR)
+                self.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR
+            )
             return
 
         for i, task in enumerate(tasks):
@@ -158,10 +159,11 @@ class DesignView(QtWidgets.QWidget):
             else:
                 modal.ModalMessageWindow(
                     self.main_window,
-                    "Failed to understand what task you wanted to perform. Please check spelling mistakes " +
-                    "or simplify your sentence and try again!",
+                    "Failed to understand what task you wanted to perform. Please check spelling mistakes "
+                    + "or simplify your sentence and try again!",
                     "Error",
-                    modal.MSG_ERROR)
+                    modal.MSG_ERROR,
+                )
                 return
             if model:
                 model.query = proc_query
@@ -550,8 +552,8 @@ class ProcessTextEditView(QtWidgets.QFrame):
         except Exception:
             traceback.print_exc()
             modal.ModalMessageWindow(
-                self.design_view.main_window,
-                str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR)
+                self.design_view.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR
+            )
 
     def submit_editing(self):
         self.design_view.submit_input_text(self.editing)

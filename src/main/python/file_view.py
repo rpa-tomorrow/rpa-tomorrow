@@ -1,9 +1,8 @@
-from PyQt5 import QtWidgets, QtGui, QtCore
+from PyQt5 import QtWidgets, QtCore
 from functools import partial
 import modal
 import os
 import sys
-
 
 
 class FileView(QtWidgets.QWidget):
@@ -12,9 +11,9 @@ class FileView(QtWidgets.QWidget):
         self.main_window = main_window
         self.design_view = design_view
         self.model = model
-        self.action_is_save = action_is_save # false = action is loading
+        self.action_is_save = action_is_save  # false = action is loading
 
-        widget = QtWidgets.QWidget();
+        widget = QtWidgets.QWidget()
         widget.setMaximumWidth(960)
         main_layout = QtWidgets.QHBoxLayout()
         main_layout.addWidget(widget)
@@ -24,7 +23,7 @@ class FileView(QtWidgets.QWidget):
         self.file_system_model = QtWidgets.QFileSystemModel()
         self.file_system_model.setRootPath(QtCore.QDir.rootPath())
         self.file_system_model.setNameFilters(["*.rpa"])
-        
+
         self.tree_view = QtWidgets.QListView()
         self.tree_view.setObjectName("fileView")
         self.tree_view.setModel(self.file_system_model)
@@ -45,7 +44,7 @@ class FileView(QtWidgets.QWidget):
         self.cancel_button = QtWidgets.QToolButton()
         self.cancel_button.setText("Cancel")
         self.cancel_button.clicked.connect(lambda: self.main_window.set_active_view(0))
-        
+
         action_str = "Save" if self.action_is_save else "Load"
         self.action_button = QtWidgets.QToolButton()
         self.action_button.setText(action_str + " Process")
@@ -78,15 +77,15 @@ class FileView(QtWidgets.QWidget):
                 filename += ".rpa"
             absolute_path = os.path.join(self.file_system_model.filePath(self.tree_view.rootIndex()), filename)
         return (filename, absolute_path)
-        
-        
+
     def save_model(self, filename=None):
         filename, absolute_path = self.get_filepath(filename)
         if os.path.isfile(absolute_path):
             save_modal = modal.ModalYesNoQuestionWindow(
                 self.main_window,
                 f"Do you want to overwrite the file {filename}? This cannot be undone!",
-                "File already exists")
+                "File already exists",
+            )
             save_modal.yes_callback = lambda: self.save_model_impl(absolute_path)
         else:
             self.save_model_impl(absolute_path)
@@ -104,16 +103,17 @@ class FileView(QtWidgets.QWidget):
                 self.main_window,
                 f"The file {filename} cannot be found in this directory, please try something else!",
                 "File cannot be found",
-                modal.MSG_ERROR)
-            
+                modal.MSG_ERROR,
+            )
+
         try:
             self.model.load(absolute_path)
         except Exception:
             modal.ModalMessageWindow(
-                self.design_view.main_window,
-                str(sys.exc_info()[1]), "Ooops! Something went wrong!", modal.MSG_ERROR)
+                self.design_view.main_window, str(sys.exc_info()[1]), "Ooops! Something went wrong!", modal.MSG_ERROR
+            )
             return
-            
+
         self.design_view.rebuild_from_loaded_model()
         self.main_window.set_active_view(0)
 
@@ -126,7 +126,6 @@ class FileView(QtWidgets.QWidget):
         if not self.file_system_model.hasChildren(index):
             filename = self.file_system_model.fileName(index)
             filename = ".".join(filename.split(".")[:-1])
-            filepath = self.file_system_model.filePath(index)
             self.filename_view.setText(filename)
 
     @QtCore.pyqtSlot(QtCore.QModelIndex)
@@ -151,7 +150,7 @@ class CurrentDirectoryView(QtWidgets.QFrame):
         self.layout.setContentsMargins(2, 2, 2, 2)
 
         self.visited_stack = []
-        self.visited_index = 0 #  used to navigate forwards and backwords through the stack
+        self.visited_index = 0  # used to navigate forwards and backwords through the stack
 
         self.next_dir_button = QtWidgets.QToolButton()
         self.next_dir_button.setText("\uf061")
@@ -195,7 +194,7 @@ class CurrentDirectoryView(QtWidgets.QFrame):
             if index and index.isValid():
                 self.set_current_directory_index(index)
                 self.tree_view.update()
-        
+
     def set_up_directory(self):
         index = self.tree_view.rootIndex()
         index = index.parent()
@@ -207,8 +206,8 @@ class CurrentDirectoryView(QtWidgets.QFrame):
     def set_current_directory_index(self, index):
         self.tree_view.setRootIndex(index)
 
-        self.prev_dir_button.setEnabled(self.visited_index < len(self.visited_stack) - 1);
-        self.next_dir_button.setEnabled(self.visited_index > 0);
+        self.prev_dir_button.setEnabled(self.visited_index < len(self.visited_stack) - 1)
+        self.next_dir_button.setEnabled(self.visited_index > 0)
 
         item = self.layout.takeAt(3)
         while item:
@@ -232,7 +231,7 @@ class CurrentDirectoryView(QtWidgets.QFrame):
         self.update()
 
     def directory_button_clicked(self, index):
-        self.visited_stack = self.visited_stack[self.visited_index:]
+        self.visited_stack = self.visited_stack[self.visited_index :]  # noqa: E203
         self.visited_index = 0
         if index and index.isValid():
             self.visited_stack.insert(0, self.file_system_model.filePath(index))
