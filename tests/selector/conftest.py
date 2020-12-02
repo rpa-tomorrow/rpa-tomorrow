@@ -38,6 +38,8 @@ class MockTask:
     A mocked task which has an execute function that just returns a response
     """
 
+    description = None
+
     def execute(self):
         """ The mocked response """
         return "this is a response"

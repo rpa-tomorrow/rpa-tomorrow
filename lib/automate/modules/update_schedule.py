@@ -4,7 +4,7 @@ import spacy
 import lib.utils.ner as ner
 
 from lib import Error
-from lib.automate.followup import MultiFollowup, BooleanFollowup
+from lib.automate.followup import MultiFollowup
 from lib.utils import contacts
 from lib.automate.google import Google
 from lib.automate.modules import Module
@@ -42,6 +42,7 @@ class UpdateSchedule(Module):
 
         self.events = []
         self.event = None
+        self.description = ""
 
         return self.prepare_processed(to, when, body, sender)
 
@@ -54,7 +55,8 @@ class UpdateSchedule(Module):
 
         # if the event has already been found then just prompt the user
         if self.event:
-            return self.prompt_update_event()
+            self.description = self.get_task_description(self.event)
+            return None
 
         # try to fetch the event by the summary
         if body["summary"] != "":
@@ -86,7 +88,7 @@ class UpdateSchedule(Module):
         else:
             raise NoEventFoundError("Could not find an event.")
 
-        return self.prompt_update_event()
+        self.description = self.get_task_description(self.event)
 
     def prompt_multiple(self):
         def callback(followup):
@@ -106,23 +108,6 @@ class UpdateSchedule(Module):
 
         followup = MultiFollowup(followup_str, alternatives, callback, True)
         return followup
-
-    def prompt_update_event(self):
-        """ Prompt the user about updating an event"""
-        start_time = self.event["start"]["dateTime"]
-        start_time = datetime.fromisoformat(start_time)
-        formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
-
-        def callback(followup):
-            if followup.answer:
-                return None
-            else:
-                raise ActionInterruptedByUserError("Event Not removed.")
-
-        question = (
-            f"You have the event '{self.event['summary']}' scheduled at {formated_time}.\n" "Do you want to update it?"
-        )
-        return BooleanFollowup(question, callback, default_answer=True)
 
     def execute(self):
         start_time = datetime.fromisoformat(self.event["start"]["dateTime"])
@@ -178,6 +163,14 @@ class UpdateSchedule(Module):
         _body["new start"] = new_start_time
 
         return (to, start_time, _body)
+
+    def get_task_description(self, event):
+        start_time = self.event["start"]["dateTime"]
+        start_time = datetime.fromisoformat(start_time)
+        formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
+        return (
+            f"\nYou have the event '{self.event['summary']}' scheduled at {formated_time}.\nDo you want to remove it?"
+        )
 
 
 class NoEventFoundError(Error):

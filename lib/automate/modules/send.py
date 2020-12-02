@@ -28,6 +28,7 @@ class Send(Module):
             self.nlp_model = spacy.load(nlp_model_names["email"])
             log.debug("Model loaded into memory")
         to, when, body = self.nlp(text)
+        self.description = ""
         return self.prepare_processed(to, when, body, sender)
 
     def prepare_processed(self, to, when, body, sender):
@@ -54,14 +55,21 @@ class Send(Module):
             return self.prompt_body()
 
         parsed_recipients = get_emails(self.to, sender)
-        recipients = parsed_recipients["emails"]
-        self.receiver = recipients
+        self.receiver = parsed_recipients["emails"]
+
         for (name, candidates) in parsed_recipients["uncertain"]:
             self.uncertain_attendee = (name, candidates)
 
             return prompt_contact_choice(name, candidates, self)
         for name in parsed_recipients["unknown"]:
             raise NoContactFoundError("\nCould not find any contacts with name " + name)
+
+        if len(self.receiver) == 1:
+            self.description = f"The email {self.subject} to {self.receiver[0]} was prepared.\nDo you want to send it?"
+        else:
+            self.description = (
+                f"The email {self.subject} to {self.receiver[0]} etc. was prepared.\nDo you want to send it?"
+            )
 
     def execute(self):
         return self.send_email(self.settings, self.receiver, self.subject, self.content)

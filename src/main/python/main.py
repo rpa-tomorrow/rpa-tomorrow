@@ -68,7 +68,7 @@ class ContentFrame(QtWidgets.QFrame):
         self.save_view = FileView(main_window, self.design_view, self.main_window.model, True)
         self.load_view = FileView(main_window, self.design_view, self.main_window.model, False)
         self.play_view = PlayView(main_window, self.design_view.process_editor)
-        self.settings_view = SettingsView()
+        self.settings_view = SettingsView(main_window)
         self.info_view = QtWidgets.QFrame()
 
         self.layout.addWidget(self.design_view)
@@ -168,7 +168,7 @@ def initialize_app():
     if SETTINGS["editor"]["font-family"]:
         font_family = SETTINGS["editor"]["font-family"]
     if SETTINGS["editor"]["font-size"]:
-        font_size = SETTINGS["editor"]["font-size"]
+        font_size = SETTINGS["editor"]["font-size"] + "pt"
 
     stylesheet = (
         """

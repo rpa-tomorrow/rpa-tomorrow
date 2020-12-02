@@ -24,7 +24,7 @@ class Reminder(Module):
     """
 
     verbs = ["remind", "reminder", "notify"]
-    supported_os = ["linux"]
+    supported_os = ["linux", "win32"]
 
     def __init__(self, model_pool):
         super(Reminder, self).__init__(model_pool)
@@ -44,13 +44,16 @@ class Reminder(Module):
         if os == "linux":
             run(["/usr/bin/notify-send", "Reminder", body])
         elif os == "win32":
-            # TODO: Add windows call here
-            pass
+            from win10toast import ToastNotifier
+
+            toaster = ToastNotifier()
+            toaster.show_toast("Reminder", body, icon_path=None, duration=10)
 
     def prepare(self, nlp_model_names, text, sender):
         if self.nlp_model is None:
             self.nlp_model = spacy.load(nlp_model_names["reminder"])
         to, when, body = self.nlp(text)
+        self.description = None
         return self.prepare_processed(to, when, body, sender)
 
     def prepare_processed(self, _to, when, body, _sender):
