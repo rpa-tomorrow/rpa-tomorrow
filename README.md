@@ -58,7 +58,7 @@ $ conda activate substorm-nlp
 
 ## Usage
 
-
+RPA Tomorrow accepts regular natural text as input. Below is the information for the supported interfaces.
 See [accepted_input.md](docs/accepted_input.md) if the program is struggling to understand the input.
 
 ### CLI
