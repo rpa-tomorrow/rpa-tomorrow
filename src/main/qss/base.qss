@@ -3,6 +3,11 @@ QLabel#viewTitle {
     color: dodgerblue;
 }
 
+QLabel#settingsSectionTitle {
+    font-size: 20pt;
+    color: dodgerblue;
+}
+
 QToolButton {
     font-size: 24px;
     font-family: FontAwesome;
@@ -91,6 +96,14 @@ QLineEdit {
     padding-top: 4px;
     padding-bottom: 4px;
     padding-right: 4px
+}
+
+QLineEdit[invalid="true"] {
+    border: 1px solid red;
+}
+
+QLineEdit[invalid="false"] {
+    border: none;
 }
 
 QComboBox {
