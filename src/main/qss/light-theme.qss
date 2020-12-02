@@ -90,3 +90,11 @@ CurrentDirectoryView {
 QListView#fileView {
     background-color: white;
 }
+
+QFrame#modalBottomFrame {
+    background-color: lightgray;
+}
+
+ModalWindow > QFrame {
+    background-color: white;
+}
