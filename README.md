@@ -4,7 +4,7 @@ The purpose of RPA Tomorrow is to implement a system where the user can write in
 
 For users of the system there are two user interfaces implemented, a CLI and a GUI.
 
-[![asciicast](https://asciinema.org/a/NJHkkxjK2dXprr2pV6fb2DXgL.svg)](https://asciinema.org/a/NJHkkxjK2dXprr2pV6fb2DXgL)
+[![asciicast](https://asciinema.org/a/NJHkkxjK2dXprr2pV6fb2DXgL.svg)](https://asciinema.org/a/NJHkkxjK2dXprr2pV6fb2DXgL?size=medium&autoplay=true)
 
 ## Table of contents
 1. [Requirements](#requirements)
