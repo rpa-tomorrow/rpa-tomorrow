@@ -1,8 +1,10 @@
-# RPA Tomorow - Process tasks from natural text
+# RPA Tomorrow - process tasks from natural text
 
 The purpose of RPA Tomorrow is to implement a system where the user can write instructions in clear text in order to instruct the computer what to do. This application utilizes natural language processing together with custom-made neural networks in order to parse the intent of the given text and then returns an executable task.
 
 For users of the system there are two user interfaces implemented, a CLI and a GUI.
+
+[![asciicast](https://asciinema.org/a/NJHkkxjK2dXprr2pV6fb2DXgL.svg)](https://asciinema.org/a/NJHkkxjK2dXprr2pV6fb2DXgL)
 
 ## Table of contents
 1. [Requirements](#requirements)
