@@ -3,18 +3,6 @@
     color: white;
 }
 
-QPushButton {
-    background-color: #282c34;
-}
-
-QPushButton:hover {
-    background-color: #343a45;
-}
-
-QPushButton:pressed {
-    background-color: #535d70;
-}
-
 QToolButton {
     background-color: #282c34;
 }
@@ -142,20 +130,34 @@ QFrame#modalBottomFrame {
     background-color: #2f333d;
 }
 
-QPushButton#primaryButton {
-    color: white;
-    background-color: dodgerblue;
+QScrollBar:vertical {
+    background-color: #2f333d;
 }
 
-QPushButton#primaryButton {
-    color: white;
-    background-color: dodgerblue;
+QScrollBar::handle:vertical {
+    background-color: #22262e;
 }
 
-QPushButton#primaryButton:hover {
-    background-color: #1774cf;
+QScrollBar::handle:vertical:hover {
+    background-color: #343a45;
 }
 
-QPushButton#primaryButton:pressed {
-    background-color: #2879c9;
+QScrollBar::handle:vertical:pressed {
+    background-color: #535d70;
+}
+
+QScrollBar:horizontal {
+    background-color: #2f333d;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #22262e;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: #343a45;
+}
+
+QScrollBar::handle:horizontal:pressed {
+    background-color: #535d70;
 }
