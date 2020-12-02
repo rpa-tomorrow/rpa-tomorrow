@@ -53,6 +53,7 @@ class Reminder(Module):
         if self.nlp_model is None:
             self.nlp_model = spacy.load(nlp_model_names["reminder"])
         to, when, body = self.nlp(text)
+        self.description = None
         return self.prepare_processed(to, when, body, sender)
 
     def prepare_processed(self, _to, when, body, _sender):
