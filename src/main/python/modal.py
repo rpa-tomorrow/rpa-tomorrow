@@ -121,9 +121,7 @@ class ModalMessageWindow(ModalWindow):
 
 class ModalYesNoQuestionWindow(ModalMessageWindow):
     def __init__(self, parent, message, title):
-        self.message = message
-        self.title = title
-        super(ModalMessageWindow, self).__init__(parent)
+        super(ModalMessageWindow, self).__init__(parent, message, title, MSG_QUESTION)
 
     def build_bottom_layout(self):
         bottom_layout = QtWidgets.QHBoxLayout()

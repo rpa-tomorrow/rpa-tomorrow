@@ -68,6 +68,11 @@ class FileView(QtWidgets.QWidget):
         
     def save_model(self, filepath=None):
         path = filepath or self.filename_view.text() + ".rpa"
+        if os.path.isfile(path):
+            modal.ModalMessageWindow(
+                self.main_window,
+                f"Do you want to overwrite the file {path}? This cannot be undone!",
+                "File already exists")
         self.model.save(path)
         self.main_window.set_info_message("Wrote " + path + ".")
         self.main_window.set_active_view(0)
@@ -85,7 +90,6 @@ class FileView(QtWidgets.QWidget):
 
     def enter_directory_index(self, index):
         self.tree_view.setRootIndex(index)
-        self.current_dir_view.set_current_directory_index(index)
 
     @QtCore.pyqtSlot(QtCore.QModelIndex)
     def on_treeView_clicked(self, index):
@@ -99,8 +103,8 @@ class FileView(QtWidgets.QWidget):
     @QtCore.pyqtSlot(QtCore.QModelIndex)
     def on_treeView_double_clicked(self, index):
         index = self.file_system_model.index(index.row(), 0, index.parent())
-        if self.file_system_model.index(0, 0, index).isValid():
-            self.enter_directory_index(index)
+        if self.file_system_model.index(0, 0, index.parent()).isValid():
+            self.current_dir_view.directory_button_clicked(index)
         else:
             filepath = self.file_system_model.filePath(index)
             if self.action_is_save:
@@ -118,6 +122,7 @@ class CurrentDirectoryView(QtWidgets.QFrame):
         self.layout.setContentsMargins(2, 2, 2, 2)
 
         self.visited_stack = []
+        self.visited_index = 0 #  used to navigate forwards and backwords through the stack
 
         self.next_dir_button = QtWidgets.QToolButton()
         self.next_dir_button.setText("\uf061")
@@ -129,57 +134,79 @@ class CurrentDirectoryView(QtWidgets.QFrame):
         self.prev_dir_button.setText("\uf060")
         self.prev_dir_button.clicked.connect(self.set_prev_directory)
 
-        self.layout.insertWidget(0, self.next_dir_button)
-        self.layout.insertWidget(0, self.prev_dir_button)
+        self.up_dir_button = QtWidgets.QToolButton()
+        self.up_dir_button.setObjectName("fileNav")
+        self.up_dir_button.setText("\uf062")
+        self.up_dir_button.clicked.connect(self.set_up_directory)
 
-        self.set_current_directory_index(self.tree_view.rootIndex())
+        self.layout.addWidget(self.prev_dir_button)
+        self.layout.addWidget(self.next_dir_button)
+        self.layout.addWidget(self.up_dir_button)
+
+        index = self.tree_view.rootIndex()
+        self.visited_stack.append(self.file_system_model.filePath(index))
+        self.set_current_directory_index(index)
 
         self.setLayout(self.layout)
 
+    def set_prev_directory(self):
+        if self.visited_index < len(self.visited_stack) - 1:
+            self.visited_index += 1
+            path = self.visited_stack[self.visited_index]
+            index = self.file_system_model.index(path)
+            if index and index.isValid():
+                self.set_current_directory_index(index)
+                self.tree_view.update()
+
     def set_next_directory(self):
-        if len(self.visited_stack) > 0:
-            index = self.visited_stack.pop()
+        if self.visited_index > 0:
+            self.visited_index -= 1
+            path = self.visited_stack[self.visited_index]
+            index = self.file_system_model.index(path)
             if index and index.isValid():
                 self.set_current_directory_index(index)
                 self.tree_view.update()
         
-    def set_prev_directory(self):
+    def set_up_directory(self):
         index = self.tree_view.rootIndex()
-        self.visited_stack.append(index)
         index = index.parent()
         if index and index.isValid():
+            self.visited_stack.append(self.file_system_model.filePath(index))
+            self.visited_index += 1
             self.set_current_directory_index(index)
 
     def set_current_directory_index(self, index):
         self.tree_view.setRootIndex(index)
-        
-        self.prev_dir_button.setEnabled(index.parent().isValid());
-        self.next_dir_button.setEnabled(len(self.visited_stack) > 0);
-        
-        item = self.layout.takeAt(2)
+
+        self.prev_dir_button.setEnabled(self.visited_index < len(self.visited_stack) - 1);
+        self.next_dir_button.setEnabled(self.visited_index > 0);
+
+        item = self.layout.takeAt(3)
         while item:
             if item.widget():
                 item.widget().deleteLater()
             self.layout.removeItem(item)
-            item = self.layout.takeAt(2)
+            item = self.layout.takeAt(3)
 
         while index and index.isValid():
             btn = QtWidgets.QToolButton()
             btn.setText(str(index.data()))
             btn.index = index
             btn.clicked.connect(partial(self.directory_button_clicked, index))
-            self.layout.insertWidget(2, btn)
+            self.layout.insertWidget(3, btn)
             index = index.parent()
             if index and index.isValid():
-                self.layout.insertWidget(2, QtWidgets.QLabel(">"))
+                self.layout.insertWidget(3, QtWidgets.QLabel(">"))
 
         self.layout.addStretch(1)
         self.tree_view.update()
         self.update()
 
     def directory_button_clicked(self, index):
+        self.visited_stack = self.visited_stack[self.visited_index:]
+        self.visited_index = 0
         if index and index.isValid():
-            self.visited_stack.append(self.tree_view.rootIndex())
+            self.visited_stack.insert(0, self.file_system_model.filePath(index))
             self.set_current_directory_index(index)
 
 
