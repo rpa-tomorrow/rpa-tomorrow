@@ -1,4 +1,4 @@
-from PyQt5 import QtWidgets, QtCore, QtGui
+from PyQt5 import QtWidgets
 from PyQt5.QtCore import QRegExp, pyqtSlot
 from PyQt5.QtGui import QRegExpValidator, QValidator
 import os
@@ -45,9 +45,9 @@ class SettingsView(QtWidgets.QWidget):
         super(SettingsView, self).__init__(*args, **kwargs)
         self.main_window = main_window
 
-        scroll_area = QtWidgets.QScrollArea();
+        scroll_area = QtWidgets.QScrollArea()
         scroll_area.setMaximumWidth(960)
-        scroll_area.setWidgetResizable(True);
+        scroll_area.setWidgetResizable(True)
 
         main_layout = QtWidgets.QHBoxLayout()
         main_layout.addWidget(scroll_area)

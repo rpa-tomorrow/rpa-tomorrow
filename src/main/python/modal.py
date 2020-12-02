@@ -1,6 +1,4 @@
-from PyQt5 import QtWidgets, QtGui, QtCore
-import sys
-
+from PyQt5 import QtWidgets, QtGui
 
 MSG_INFO = 0
 MSG_QUESTION = 1
@@ -65,7 +63,7 @@ class ModalMessageWindow(ModalWindow):
         self.title = title
         self.message_type = message_type
         super(ModalMessageWindow, self).__init__(parent)
-        
+
     def build_layout(self):
         layout = QtWidgets.QGridLayout()
         layout.setContentsMargins(0, 0, 0, 0)
@@ -88,12 +86,12 @@ class ModalMessageWindow(ModalWindow):
         elif self.message_type == MSG_ERROR:
             label_icon = QtWidgets.QLabel("\uF057")
             label_icon.setObjectName("modalIconRed")
-            
+
         label_title = QtWidgets.QLabel(self.title)
         label_title.setObjectName("modalTitle")
         label_message = QtWidgets.QLabel(self.message)
         label_message.setObjectName("modalMessage")
-        label_message.setWordWrap(True);
+        label_message.setWordWrap(True)
 
         self.bottom_layout = self.build_bottom_layout()
         bottom_frame = QtWidgets.QFrame()
@@ -119,6 +117,7 @@ class ModalMessageWindow(ModalWindow):
         bottom_layout.addWidget(close_button)
         return bottom_layout
 
+
 class ModalYesNoQuestionWindow(ModalMessageWindow):
     def __init__(self, parent, message, title):
         super(ModalYesNoQuestionWindow, self).__init__(parent, message, title, MSG_QUESTION)
@@ -136,7 +135,7 @@ class ModalYesNoQuestionWindow(ModalMessageWindow):
         no_button = QtWidgets.QToolButton()
         no_button.setText("No")
         no_button.clicked.connect(self.answer_no)
-        
+
         bottom_layout.addStretch(1)
         bottom_layout.addWidget(yes_button)
         bottom_layout.addWidget(no_button)
@@ -146,17 +145,8 @@ class ModalYesNoQuestionWindow(ModalMessageWindow):
         if self.yes_callback:
             self.yes_callback()
         self.close_window()
-        
+
     def answer_no(self):
         if self.no_callback:
             self.no_callback()
         self.close_window()
-    
-# NOTE(alexander): DEV mode entry point only!!!
-if __name__ == "__main__":
-    from main import initialize_app
-
-    appctxt, window = initialize_app()
-    ModalMessageWindow(window, "Hello world this is just a test error message! Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.", "Error", MSG_ERROR)
-    exit_code = appctxt.app.exec_()
-    sys.exit(exit_code)
