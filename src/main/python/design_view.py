@@ -131,7 +131,7 @@ class DesignView(QtWidgets.QWidget):
             self.process_text_edit.restore_cursor_pos()
             modal.ModalMessageWindow(
                 self.main_window,
-                str(sys.exc_info()[1]), "Ooops! Something went wrong!", modal.MSG_ERROR)
+                str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR)
             return
 
         for i, task in enumerate(tasks):
@@ -551,7 +551,7 @@ class ProcessTextEditView(QtWidgets.QFrame):
             traceback.print_exc()
             modal.ModalMessageWindow(
                 self.design_view.main_window,
-                str(sys.exc_info()[1]), "Ooops! Something went wrong!", modal.MSG_ERROR)
+                str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR)
 
     def submit_editing(self):
         self.design_view.submit_input_text(self.editing)

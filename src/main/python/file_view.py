@@ -1,7 +1,9 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 from functools import partial
+import modal
 import os
 import sys
+
 
 
 class FileView(QtWidgets.QWidget):
@@ -65,24 +67,51 @@ class FileView(QtWidgets.QWidget):
 
         self.setLayout(main_layout)
         widget.setLayout(layout)
+
+    def get_filepath(self, filename=None):
+        absolute_path = ""
+        if filename and os.path.isfile(filename):
+            absolute_path = filename
+        else:
+            filename = filename or self.filename_view.text()
+            if not filename.endswith(".rpa"):
+                filename += ".rpa"
+            absolute_path = os.path.join(self.file_system_model.filePath(self.tree_view.rootIndex()), filename)
+        return (filename, absolute_path)
         
-    def save_model(self, filepath=None):
-        path = filepath or self.filename_view.text() + ".rpa"
-        if os.path.isfile(path):
-            modal.ModalMessageWindow(
+        
+    def save_model(self, filename=None):
+        filename, absolute_path = self.get_filepath(filename)
+        if os.path.isfile(absolute_path):
+            save_modal = modal.ModalYesNoQuestionWindow(
                 self.main_window,
-                f"Do you want to overwrite the file {path}? This cannot be undone!",
+                f"Do you want to overwrite the file {filename}? This cannot be undone!",
                 "File already exists")
-        self.model.save(path)
-        self.main_window.set_info_message("Wrote " + path + ".")
+            save_modal.yes_callback = lambda: self.save_model_impl(absolute_path)
+        else:
+            self.save_model_impl(absolute_path)
+
+    def save_model_impl(self, absolute_path):
+        print(absolute_path)
+        self.model.save(absolute_path)
+        self.main_window.set_info_message(f"Wrote {absolute_path}.")
         self.main_window.set_active_view(0)
 
-    def load_model(self, filepath=None):
-        path = filepath or self.filename_view.text() + ".rpa"
+    def load_model(self, filename=None):
+        filename, absolute_path = self.get_filepath(filename)
+        if not os.path.isfile(absolute_path):
+            modal.ModalMessageWindow(
+                self.main_window,
+                f"The file {filename} cannot be found in this directory, please try something else!",
+                "File cannot be found",
+                modal.MSG_ERROR)
+            
         try:
-            self.model.load(path)
+            self.model.load(absolute_path)
         except Exception:
-            self.main_window.set_info_message("Could not find file `" + path + "`.")
+            modal.ModalMessageWindow(
+                self.design_view.main_window,
+                str(sys.exc_info()[1]), "Ooops! Something went wrong!", modal.MSG_ERROR)
             return
             
         self.design_view.rebuild_from_loaded_model()
@@ -94,7 +123,7 @@ class FileView(QtWidgets.QWidget):
     @QtCore.pyqtSlot(QtCore.QModelIndex)
     def on_treeView_clicked(self, index):
         index = self.file_system_model.index(index.row(), 0, index.parent())
-        if not self.file_system_model.index(0, 0, index.parent()).isValid():
+        if not self.file_system_model.hasChildren(index):
             filename = self.file_system_model.fileName(index)
             filename = ".".join(filename.split(".")[:-1])
             filepath = self.file_system_model.filePath(index)
@@ -103,10 +132,10 @@ class FileView(QtWidgets.QWidget):
     @QtCore.pyqtSlot(QtCore.QModelIndex)
     def on_treeView_double_clicked(self, index):
         index = self.file_system_model.index(index.row(), 0, index.parent())
-        if self.file_system_model.index(0, 0, index.parent()).isValid():
+        if self.file_system_model.hasChildren(index):
             self.current_dir_view.directory_button_clicked(index)
         else:
-            filepath = self.file_system_model.filePath(index)
+            filepath = self.file_system_model.fileName(index)
             if self.action_is_save:
                 self.save_model(filepath)
             else:
