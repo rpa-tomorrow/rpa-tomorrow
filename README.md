@@ -38,17 +38,17 @@ Clone and `cd` into the repository.
 
 To create and activate the project environment the included setup script can be used 
 ```bash
-source substorm.sh
+$ source substorm.sh
 ```
 
 Otherwise you can do it manually
 ```bash
 # Create environment
-conda env create -f substorm-nlp.yml
+$ conda env create -f substorm-nlp.yml
 # Install RPA models
-pip install -r requirements.txt
+$ pip install -r requirements.txt
 # Activate environment
-conda activate substorm-nlp
+$ conda activate substorm-nlp
 ```
 **NOTE!** If you're on Windows, replace all `substorm-nlp` with `substorm-nlp-win` above.
 
@@ -65,15 +65,15 @@ See [accepted_input.md](docs/accepted_input.md) if the program is struggling to 
 
 The CLI can be started as follows
 ```bash
-python lib/cli/cli.py
+$ python lib/cli/cli.py
 ```
 Inside the CLI, type `help` for more instructions. 
 
 ### GUI
 
 The GUI can be started as follows
-```
-fbs run
+```bash
+$ fbs run
 ```
 
 ## Documentation
