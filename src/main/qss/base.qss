@@ -14,6 +14,15 @@ QToolButton {
     border-radius: 4px;
 }
 
+QScrollArea {
+    background: transparent;
+    border-style: none;
+}
+
+QScrollArea > QWidget > QWidget {
+    background: transparent;
+}
+
 QToolButton#fileNav {
     font-size: 24px;
     font-family: FontAwesome;
