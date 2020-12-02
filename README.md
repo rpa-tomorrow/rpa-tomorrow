@@ -86,7 +86,7 @@ Documentation are provided in `docs/`.
 The tests can be run with the following command
 
 ```bash
-pytest
+$ pytest
 ```
 A coverage report will automatically be generated and saved in `htmlcov/` and it can be viewed at `htmlcov/index.html`
 
