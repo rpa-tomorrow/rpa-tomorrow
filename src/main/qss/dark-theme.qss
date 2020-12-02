@@ -133,3 +133,29 @@ ProcessConnector:Hover {
     background-color: #187aad;
     border-color: #187aad;
 }
+
+ModalWindow > QFrame {
+    background-color: #282c34;
+}
+
+QFrame#modalBottomFrame {
+    background-color: #2f333d;
+}
+
+QPushButton#primaryButton {
+    color: white;
+    background-color: dodgerblue;
+}
+
+QPushButton#primaryButton {
+    color: white;
+    background-color: dodgerblue;
+}
+
+QPushButton#primaryButton:hover {
+    background-color: #1774cf;
+}
+
+QPushButton#primaryButton:pressed {
+    background-color: #2879c9;
+}

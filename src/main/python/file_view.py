@@ -40,10 +40,13 @@ class FileView(QtWidgets.QWidget):
 
         self.fileformat_view = QtWidgets.QComboBox()
         self.fileformat_view.addItem("Robotic Process Automation (*.rpa)", ".rpa")
-        self.cancel_button = QtWidgets.QPushButton("Cancel");
+        self.cancel_button = QtWidgets.QToolButton()
+        self.cancel_button.setText("Cancel")
         self.cancel_button.clicked.connect(lambda: self.main_window.set_active_view(0))
+        
         action_str = "Save" if self.action_is_save else "Load"
-        self.action_button = QtWidgets.QPushButton(action_str + " Process");
+        self.action_button = QtWidgets.QToolButton()
+        self.action_button.setText(action_str + " Process")
         if self.action_is_save:
             self.action_button.clicked.connect(self.save_model)
         else:
@@ -161,7 +164,8 @@ class CurrentDirectoryView(QtWidgets.QFrame):
             item = self.layout.takeAt(2)
 
         while index and index.isValid():
-            btn = QtWidgets.QPushButton(str(index.data()))
+            btn = QtWidgets.QToolButton()
+            btn.setText(str(index.data()))
             btn.index = index
             btn.clicked.connect(partial(self.directory_button_clicked, index))
             self.layout.insertWidget(2, btn)

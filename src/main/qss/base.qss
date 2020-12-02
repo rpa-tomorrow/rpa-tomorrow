@@ -4,15 +4,15 @@ QLabel#viewTitle {
 }
 
 QToolButton {
-    font-size: 24px;
-    font-family: FontAwesome;
     border-style: none;
+    padding: 6px 6px 6px 6px;
     border-radius: 4px;
 }
 
-QToolButton#fileNav {
-    padding-top: 1px;
-    padding-bottom: 3px;
+QToolButton#iconButton {
+    font-size: 24px;
+    font-family: FontAwesome;
+    padding: 0;
 }
 
 SideMenuBar {
@@ -22,6 +22,7 @@ SideMenuBar {
 
 MenuBarButton {
     color: white;
+    font-family: FontAwesome;
     background-color: dodgerblue;
     font-size: 32px;
     padding-bottom: 22px;
@@ -151,12 +152,6 @@ QMenu::indicator {
     height: 13px;
 }
 
-QPushButton {
-    border-style: none;
-    padding: 6px 6px 6px 6px;
-    border-radius: 4px;
-}
-
 QLabel#processEntryHeading {
     font-weight: bold;
 }
@@ -228,6 +223,60 @@ ProcessView[editing=true] {
     border-width: 2px;
 }
 
+ModalWindow > QFrame {
+    border-radius: 4px;
+}
+
+QLabel#modalTitle {
+    font-size: 18pt;
+    padding-top: 12px;
+    padding-right: 12px;
+}
+
+QLabel#modalMessage {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+QFrame#modalBottomFrame {
+    background-color: white;
+    border-radius: 4px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+QLabel#modalIconGreen {
+    font-size: 28px;
+    padding-top: 12px;
+    padding-left: 12px;
+    font-family: FontAwesome;
+    color: green;
+}
+
+QLabel#modalIconRed {
+    font-size: 28px;
+    padding-top: 12px;
+    padding-left: 12px;
+    font-family: FontAwesome;
+    color: red;
+}
+
+QLabel#modalIconOrange {
+    font-size: 28px;
+    padding-top: 12px;
+    padding-left: 12px;
+    font-family: FontAwesome;
+    color: orange;
+}
+
+QLabel#modalIconBlue {
+    font-size: 28px;
+    padding-top: 12px;
+    padding-left: 12px;
+    font-family: FontAwesome;
+    color: dodgerblue;
+}
+
 QScrollBar:vertical {
     border-style: none;
     border-radius: 4px;
@@ -240,10 +289,6 @@ QScrollBar::handle:vertical {
     background-color: lightgray;
     border-radius: 4px;
     min-height: 20px;
-}
-
-QWidget#modalBackground {
-    background-color: rgba(0, 0, 0, 0.4);
 }
 
 /* QScrollBar::add-line:vertical { */

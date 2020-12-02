@@ -19,24 +19,30 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setWindowTitle("RPA Tomorrow")
 
-        layout = QtWidgets.QGridLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
+        self.layout = QtWidgets.QGridLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.model = proc_model.Model("untitled")
 
         self.bottom = BottomInfoBar()
         self.menu = SideMenuBar(self)
         self.content = ContentFrame(self)
+        self.modal = None
 
-        layout.addWidget(self.menu, 0, 0, 2, 1)
-        layout.addWidget(self.content, 0, 1)
-        layout.addWidget(self.bottom, 1, 1)
-        layout.setHorizontalSpacing(0)
-        layout.setVerticalSpacing(0)
+        self.layout.addWidget(self.menu, 0, 0, 2, 1)
+        self.layout.addWidget(self.content, 0, 1)
+        self.layout.addWidget(self.bottom, 1, 1)
+        self.layout.setHorizontalSpacing(0)
+        self.layout.setVerticalSpacing(0)
 
         widget = QtWidgets.QWidget()
-        widget.setLayout(layout)
+        widget.setLayout(self.layout)
         self.setCentralWidget(widget)
+
+    def resizeEvent(self, event):
+        QtWidgets.QMainWindow.resizeEvent(self, event)
+        if self.modal:
+            self.modal.resize(self.width(), self.height())
 
     def set_active_view(self, view):
         self.content.set_active_view(view)
