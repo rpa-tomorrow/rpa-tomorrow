@@ -1,10 +1,14 @@
 # RPA Tomorrow - process tasks from natural text
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
+[![GitHub release](https://img.shields.io/github/release/rpa-tomorrow/substorm-nlp.svg)](https://github.com/rpa-tomorrow/substorm-nlp/releases/)
+<a href="https://github.com/rpa-tomorrow/substorm-action/actions"><img alt="Actions Status" src="https://github.com/rpa-tomorrow/substorm-nlp/workflows/CI/badge.svg"></a>
+<a href="https://github.com/rpa-tomorrow/substorm-nlp/blob/master/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+</p>
 
 The purpose of RPA Tomorrow is to implement a system where the user can write instructions in clear text in order to instruct the computer what to do. This application utilizes natural language processing together with custom-made neural networks in order to parse the intent of the given text and then returns an executable task.
 
 For users of the system there are two user interfaces implemented, a CLI and a GUI.
-
-[![asciicast](https://asciinema.org/a/NJHkkxjK2dXprr2pV6fb2DXgL.svg)](https://asciinema.org/a/NJHkkxjK2dXprr2pV6fb2DXgL?size=medium&autoplay=true)
 
 ## Table of contents
 1. [Requirements](#requirements)
@@ -14,9 +18,10 @@ For users of the system there are two user interfaces implemented, a CLI and a G
 4. [Usage](#usage)
     1. [CLI](#cli)
     2. [GUI](#gui)
-5. [Documentation](#documentation)
-6. [Testing](#testing)
-7. [License](#license)
+5. [DEMO](#demo)
+6. [Documentation](#documentation)
+7. [Testing](#testing)
+8. [License](#license)
 
 ## Requirements
 
@@ -75,6 +80,9 @@ The GUI can be started as follows
 ```bash
 $ fbs run
 ```
+
+## DEMO
+[![asciicast](https://asciinema.org/a/NJHkkxjK2dXprr2pV6fb2DXgL.svg)](https://asciinema.org/a/NJHkkxjK2dXprr2pV6fb2DXgL?size=medium&autoplay=true)
 
 ## Documentation
 
