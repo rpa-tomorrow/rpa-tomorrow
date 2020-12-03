@@ -33,7 +33,8 @@ class InputValidator(QRegExpValidator):
         else:
             self.parent().setProperty("invalid", False)
 
-        self.parent().setStyleSheet("/**/")  # Updates the style of parent
+        self.parent().style().unpolish(self.parent())
+        self.parent().style().polish(self.parent())
         return state, text, pos
 
 
@@ -247,7 +248,8 @@ class SettingsView(QtWidgets.QWidget):
             else:
                 self.empty_fields["name"] = False
                 self.name.setProperty("invalid", False)
-            self.name.setStyleSheet("/**/")
+            self.name.style().unpolish(self.name)
+            self.name.style().polish(self.name)
 
     @pyqtSlot()
     def restore_on_click(self):
