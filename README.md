@@ -86,7 +86,7 @@ $ fbs run
 
 ## Documentation
 
-Documentation are provided in `docs/`.
+Documentation are provided in `docs/` [here](/docs).
 
 
 ## Testing
