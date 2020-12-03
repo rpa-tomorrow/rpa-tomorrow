@@ -66,7 +66,6 @@ class Schedule(Module):
             self.unknown_attendee = name
             return self.prompt_unknown_contact(name)
 
-        attendees = [settings["address"]] + attendees
         event = calendar.event(self.when["start"], self.when["end"], attendees, self.body)
         self.event = event
         self.description = (
