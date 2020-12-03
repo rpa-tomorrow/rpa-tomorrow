@@ -6,7 +6,7 @@
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 </p>
 
-The purpose of RPA Tomorrow is to implement a system where the user can write instructions in clear text in order to instruct the computer what to do. This application utilizes natural language processing together with custom-made neural networks in order to parse the intent of the given text and then returns an executable task.
+> The purpose of RPA Tomorrow is to implement a system where the user can write instructions in clear text in order to instruct the computer what to do. This application utilizes natural language processing together with custom-made neural networks in order to parse the intent of the given text and then returns an executable task.
 
 For users of the system there are two user interfaces implemented, a CLI and a GUI.
 
