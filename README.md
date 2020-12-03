@@ -29,7 +29,7 @@ Linux and Windows:
 - Python 3+
 - Anaconda or Miniconda
 
-Windows Only:
+Additional for Windows Only:
 - Microsoft C++ Build Tools (for GUI)
 
 ## Quickstart
