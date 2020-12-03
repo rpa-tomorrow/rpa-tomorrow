@@ -98,3 +98,11 @@ QFrame#modalBottomFrame {
 ModalWindow > QFrame {
     background-color: white;
 }
+
+QLabel#fontFaint {
+    color: #333333;
+}
+
+QLineEdit#fontFaint {
+    color: #333333;
+}

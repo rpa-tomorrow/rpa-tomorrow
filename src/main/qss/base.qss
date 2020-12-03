@@ -419,3 +419,15 @@ QScrollBar::up-arrow:horizontal, QScrollBar::down-arrow:horizontal {
 QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
     background: none;
 }
+
+QLabel#fontBold {
+    font-weight: bold;
+}
+
+QLineEdit#fontBold {
+    font-weight: bold;
+}
+
+ContactEntryView {
+    /* padding: 8px; */
+}

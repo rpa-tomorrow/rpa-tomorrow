@@ -122,6 +122,18 @@ ProcessConnector:Hover {
     border-color: #187aad;
 }
 
+ContactEntryView {
+    background-color: #282c34;
+}
+
+QLabel#fontFaint {
+    color: #a8afbf;
+}
+
+QLineEdit#fontFaint {
+    color: #a8afbf;
+}
+
 ModalWindow > QFrame {
     background-color: #282c34;
 }
