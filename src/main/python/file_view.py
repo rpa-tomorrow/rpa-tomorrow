@@ -35,9 +35,9 @@ class FileView(QtWidgets.QWidget):
 
         self.filename_view = QtWidgets.QLineEdit(self.model.filename)
         if self.action_is_save:
-            self.filename_view.returnPressed.connect(self.save_model)
+            self.filename_view.returnPressed.connect(self.save_taskboard)
         else:
-            self.filename_view.returnPressed.connect(self.load_model)
+            self.filename_view.returnPressed.connect(self.load_taskboard)
 
         self.fileformat_view = QtWidgets.QComboBox()
         self.fileformat_view.addItem("Robotic Process Automation (*.rpa)", ".rpa")
@@ -49,9 +49,9 @@ class FileView(QtWidgets.QWidget):
         self.action_button = QtWidgets.QToolButton()
         self.action_button.setText(action_str + " Process")
         if self.action_is_save:
-            self.action_button.clicked.connect(self.save_model)
+            self.action_button.clicked.connect(self.save_taskboard)
         else:
-            self.action_button.clicked.connect(self.load_model)
+            self.action_button.clicked.connect(self.load_taskboard)
 
         layout.addWidget(self.current_dir_view, 0, 0, 1, 4)
         layout.addWidget(self.tree_view, 1, 0, 1, 4)
@@ -78,7 +78,7 @@ class FileView(QtWidgets.QWidget):
             absolute_path = os.path.join(self.file_system_model.filePath(self.tree_view.rootIndex()), filename)
         return (filename, absolute_path)
 
-    def save_model(self, filename=None):
+    def save_taskboard(self, filename=None):
         filename, absolute_path = self.get_filepath(filename)
         if os.path.isfile(absolute_path):
             save_modal = modal.ModalYesNoQuestionWindow(
@@ -86,17 +86,17 @@ class FileView(QtWidgets.QWidget):
                 f"Do you want to overwrite the file {filename}? This cannot be undone!",
                 "File already exists",
             )
-            save_modal.yes_callback = lambda: self.save_model_impl(absolute_path)
+            save_modal.yes_callback = lambda: self.save_taskboard_impl(absolute_path)
         else:
-            self.save_model_impl(absolute_path)
+            self.save_taskboard_impl(absolute_path)
 
-    def save_model_impl(self, absolute_path):
+    def save_taskboard_impl(self, absolute_path):
         print(absolute_path)
         self.model.save(absolute_path)
         self.main_window.set_info_message(f"Wrote {absolute_path}.")
         self.main_window.set_active_view(0)
 
-    def load_model(self, filename=None):
+    def load_taskboard(self, filename=None):
         filename, absolute_path = self.get_filepath(filename)
         if not os.path.isfile(absolute_path):
             modal.ModalMessageWindow(
@@ -136,9 +136,9 @@ class FileView(QtWidgets.QWidget):
         else:
             filepath = self.file_system_model.fileName(index)
             if self.action_is_save:
-                self.save_model(filepath)
+                self.save_taskboard(filepath)
             else:
-                self.load_model(filepath)
+                self.load_taskboard(filepath)
 
 
 class CurrentDirectoryView(QtWidgets.QFrame):
