@@ -1,154 +1,102 @@
-# D7017E Substorm - Natural language processing
+# RPA Tomorrow - process tasks from natural text
+[![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
+[![GitHub release](https://img.shields.io/github/release/rpa-tomorrow/substorm-nlp.svg)](https://github.com/rpa-tomorrow/substorm-nlp/releases/)
+<a href="https://github.com/rpa-tomorrow/substorm-action/actions"><img alt="Actions Status" src="https://github.com/rpa-tomorrow/substorm-nlp/workflows/CI/badge.svg"></a>
+<a href="https://github.com/rpa-tomorrow/substorm-nlp/blob/master/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
+<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
+</p>
 
-Project designed and written in Python in conjunction with the D7017E Project in Information and Communication Technology course at Luleå University of Technology.
+> The purpose of RPA Tomorrow is to implement a system where the user can write instructions in clear text in order to instruct the computer what to do. This application utilizes natural language processing together with custom-made neural networks in order to parse the intent of the given text and then returns an executable task.
 
-## Project description
+For users of the system there are two user interfaces implemented, a CLI and a GUI.
 
-The purpose of the project is to implement a system where the user can write instructions in clear text using machine learning and natural language processing, in order to instruct the computer what to do.
+## Table of contents
+1. [Requirements](#requirements)
+2. [Setup](#setup)
+    1. [Advanced setup](#advanced-setup)
+3. [Quickstart](#quickstart)
+4. [Usage](#usage)
+    1. [CLI](#cli)
+    2. [GUI](#gui)
+5. [DEMO](#demo)
+6. [Documentation](#documentation)
+7. [Testing](#testing)
+8. [License](#license)
 
 ## Requirements
 
-- Python 3.8.5
-- Anaconda
+Linux and Windows:
+- Python 3+
+- Anaconda or Miniconda
+
+Additional for Windows Only:
+- Microsoft C++ Build Tools (for GUI)
+
+## Quickstart
+
+1. Follow the [setup](#setup)
+2. Start the application through either the [CLI](#cli) or [GUI](#gui)
 
 ## Setup
 
-To create and activate the projects conda environment the setup script can be used with the following command
+Clone and `cd` into the repository.
 
-```
-source substorm.sh
-```
-
-This will also install all of the required models from the [model releases repository](https://github.com/rpa-tomorrow/model-releases).
-Please note that no newly released models will be installed if this script has already been used before. For this to work the conda environment needs to be removed entirely before running the setup script again.
-
-### Manually installing a model
-
-With the conda environment activated a model can be installed by using `pip`
-
+To create and activate the project environment the included setup script can be used 
 ```bash
-pip install https://github.com/rpa-tomorrow/model-releases/releases/download/<TAG>/<TAG>.tar.gz
+$ source substorm.sh
 ```
 
-where `<TAG>` is the [tag](https://github.com/rpa-tomorrow/model-releases/tags) of the model to install.
-
-### Local SMTP server
-
-It can be nice to test the Send automation module (sends emails) using a local SMTP debugging server. This can be done by running
-
+Otherwise you can do it manually
+```bash
+# Create environment
+$ conda env create -f substorm-nlp.yml
+# Install RPA models
+$ pip install -r requirements.txt
+# Activate environment
+$ conda activate substorm-nlp
 ```
-python -m smtpd -n -c DebuggingServer localhost:1025
-```
+**NOTE!** If you're on Windows, replace all `substorm-nlp` with `substorm-nlp-win` above.
 
-in your terminal. A local SMTP debugging server is now running on `localhost:1025` and the predefined user `John Doe` in [config/user.yaml](config/user.yaml) can be used to send emails to this local server. If an email is sent using the module you should now be able to see it in the terminal.
-
-### Google QAuth 2.0 client secret
-
-Since the [schedule module](lib/automate/modules/schedule.py), responsible for scheduling meetings, uses the Google Calendar API some setup is required
-for this module to work.
-Follow this [Google guide](https://support.google.com/cloud/answer/6158849?hl=en) and create a Google Calendar API.
-
-The scope of the credentials needs to set to
-
-```
-https://www.googleapis.com/auth/calendar.events.owned
-https://www.googleapis.com/auth/calendar.readonly
-https://www.googleapis.com/auth/contacts.readonly
-https://www.googleapis.com/auth/contacts.other.readonly
-https://www.googleapis.com/auth/directory.readonly
-```
-
-After that download the credentials and put it in `substorm-nlp/` directory, also name it `client_secret.json`.
-
-Now the schedule module should work and any created meetings should show up in the calendar of the account you created the credentials for.
-
-### Google service account
-
-To use the Speech-to-Text feature of the program a Google service account key is required, since it uses the Google [Cloud Speech-to-Text API](https://cloud.google.com/speech-to-text).
-
-1. Navigate to [Google Cloud Console](https://console.cloud.google.com/apis/) and make sure the correct project is selected.
-2. Go to `credentials`
-3. Click `Create credentials` and select `Service account`
-4. Fill in the required fields, select `Owner` role
-5. Click on the newly created service account, under Keys press `Add key` and select `Create new key`
-6. When prompted to choose key type select `JSON`
-7. Save the key as `service_account.json`
-8. Move the key into the project folder
-9. [Enable](https://console.cloud.google.com/apis/library/speech.googleapis.com) the Cloud Speech-to-Text API for the same project you created the key for. **Please note that this Google service is only free for the first 60 minutes of Speech-to-Text processed each month. If you can I recommend starting a [trial account](https://console.cloud.google.com/freetrial/signup/tos) which will give you \$300 free credits.**
+### Advanced setup
+- To authenticate with Google for GCal support see [google_auth_setup.md](docs/google_auth_setup.md)
+- User settings can be configured manually inside `config/` or through the GUI
 
 ## Usage
 
-### User input
-
-Since the program is intended to be able to parse and understand clear text as input, to perform various tasks, there is no specific
-syntax for the input. However, the program is only able to perform three specific use cases at the moment, these are:
-
-- Sending emails
-- Creating reminders
-- Scheduling meetings
-
-Because of this the input has to contain a verb connected to one of these use cases in order for the program to understand and invoke a module for execution. Below are the verbs connected to each module, which can be used in the input.
-
-- Send email [send, mail, e-mail, email]
-- Reminder [remind, reminder, notify]
-- Schedule meeting [book, schedule, meeting]
-
-As long as a module can be invoked after parsing the input you will be prompted about any missing information in the input such as when to schedule the reminder, what should be sent in the email etc.
-
-#### Example input
-
-```
-remind me to eat in 30 seconds
-```
-
-```
-send an email to Niklas
-```
-
-```
-schedule a meeting with John at 13:00
-```
+RPA Tomorrow accepts regular natural text as input. Below is the information for the supported interfaces.
+See [accepted_input.md](docs/accepted_input.md) if the program is struggling to understand the input.
 
 ### CLI
 
 The CLI can be started as follows
-
-- `cd` into the project folder
-- Run `python lib/cli/cli.py`
-- You can check available CLI options with the `--help` flag
-
-The CLI should now be running in your terminal. Type `help` for more instructions. See [User input](#user-input) if the program is struggling to understand the input.
+```bash
+$ python lib/cli/cli.py
+```
+Inside the CLI, type `help` for more instructions. 
 
 ### GUI
 
 The GUI can be started as follows
+```bash
+$ fbs run
+```
 
-- `cd` into the project folder
-- Run `fbs run`
+## DEMO
+[![asciicast](https://asciinema.org/a/NJHkkxjK2dXprr2pV6fb2DXgL.svg)](https://asciinema.org/a/NJHkkxjK2dXprr2pV6fb2DXgL?size=medium&autoplay=true)
 
-Note: in the future if possible the GUI will be distributed as a single executable file.
+## Documentation
+
+Documentation are provided in `docs/` [here](/docs).
+
 
 ## Testing
 
 The tests can be run with the following command
 
 ```bash
-pytest
+$ pytest
 ```
-
-while inside the project directory. You will need the `pytest-cov` package to run it, this will already be installed if the conda environment is activated when issuing the above command.
-
 A coverage report will automatically be generated and saved in `htmlcov/` and it can be viewed at `htmlcov/index.html`
-
-## Authors
-
-- Viktor From - vikfro-6@student.ltu.se - [viktorfrom](https://github.com/viktorfrom)
-- Mark Hakansson - marhak-6@student.ltu.se - [markhakansson](https://github.com/markhakansson)
-- Gustav Hansson - gushan-6@student.ltu.se - [97gushan](https://github.com/97gushan)
-- Niklas Lundberg - inaule-6@student.ltu.se - [Blinningjr](https://github.com/Blinningjr)
-- Alexander Mennborg - alemen-6@student.ltu.se - [Aleman778](https://github.com/Aleman778)
-- Hugo Wangler - hugwan-6@student.ltu.se - [hugowangler](https://github.com/hugowangler)
-- Aron Widforss - arowid-6@student.ltu.se - [widforss](https://github.com/widforss)
 
 ## License
 

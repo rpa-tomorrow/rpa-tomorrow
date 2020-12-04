@@ -11,8 +11,6 @@ echo "activate conda substorm-nlp env..."
 source ~/anaconda3/etc/profile.d/conda.sh 
 conda activate substorm-nlp
 
-spacy download xx_ent_wiki_sm
-
 MULTILINE2=$(pip list | grep -F en-rpa-simple)
 
 echo "installed rpa-models..."

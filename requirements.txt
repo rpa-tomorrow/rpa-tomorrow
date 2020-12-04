@@ -2,3 +2,4 @@ https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple_r
 https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple_email-0.0.1/en_rpa_simple_email-0.0.1.tar.gz
 https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple-0.0.1/en_rpa_simple-0.0.1.tar.gz
 https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple_calendar-0.0.4/en_rpa_simple_calendar-0.0.4.tar.gz
+https://github.com/explosion/spacy-models/releases/download/xx_ent_wiki_sm-2.3.0/xx_ent_wiki_sm-2.3.0.tar.gz
