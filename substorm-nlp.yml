@@ -92,6 +92,7 @@ dependencies:
   - pytest-cov=2.10.1=pyh9f0ad1d_0
   - python=3.8.5=h7579374_1
   - python-dateutil=2.8.1=py_0
+  - python-dotenv=0.15.0=pyhd8ed1ab_0
   - python-levenshtein=0.12.0=py38h1e0a361_1001
   - python-sounddevice=0.4.1=pyh9f0ad1d_0
   - python_abi=3.8=1_cp38

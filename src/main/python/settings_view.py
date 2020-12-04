@@ -5,6 +5,7 @@ import os
 import sys
 
 from lib.settings import SETTINGS, get_language_versions, get_model_languages, update_settings
+from lib.utils.crypt import Crypt
 
 VALID = 2  # value of state enum representing valid state after validation
 EMAIL_REGEX = "^([a-zA-Z0-9]+[\\._-]?[a-zA-Z0-9]+)[@](\\w+[.])+\\w{2,3}$"
@@ -127,15 +128,6 @@ class SettingsView(QtWidgets.QWidget):
         layout.addWidget(QtWidgets.QLabel("Email"), row, 0)
         layout.addWidget(self.email_address, row, 1, 1, 3)
 
-        # Email password
-        row += 1
-        self.email_password = QtWidgets.QLineEdit(
-            str(SETTINGS["user"]["email"]["password"] if SETTINGS["user"]["email"]["password"] is not None else "")
-        )
-        self.email_password.setEchoMode(QtWidgets.QLineEdit.Password)
-        layout.addWidget(QtWidgets.QLabel("Password"), row, 0)
-        layout.addWidget(self.email_password, row, 1, 1, 3)
-
         # SMTP server section
         row += 1
         self.smtp_title = QtWidgets.QLabel("SMTP server")
@@ -148,6 +140,14 @@ class SettingsView(QtWidgets.QWidget):
         self.smtp_username = QtWidgets.QLineEdit(str(conf_username))
         layout.addWidget(QtWidgets.QLabel("Username"), row, 0)
         layout.addWidget(self.smtp_username, row, 1, 1, 3)
+
+        # SMTP password (email)
+        row += 1
+        self.email_password = QtWidgets.QLineEdit()
+        self.email_password.setPlaceholderText("Change password")
+        self.email_password.setEchoMode(QtWidgets.QLineEdit.Password)
+        layout.addWidget(QtWidgets.QLabel("Password"), row, 0)
+        layout.addWidget(self.email_password, row, 1, 1, 3)
 
         # SMTP host
         row += 1
@@ -265,7 +265,7 @@ class SettingsView(QtWidgets.QWidget):
         # User
         self.name.setText(self.initial_state["user"]["name"])
         self.email_address.setText(self.initial_state["user"]["email"]["address"])
-        self.email_password.setText(self.initial_state["user"]["email"]["password"])
+        self.email_password.setText("")
 
         # SMTP
         self.smtp_username.setText(self.initial_state["user"]["email"]["username"])
@@ -312,6 +312,8 @@ class SettingsView(QtWidgets.QWidget):
             self.main_window.set_info_message("Failed to update settings. Some fields are either invalid or empty.")
             return
 
+        crypt = Crypt()
+
         # Editor
         SETTINGS["editor"]["theme"] = self.theme.currentData()
         SETTINGS["editor"]["font-family"] = self.font_family.text()
@@ -327,15 +329,20 @@ class SettingsView(QtWidgets.QWidget):
         SETTINGS["user"]["email"] = {
             "address": self.email_address.text(),
             "host": self.smtp_host.text(),
-            "password": self.email_password.text() if self.email_password.text() != "" else None,
+            # Only update password if a new password was given
+            "password": crypt.encrypt(self.email_password.text())
+            if self.email_password.text() != ""
+            else self.initial_state["user"]["email"]["password"],
             "port": int(self.smtp_port.text()),
             "ssl": self.smtp_ssl.isChecked(),
             "username": self.smtp_username.text(),
         }
         SETTINGS["user"]["language"] = self.model_language.currentData()
         SETTINGS["user"]["language_version"] = self.model_lang_version.currentData()
+
         update_settings(os.path.abspath("config/user"), SETTINGS["user"])
         self.main_window.set_info_message("Updated settings.")
+        self.email_password.setText("")  # show placeholder again
 
 
 # NOTE(alexander): DEV mode entry point only!!!

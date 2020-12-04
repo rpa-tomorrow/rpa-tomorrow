@@ -1,15 +1,19 @@
+import getpass
 import sys
 
 sys.path.append(".")
 
 from lib.settings import (  # noqa: E402
     SETTINGS,
+    get_language_versions,
+    get_model_languages,
     load_local_contacts,
+    load_meeting_settings,
+    load_nlp_models_config,
     load_user,
     update_settings,
-    load_nlp_models_config,
-    load_meeting_settings,
 )
+from lib.utils.crypt import Crypt  # noqa: E402
 
 
 def load_settings_from_cli():
@@ -42,11 +46,11 @@ def load_user_from_cli():
         update = True
 
     if SETTINGS["user"]["language"] is None:
-        SETTINGS["user"]["language"] = config_model_language()
+        SETTINGS["user"]["language"] = config_model_language(get_model_languages())
         update = True
 
     if SETTINGS["user"]["language_version"] is None:
-        SETTINGS["user"]["language_version"] = choose_version(SETTINGS["user"]["language"])
+        SETTINGS["user"]["language_version"] = choose_version(get_language_versions(SETTINGS["user"]["language"]))
         update = True
 
     SETTINGS["user"]["email"] = email_config
@@ -87,7 +91,8 @@ def config_email_host(email_config: dict) -> dict:
         email_config["username"] = sys.stdin.readline().strip()
 
         print("Enter Password: ")
-        email_config["password"] = sys.stdin.readline().strip()
+        crypt = Crypt()
+        email_config["password"] = crypt.encrypt(getpass.getpass())
 
         print("Does the Email service use SSL? (y/n): ")
         email_config["ssl"] = sys.stdin.readline().strip().lower() in [
