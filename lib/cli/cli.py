@@ -38,8 +38,7 @@ def cli(debug, verbose):
 
 def load_prerequisites(spinner, debug, verbose):
     click.secho("· Loading settings... ", bold=True)
-    with spinner:
-        load_settings_from_cli()
+    load_settings_from_cli()
     print("", end="\x1b[1K\r")
     click.secho("---> DONE", fg="green", bold=True)
 
