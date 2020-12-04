@@ -9,10 +9,32 @@ QLabel#settingsSectionTitle {
 }
 
 QToolButton {
+    border-style: none;
+    padding: 6px 6px 6px 6px;
+    border-radius: 4px;
+}
+
+QScrollArea {
+    background: transparent;
+    border-style: none;
+}
+
+QScrollArea > QWidget > QWidget {
+    background: transparent;
+}
+
+QToolButton#fileNav {
     font-size: 24px;
     font-family: FontAwesome;
-    border-style: none;
-    border-radius: 4px;
+    padding: 0;
+    padding-top: 1px;
+    padding-bottom: 3px;
+}
+
+QToolButton#iconButton {
+    font-size: 24px;
+    font-family: FontAwesome;
+    padding: 0;
 }
 
 SideMenuBar {
@@ -22,6 +44,7 @@ SideMenuBar {
 
 MenuBarButton {
     color: white;
+    font-family: FontAwesome;
     background-color: dodgerblue;
     font-size: 32px;
     padding-bottom: 22px;
@@ -128,7 +151,6 @@ QMenu {
     border: 1px solid #303030;
 }
 
-
 QMenu::item {
     padding: 2px 25px 2px 20px;
 }
@@ -159,12 +181,6 @@ QMenu::indicator {
     height: 13px;
 }
 
-QPushButton {
-    border-style: none;
-    padding: 6px 6px 6px 6px;
-    border-radius: 4px;
-}
-
 QLabel#processEntryHeading {
     font-weight: bold;
 }
@@ -180,6 +196,14 @@ QTreeView {
 
 QListView {
     border-style: none;
+}
+
+QListView#fileView {
+    padding-left: 8px;
+    padding-right: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    border-radius: 4px;
 }
 
 QHeaderView {
@@ -226,4 +250,172 @@ ProcessTextEditView[editing=true] {
 ProcessView[editing=true] {
     border-color: orange;
     border-width: 2px;
+}
+
+ModalWindow > QFrame {
+    border-radius: 4px;
+}
+
+QLabel#modalTitle {
+    font-size: 18pt;
+    padding-top: 12px;
+    padding-right: 12px;
+}
+
+QLabel#modalMessage {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+QFrame#modalBottomFrame {
+    background-color: white;
+    border-radius: 4px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+}
+
+QLabel#modalIconGreen {
+    font-size: 28px;
+    padding-top: 12px;
+    padding-left: 12px;
+    font-family: FontAwesome;
+    color: green;
+}
+
+QLabel#modalIconRed {
+    font-size: 28px;
+    padding-top: 12px;
+    padding-left: 12px;
+    font-family: FontAwesome;
+    color: red;
+}
+
+QLabel#modalIconOrange {
+    font-size: 28px;
+    padding-top: 12px;
+    padding-left: 12px;
+    font-family: FontAwesome;
+    color: orange;
+}
+
+QLabel#modalIconBlue {
+    font-size: 28px;
+    padding-top: 12px;
+    padding-left: 12px;
+    font-family: FontAwesome;
+    color: dodgerblue;
+}
+
+QToolButton#primaryButton {
+    color: white;
+    background-color: dodgerblue;
+}
+
+QToolButton#primaryButton {
+    color: white;
+    background-color: dodgerblue;
+}
+
+QToolButton#primaryButton:hover {
+    background-color: #1774cf;
+}
+
+QToolButton#primaryButton:pressed {
+    background-color: #2879c9;
+}
+
+QScrollBar:vertical {
+    background-color: #f1f1f1;
+    width: 18px;
+    margin: 3px 3px 3px 3px;
+    border: 1px transparent white;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #e0e0e0;
+    min-height: 5px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #d1d1d1;
+    min-height: 5px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:vertical:pressed {
+    background-color: #c1c1c1;
+    min-height: 5px;
+    border-radius: 4px;
+}
+
+QScrollBar::sub-line:vertical {
+    height: 0px;
+    width: 0px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::add-line:vertical {
+    height: 0px;
+    width: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::up-arrow:vertical, QScrollBar::down-arrow:vertical {
+    background: none;
+}
+
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+
+QScrollBar:horizontal {
+    background-color: #f1f1f1;
+    height: 18px;
+    margin: 3px 3px 3px 3px;
+    border: 1px transparent white;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #e0e0e0;
+    min-width: 5px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: #d1d1d1;
+    min-width: 5px;
+    border-radius: 4px;
+}
+
+QScrollBar::handle:horizontal:pressed {
+    background-color: #c1c1c1;
+    min-width: 5px;
+    border-radius: 4px;
+}
+
+QScrollBar::sub-line:horizontal {
+    height: 0px;
+    width: 0px;
+    subcontrol-position: top;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::add-line:horizontal {
+    height: 0px;
+    width: 0px;
+    subcontrol-position: bottom;
+    subcontrol-origin: margin;
+}
+
+QScrollBar::up-arrow:horizontal, QScrollBar::down-arrow:horizontal {
+    background: none;
+}
+
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
 }

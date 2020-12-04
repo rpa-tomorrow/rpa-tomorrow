@@ -1,7 +1,5 @@
 from fbs_runtime.application_context.PyQt5 import ApplicationContext
-import PyQt5.QtWidgets as QtWidgets
-import PyQt5.QtCore as QtCore
-import PyQt5.QtGui as QtGui
+from PyQt5 import QtWidgets, QtGui, QtCore
 import os
 import sys
 import resources  # noqa: F401
@@ -21,27 +19,34 @@ class MainWindow(QtWidgets.QMainWindow):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setWindowTitle("RPA Tomorrow")
 
-        layout = QtWidgets.QGridLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
+        self.layout = QtWidgets.QGridLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.model = proc_model.Model("untitled")
 
         self.bottom = BottomInfoBar()
         self.menu = SideMenuBar(self)
         self.content = ContentFrame(self)
+        self.modal = None
 
-        layout.addWidget(self.menu, 0, 0, 2, 1)
-        layout.addWidget(self.content, 0, 1)
-        layout.addWidget(self.bottom, 1, 1)
-        layout.setHorizontalSpacing(0)
-        layout.setVerticalSpacing(0)
+        self.layout.addWidget(self.menu, 0, 0, 2, 1)
+        self.layout.addWidget(self.content, 0, 1)
+        self.layout.addWidget(self.bottom, 1, 1)
+        self.layout.setHorizontalSpacing(0)
+        self.layout.setVerticalSpacing(0)
 
         widget = QtWidgets.QWidget()
-        widget.setLayout(layout)
+        widget.setLayout(self.layout)
         self.setCentralWidget(widget)
+
+    def resizeEvent(self, event):
+        QtWidgets.QMainWindow.resizeEvent(self, event)
+        if self.modal:
+            self.modal.resize(self.width(), self.height())
 
     def set_active_view(self, view):
         self.content.set_active_view(view)
+        self.menu.set_active_view(view)
         self.update()
 
     def set_info_message(self, msg):
@@ -60,8 +65,8 @@ class ContentFrame(QtWidgets.QFrame):
 
         self.main_window = main_window
         self.design_view = DesignView(main_window)
-        self.save_view = FileView(main_window, self.main_window.model)
-        self.load_view = FileView(main_window, self.main_window.model)
+        self.save_view = FileView(main_window, self.design_view, self.main_window.model, True)
+        self.load_view = FileView(main_window, self.design_view, self.main_window.model, False)
         self.play_view = PlayView(main_window, self.design_view.process_editor)
         self.settings_view = SettingsView(main_window)
         self.info_view = QtWidgets.QFrame()
@@ -94,7 +99,8 @@ class MenuBarButton(QtWidgets.QToolButton):
         self.label.move(0, 50)
 
     def set_active_view(self):
-        self.parent.set_active_view(self, self.view_id)
+        self.parent.set_active_view(self.view_id)
+        self.parent.parent.set_active_view(self.view_id)
 
 
 class SideMenuBar(QtWidgets.QFrame):
@@ -123,11 +129,13 @@ class SideMenuBar(QtWidgets.QFrame):
 
         self.setLayout(layout)
 
-    def set_active_view(self, target, view):
-        for item in self.items:
-            item.setChecked(False)
-        target.setChecked(True)
-        self.parent.set_active_view(view)
+    def set_active_view(self, view):
+        for i in range(0, len(self.items)):
+            item = self.items[i]
+            if i == view:
+                item.setChecked(True)
+            else:
+                item.setChecked(False)
 
 
 class BottomInfoBar(QtWidgets.QFrame):

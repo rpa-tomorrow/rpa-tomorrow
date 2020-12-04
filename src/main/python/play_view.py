@@ -1,7 +1,4 @@
-import PyQt5.QtWidgets as QtWidgets
-import PyQt5.QtGui as QtGui
-import PyQt5.QtCore as QtCore
-
+from PyQt5 import QtWidgets, QtGui, QtCore
 import sys
 
 

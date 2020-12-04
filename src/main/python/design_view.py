@@ -1,6 +1,4 @@
-import PyQt5.QtWidgets as QtWidgets
-import PyQt5.QtGui as QtGui
-import PyQt5.QtCore as QtCore
+from PyQt5 import QtWidgets, QtGui, QtCore
 
 import traceback
 import sys
@@ -10,6 +8,7 @@ import pyaudio
 import uuid
 
 import process_models as proc_models
+import modal
 
 from lib.speech.transcribe import transcribe
 from lib.automate.modules.send import Send
@@ -17,15 +16,6 @@ from lib.automate.modules.schedule import Schedule
 from lib.automate.modules.reminder import Reminder
 from lib.selector.selector import ModuleSelector
 from lib.settings import SETTINGS
-
-
-def display_error_message(message, title="Error"):
-    msg = QtWidgets.QMessageBox()
-    msg.setIcon(QtWidgets.QMessageBox.Critical)
-    msg.setText(message)
-    msg.setWindowTitle(title)
-    msg.resize(360, 280)
-    msg.exec_()
 
 
 class DesignView(QtWidgets.QWidget):
@@ -62,7 +52,7 @@ class DesignView(QtWidgets.QWidget):
         self.save_shortcut.activated.connect(self.save_model)
 
         self.load_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+F"), self)
-        self.load_shortcut.activated.connect(self.DEBUG_load_model)
+        self.load_shortcut.activated.connect(self.load_model)
 
         self.select_all_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Ctrl+A"), self)
         self.select_all_shortcut.activated.connect(self.process_editor.select_all_processes)
@@ -80,16 +70,23 @@ class DesignView(QtWidgets.QWidget):
         self.cancel_actions_shortcut.activated.connect(self.cancel_actions)
 
     def save_model(self):
-        self.model.save()
-        self.main_window.set_info_message("Wrote " + self.model.absolute_path)
+        if self.model.absolute_path:
+            self.model.save()
+            self.main_window.set_info_message("Wrote " + self.model.absolute_path)
+        else:
+            self.main_window.content.save_view.filename_view.setFocus()
+            self.main_window.content.save_view.filename_view.selectAll()
+            self.main_window.set_active_view(1)
 
-    # TODO(alexander): temporary load model only for development and testing
-    def DEBUG_load_model(self):
+    def load_model(self):
+        self.main_window.content.load_view.filename_view.setFocus()
+        self.main_window.content.load_view.filename_view.selectAll()
+        self.main_window.set_active_view(2)
+
+    def rebuild_from_loaded_model(self):
         for view in self.process_editor.process_views.values():
             view.close()
         self.process_editor.process_views.clear()
-
-        self.model.load("untitled.yaml")
 
         for id, proc in self.model.processes.items():
             view = self.process_editor.create_process_view(proc)
@@ -133,7 +130,9 @@ class DesignView(QtWidgets.QWidget):
         except Exception:
             traceback.print_exc()
             self.process_text_edit.restore_cursor_pos()
-            display_error_message(str(sys.exc_info()[1]) + ".")
+            modal.ModalMessageWindow(
+                self.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR
+            )
             return
 
         for i, task in enumerate(tasks):
@@ -158,7 +157,13 @@ class DesignView(QtWidgets.QWidget):
                 model.when = str(task.when)
                 model.body = str(task.body)
             else:
-                display_error_message("Failed to understand what task you wanted to perform.")
+                modal.ModalMessageWindow(
+                    self.main_window,
+                    "Failed to understand what task you wanted to perform. Please check spelling mistakes "
+                    + "or simplify your sentence and try again!",
+                    "Error",
+                    modal.MSG_ERROR,
+                )
                 return
             if model:
                 model.query = proc_query
@@ -485,6 +490,7 @@ class ProcessTextEditView(QtWidgets.QFrame):
 
         self.speech_button = QtWidgets.QToolButton()
         self.speech_button.setText("\uF130")
+        self.speech_button.setObjectName("iconButton")
         self.speech_button.setMinimumWidth(32)
         self.speech_button.setMinimumHeight(32)
         self.speech_button.setMaximumWidth(32)
@@ -493,6 +499,7 @@ class ProcessTextEditView(QtWidgets.QFrame):
 
         self.submit_button = QtWidgets.QToolButton()
         self.submit_button.setText("\uF00C")
+        self.submit_button.setObjectName("iconButton")
         self.submit_button.setMinimumWidth(32)
         self.submit_button.setMinimumHeight(32)
         self.submit_button.setMaximumWidth(32)
@@ -500,6 +507,7 @@ class ProcessTextEditView(QtWidgets.QFrame):
         self.submit_button.clicked.connect(self.submit_editing)
 
         self.cancel_button = QtWidgets.QToolButton()
+        self.cancel_button.setObjectName("iconButton")
         self.cancel_button.setText("\uF00D")
         self.cancel_button.setMinimumWidth(32)
         self.cancel_button.setMinimumHeight(32)
@@ -543,7 +551,9 @@ class ProcessTextEditView(QtWidgets.QFrame):
             transcribed_input
         except Exception:
             traceback.print_exc()
-            display_error_message(str(sys.exc_info()[1]) + ".")
+            modal.ModalMessageWindow(
+                self.design_view.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR
+            )
 
     def submit_editing(self):
         self.design_view.submit_input_text(self.editing)

@@ -3,18 +3,6 @@
     color: white;
 }
 
-QPushButton {
-    background-color: #282c34;
-}
-
-QPushButton:hover {
-    background-color: #343a45;
-}
-
-QPushButton:pressed {
-    background-color: #535d70;
-}
-
 QToolButton {
     background-color: #282c34;
 }
@@ -25,6 +13,11 @@ QToolButton:hover {
 
 QToolButton:pressed {
     background-color: #535d70;
+}
+
+QToolButton:disabled {
+    background-color: #22262e;
+    color: #adadad;
 }
 
 ProcessEntryView {
@@ -40,36 +33,16 @@ QListView {
     background-color: #282c34;
 }
 
+QListView::item:disabled {
+    color: #adadad;
+}
+
 QHeaderView {
     background-color: #282c34;
 }
 
 QHeaderView::section {
     background-color: #21252b;
-}
-
-QTreeView::branch:has-siblings:!adjoins-item {
-    border-image: url(vline.png) 0;
-}
-
-QTreeView::branch:has-siblings:adjoins-item {
-    border-image: url(branch-more.png) 0;
-}
-
-QTreeView::branch:!has-children:!has-siblings:adjoins-item {
-    border-image: url(branch-end.png) 0;
-}
-
-QTreeView::branch:has-children:!has-siblings:closed,
-QTreeView::branch:closed:has-children:has-siblings {
-    border-image: none;
-    image: url(branch-closed.png);
-}
-
-QTreeView::branch:open:has-children:!has-siblings,
-QTreeView::branch:open:has-children:has-siblings  {
-    border-image: none;
-    image: url(branch-open.png);
 }
 
 MainWindow {
@@ -147,4 +120,44 @@ MenuBarButton:checked {
 ProcessConnector:Hover {
     background-color: #187aad;
     border-color: #187aad;
+}
+
+ModalWindow > QFrame {
+    background-color: #282c34;
+}
+
+QFrame#modalBottomFrame {
+    background-color: #2f333d;
+}
+
+QScrollBar:vertical {
+    background-color: #2f333d;
+}
+
+QScrollBar::handle:vertical {
+    background-color: #22262e;
+}
+
+QScrollBar::handle:vertical:hover {
+    background-color: #343a45;
+}
+
+QScrollBar::handle:vertical:pressed {
+    background-color: #535d70;
+}
+
+QScrollBar:horizontal {
+    background-color: #2f333d;
+}
+
+QScrollBar::handle:horizontal {
+    background-color: #22262e;
+}
+
+QScrollBar::handle:horizontal:hover {
+    background-color: #343a45;
+}
+
+QScrollBar::handle:horizontal:pressed {
+    background-color: #535d70;
 }
