@@ -135,11 +135,11 @@ QLineEdit#fontFaint {
 }
 
 ModalWindow > QFrame {
-    background-color: #282c34;
+    background-color: #1d2026;
 }
 
 QFrame#modalBottomFrame {
-    background-color: #2f333d;
+    background-color: #21242b;
 }
 
 QScrollBar:vertical {

@@ -96,7 +96,7 @@ QFrame#modalBottomFrame {
 }
 
 ModalWindow > QFrame {
-    background-color: white;
+    background-color: #ebebeb;
 }
 
 QLabel#fontFaint {
@@ -105,4 +105,8 @@ QLabel#fontFaint {
 
 QLineEdit#fontFaint {
     color: #333333;
+}
+
+ContactEntryView {
+    background-color: white;
 }

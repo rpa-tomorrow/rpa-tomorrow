@@ -19,6 +19,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setWindowTitle("RPA Tomorrow")
+        self.modal = None
 
         self.layout = QtWidgets.QGridLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -28,7 +29,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.bottom = BottomInfoBar()
         self.menu = SideMenuBar(self)
         self.content = ContentFrame(self)
-        self.modal = None
 
         self.layout.addWidget(self.menu, 0, 0, 2, 1)
         self.layout.addWidget(self.content, 0, 1)

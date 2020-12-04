@@ -429,5 +429,15 @@ QLineEdit#fontBold {
 }
 
 ContactEntryView {
-    /* padding: 8px; */
+    border-radius: 4px;
+}
+
+QLabel#hMargin {
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+QLineEdit#hMargin {
+    margin-left: 8px;
+    margin-right: 8px;
 }
