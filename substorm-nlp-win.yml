@@ -1,15 +1,17 @@
 name: substorm-nlp-win
 channels:
+  - conda-forge
   - defaults
 dependencies:
   - appdirs=1.4.4=py_0
   - attrs=20.2.0=py_0
+  - beautifulsoup4=4.9.3=pyhb0f4dca_0
   - black=19.10b0=py_0
   - blas=1.0=mkl
   - brotlipy=0.7.0=py38he774522_1000
-  - ca-certificates=2020.10.14=0
+  - ca-certificates=2020.11.8=h5b45459_0
   - catalogue=1.0.0=py38_1
-  - certifi=2020.6.20=pyhd3eb1b0_3
+  - certifi=2020.11.8=py38haa244fe_0
   - cffi=1.14.3=py38h7a1dbc1_0
   - chardet=3.0.4=py38_1003
   - click=7.1.2=py_0
@@ -17,6 +19,8 @@ dependencies:
   - cymem=2.0.3=py38ha925a31_0
   - cython-blis=0.4.1=py38he774522_1
   - flake8=3.8.4=py_0
+  - future=0.18.2=py38_1
+  - fuzzywuzzy=0.18.0=pyhd8ed1ab_0
   - idna=2.10=py_0
   - importlib-metadata=2.0.0=py_1
   - importlib_metadata=2.0.0=1
@@ -45,12 +49,18 @@ dependencies:
   - pyrsistent=0.17.3=py38he774522_0
   - pysocks=1.7.1=py38_0
   - python=3.8.5=h5fd99cc_1
+  - python-levenshtein=0.12.0=py38h1e8a9f7_1004
+  - python_abi=3.8=1_cp38
+  - pytz=2020.4=pyhd3eb1b0_0
   - pyyaml=5.3.1=py38he774522_1
   - regex=2020.10.15=py38he774522_0
   - requests=2.24.0=py_0
   - setuptools=50.3.0=py38h9490d1a_1
   - six=1.15.0=py_0
+  - soupsieve=2.0.1=py_0
   - spacy=2.3.2=py38h74a9793_0
+  - spacy-model-en_core_web_md=2.3.1=pyh9f0ad1d_0
+  - spacy-model-en_core_web_sm=2.3.1=pyh9f0ad1d_0
   - sqlite=3.33.0=h2a8f88b_0
   - srsly=1.0.2=py38ha925a31_0
   - thinc=7.4.1=py38h74a9793_0
@@ -66,16 +76,14 @@ dependencies:
   - wheel=0.35.1=py_0
   - win_inet_pton=1.1.0=py38_0
   - wincertstore=0.2=py38_0
+  - word2number=1.1=py_0
   - yaml=0.2.5=he774522_0
   - zipp=3.3.1=py_0
   - zlib=1.2.11=h62dcd97_4
   - pip:
     - altgraph==0.17
-    - beautifulsoup4==4.9.3
     - cachetools==4.1.1
     - fbs==0.9.0
-    - future==0.18.2
-    - fuzzywuzzy==0.18.0
     - google==3.0.0
     - google-api-client==3.14.159265359.post1
     - google-api-core==1.23.0
@@ -99,15 +107,10 @@ dependencies:
     - pypiwin32==223
     - pyqt5==5.15.1
     - pyqt5-sip==12.8.1
-    - python-levenshtein==0.12.0
-    - pytz==2020.4
     - pywin32==300
     - pywin32-ctypes==0.2.0
     - requests-oauthlib==1.3.0
     - rsa==4.6
-    - soupsieve==2.0.1
     - typing-inspect==0.6.0
     - uritemplate==3.0.1
     - win10toast==0.9
-    - word2number==1.1
-prefix: C:\Users\alexa\anaconda3\envs\substorm-nlp-win
