@@ -1,42 +1,8 @@
 from PyQt5 import QtWidgets, QtCore
-from PyQt5.QtCore import QRegExp, pyqtSlot
-from PyQt5.QtGui import QRegExpValidator, QValidator
 from fuzzywuzzy import fuzz
 import modal
-import os
 
 from lib.settings import SETTINGS, update_settings
-
-VALID = 2  # value of state enum representing valid state after validation
-EMAIL_REGEX = "^([a-zA-Z0-9]+[\\._-]?[a-zA-Z0-9]+)[@](\\w+[.])+\\w{2,3}$"
-
-
-class InputValidator(QRegExpValidator):
-    """
-    A custom validator class that will set mark the parent object as invalid if
-    the validator fails.
-    """
-
-    def __init__(self, *args, allow_empty=False, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.allow_empty = allow_empty
-
-    def validate(self, text: str, pos: int):
-        state, text, pos = super(InputValidator, self).validate(text, pos)
-        selector = {
-            QValidator.Invalid: "invalid",
-            QValidator.Intermediate: "intermediate",
-            QValidator.Acceptable: "acceptable",
-        }[state]
-
-        if selector == "invalid" or (not self.allow_empty and selector == "intermediate"):
-            self.parent().setProperty("invalid", True)
-        else:
-            self.parent().setProperty("invalid", False)
-
-        self.parent().style().unpolish(self.parent())
-        self.parent().style().polish(self.parent())
-        return state, text, pos
 
 
 class ContactsView(QtWidgets.QWidget):
@@ -74,7 +40,7 @@ class ContactsView(QtWidgets.QWidget):
         self.search_name.setPlaceholderText("Search for a name in your contact list...")
         self.search_name.installEventFilter(self)
         top_layout.addWidget(self.search_name)
-        
+
         self.add_contact = QtWidgets.QToolButton()
         self.add_contact.setText("\uf234 Create new contact")
         self.add_contact.clicked.connect(self.create_new_contact)
@@ -88,7 +54,6 @@ class ContactsView(QtWidgets.QWidget):
         self.setLayout(main_layout)
         widget.setLayout(self.layout)
         scroll_area.setWidget(widget)
-
 
     def build_contact_list(self):
         row = 3
@@ -151,9 +116,10 @@ class ContactsView(QtWidgets.QWidget):
                     self.main_window,
                     f"Contact with name {new_name} is already stored in the this contact list.",
                     "Failed to rename contact!",
-                    modal.MSG_ERROR)
+                    modal.MSG_ERROR,
+                )
                 return False
-                
+
             contact = SETTINGS["contacts"][old_name]
             del SETTINGS["contacts"][old_name]
             SETTINGS["contacts"][new_name] = contact
@@ -165,12 +131,11 @@ class ContactsView(QtWidgets.QWidget):
     def update_contact_list(self):
         update_settings("../config/contacts", SETTINGS["contacts"])
         self.main_window.set_info_message("Contacts saved!")
-    
+
     def create_new_contact(self):
         create_modal = CreateContactModal(self.main_window, self.search_name.text())
-        create_modal.create_callback = lambda: self.add_contact(create_modal.name.text(),
-                                                                create_modal.email.text())
-        
+        create_modal.create_callback = lambda: self.add_contact(create_modal.name.text(), create_modal.email.text())
+
 
 class CreateContactModal(modal.ModalWindow):
     def __init__(self, parent, name):
@@ -183,10 +148,10 @@ class CreateContactModal(modal.ModalWindow):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setVerticalSpacing(12)
         layout.setHorizontalSpacing(0)
-        
+
         label_icon = QtWidgets.QLabel("\uf234")
         label_icon.setObjectName("modalIconBlue")
-        
+
         label_title = QtWidgets.QLabel("Create a new contact")
         label_title.setObjectName("modalTitle")
 
@@ -209,7 +174,7 @@ class CreateContactModal(modal.ModalWindow):
         name_label.setObjectName("hMargin")
         email_label = QtWidgets.QLabel("Email:")
         email_label.setObjectName("hMargin")
-        
+
         layout.addWidget(label_icon, 0, 0)
         layout.addWidget(label_title, 0, 1, 1, 2)
         layout.addWidget(name_label, 1, 0)
@@ -219,7 +184,7 @@ class CreateContactModal(modal.ModalWindow):
         layout.addWidget(bottom_frame, 3, 0, 1, 3)
         layout.setColumnStretch(1, 1)
         return layout
-    
+
     def build_bottom_layout(self):
         bottom_layout = QtWidgets.QHBoxLayout()
         bottom_layout.setContentsMargins(12, 12, 12, 12)
@@ -237,11 +202,11 @@ class CreateContactModal(modal.ModalWindow):
         bottom_layout.addWidget(cancel_button)
         return bottom_layout
 
-    def answer_create(self):        
+    def answer_create(self):
         if self.create_callback:
             self.create_callback()
         self.close_window()
-        
+
 
 class ContactEntryView(QtWidgets.QFrame):
     def __init__(self, contact_view, name, contact):
@@ -249,8 +214,8 @@ class ContactEntryView(QtWidgets.QFrame):
         layout = QtWidgets.QGridLayout()
         self.contact_view = contact_view
 
-        self.contact = contact;
-        self.name = name;
+        self.contact = contact
+        self.name = name
 
         self.name_edit = QtWidgets.QLineEdit(name)
         self.name_edit.setObjectName("fontBold")
@@ -313,7 +278,8 @@ class ContactEntryView(QtWidgets.QFrame):
         del_modal = modal.ModalYesNoQuestionWindow(
             self.contact_view.main_window,
             f"Are your sure you want to delete `{self.name}` from your contacts?",
-            "Delete contact?")
+            "Delete contact?",
+        )
         del_modal.yes_callback = self.remove_contact_impl
 
     def remove_contact_impl(self):
@@ -347,11 +313,12 @@ class ContactEntryView(QtWidgets.QFrame):
         self.save_button.hide()
         self.restore_button.hide()
 
+
 class NoContactsView(QtWidgets.QFrame):
     def __init__(self, contacts_view):
         super(NoContactsView, self).__init__()
         self.contacts_view = contacts_view
-        
+
         layout = QtWidgets.QGridLayout()
         self.add_contact = QtWidgets.QToolButton()
         self.add_contact.setText("\uf234 Create new contact")
@@ -366,6 +333,7 @@ class NoContactsView(QtWidgets.QFrame):
         layout.setRowStretch(3, 1)
         self.setMinimumHeight(128)
         self.setLayout(layout)
+
 
 # NOTE(alexander): DEV mode entry point only!!!
 if __name__ == "__main__":
