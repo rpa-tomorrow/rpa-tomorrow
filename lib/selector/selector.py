@@ -16,6 +16,12 @@ log = logging.getLogger(__name__)
 
 
 class ModuleSelector:
+    """
+    ModuleSelector is the main entrypoint for interfaces.
+    It preprocesses the input text from the user and then finds
+    the most suitable modules for the sentences.
+    """
+
     def __init__(self):
         # Checks for task root/keywords
         self.root_model = spacy.load(SETTINGS["nlp_models"]["basic"])
@@ -66,6 +72,7 @@ class ModuleSelector:
         :param text: The user natural language input to process
         :type text: string
         :return A list of processed automation modules
+        :rtype: list[lib.automate.modules.Module]
         """
         doc = self.general_model(text)
         sentences = [sentence.lower_ for sentence in doc.sents]
@@ -83,6 +90,9 @@ class ModuleSelector:
         """
         Prepares the text and then executes the corresponding
         modules.
+
+        If immediate execution is undesirable, it is recommended to
+        call the method `prepare` and then handle the execution directly.
 
         :param: text The user natural language input to process
         :type text: string
