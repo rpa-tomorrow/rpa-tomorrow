@@ -84,7 +84,7 @@ class Automate:
 
         followup = instance.prepare(SETTINGS["nlp_models"], text, sender)
         if self.response_callback:
-            return self.response_callback(instance, followup.question)
+            return self.response_callback(instance, followup)
         return handle_response(followup)
 
 

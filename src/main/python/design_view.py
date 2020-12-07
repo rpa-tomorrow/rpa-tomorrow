@@ -15,6 +15,7 @@ from lib.automate.modules.send import Send
 from lib.automate.modules.schedule import Schedule
 from lib.automate.modules.reminder import Reminder
 from lib.selector.selector import ModuleSelector
+from lib.automate.followup import MultiFollowup, StringFollowup, BooleanFollowup
 from lib.settings import SETTINGS
 
 
@@ -104,7 +105,19 @@ class DesignView(QtWidgets.QWidget):
         self.main_window.set_info_message("Loaded " + self.model.absolute_path)
 
     def handle_response(self, task, followup):
-        self.main_window.set_info_message(str(followup).replace("\n", ". ") + ".")
+        if followup:
+            if isinstance(followup, MultiFollowup):
+                modal.ModalMultiFollowupWindow(self.main_window, followup)
+            elif isinstance(followup, StringFollowup):
+                modal.ModalStringFollowupWindow(self.main_window, followup)
+            elif isinstance(followup, BooleanFollowup):
+                bool_modal = modal.ModalYesNoQuestionWindow(
+                    self.main_window,
+                    followup.question,
+                    "Question",
+                    modal.MSG_QUESTION)
+                bool_modal.yes_callback = lambda: followup.callback(True)
+                bool_modal.no_callback = lambda: followup.callback(False)
         return task
 
     def cancel_actions(self):
@@ -131,8 +144,7 @@ class DesignView(QtWidgets.QWidget):
             traceback.print_exc()
             self.process_text_edit.restore_cursor_pos()
             modal.ModalMessageWindow(
-                self.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR
-            )
+                self.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR)
             return
 
         for i, task in enumerate(tasks):
@@ -188,7 +200,7 @@ class DesignView(QtWidgets.QWidget):
         self.process_text_edit.set_cursor_pos(0)
         self.process_text_edit.clear()
 
-
+        
 class ProcessEditorView(QtWidgets.QFrame):
     def __init__(self, design_view, model):
         super(ProcessEditorView, self).__init__()
