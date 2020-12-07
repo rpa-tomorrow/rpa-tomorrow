@@ -1,7 +1,7 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 import sys
 
-from design_view import tasks, execute_tasks, clear_tasks
+from design_view import tasks
 
 class PlayView(QtWidgets.QWidget):
     def __init__(self, main_window, *args, **kwargs):
@@ -17,8 +17,12 @@ class PlayView(QtWidgets.QWidget):
         self.title.setMaximumHeight(48)
         layout.addWidget(self.title)
 
-        self.example_process = ProcessView("Example Process #1")
+        self.example_process = ProcessView("Execute tasks: ")
         layout.addWidget(self.example_process)
+
+        self.process_text_edit = ProcessTextEditView(self, "")
+        self.process_text_edit.setMaximumHeight(180)
+        layout.addWidget(self.process_text_edit)
 
         layout.addStretch(1)
 
@@ -38,23 +42,48 @@ class ProcessView(QtWidgets.QFrame):
         self.run_btn.clicked.connect(execute_tasks) 
         self.run_btn.clicked.connect(clear_tasks)
 
-        
-
-
-        # self.proc1 = ProcessEntryView("\uf0e0", "Send email - John Doe", "Hello world 1")
-        # self.proc2 = ProcessEntryView("\uf0f3", "Remind - John Doe", "Hello world 2")
-        # self.proc3 = ProcessEntryView("\uf271", "Schedule - John Doe", "Hello world 3")
-
         layout.addWidget(self.name, 0, 0)
         layout.addWidget(self.run_btn, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
-        # layout.addWidget(self.proc1, 1, 0, 1, 2)
-        # layout.addWidget(self.proc2, 2, 0, 1, 2)
-        # layout.addWidget(self.proc3, 3, 0, 1, 2)
         layout.setColumnStretch(1, 1)
         self.setLayout(layout)
 
 
+class ProcessTextEditView(QtWidgets.QFrame):
+    def __init__(self, design_view, *args, **kwargs):
+        super(ProcessTextEditView, self).__init__()
+        self.design_view = design_view
+        layout = QtWidgets.QGridLayout()
 
+        self.text_edit = QtWidgets.QTextEdit(*args, **kwargs)
+        self.text_edit.setReadOnly(True)
+
+        layout.addWidget(self.text_edit, 0, 0, 1, 4)
+        layout.setColumnStretch(3, 1)
+        layout.setRowStretch(0, 1)
+        self.setLayout(layout)
+        self.text_edit.installEventFilter(self)
+
+        self.text_output = QtWidgets.QTextBrowser(self.text_edit)
+        self.writetest("Natural language processing ready!")
+
+
+    def cleartest(self):
+        self.text_output.clear() 
+
+    def writetest(self, input):
+        self.text_output.append(input) 
+
+
+def execute_tasks():
+    print("executing tasks...")
+    for task in tasks:
+        asd = task.execute()
+        ProcessTextEditView.writetest(asd)
+        # print("task = ", asd)
+
+def clear_tasks():
+    print("clearing tasks...")
+    tasks.clear()
 
 
 class ProcessEntryView(QtWidgets.QFrame):
@@ -85,8 +114,3 @@ if __name__ == "__main__":
     window.set_active_view(3)
     exit_code = appctxt.app.exec_()
     sys.exit(exit_code)
-
-                                                                                                    
-
-def say_hello():                                                                                     
-    print("Button clicked, Hello!")

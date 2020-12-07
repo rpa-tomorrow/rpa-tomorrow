@@ -203,15 +203,20 @@ class DesignView(QtWidgets.QWidget):
         self.proc_view = proc_view
         self.process_text_edit.save_cursor_pos()
         query = self.process_text_edit.get_text()
-        query_parts = query.split(".")
         if query == "":
             return
 
-
         try:
-            # tasks = self.nlp.prepare(query)
-            for task in self.nlp.prepare(query):
-                tasks.append(task)
+            task = self.nlp.prepare(query)
+            if task is None:
+                modal.ModalMessageWindow(
+                    self.main_window,
+                    "Failed to understand what task you wanted to perform. Please check spelling mistakes "
+                    + "or simplify your sentence and try again!",
+                    "Error",
+                    modal.MSG_ERROR,
+                )
+                return
         except Exception:
             traceback.print_exc()
             self.process_text_edit.restore_cursor_pos()
@@ -219,20 +224,9 @@ class DesignView(QtWidgets.QWidget):
                 self.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR
             )
             return
-
         self.process_text_edit.set_cursor_pos(0)
         self.process_text_edit.clear()
-        clear_tasks(self.process_editor)
 
-def execute_tasks():
-    print("executing tasks...")
-    for task in tasks:
-        task.execute()
-
-def clear_tasks(process_editor):
-    print("clearing tasks...")
-    tasks.clear()
-    process_editor.remove_process()
 
 class ProcessEditorView(QtWidgets.QFrame):
     def __init__(self, design_view, model):
