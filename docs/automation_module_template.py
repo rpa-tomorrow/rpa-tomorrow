@@ -7,7 +7,6 @@ import spacy
 import logging
 
 from datetime import datetime, timedelta
-from lib import TimeIsInPastError
 from lib.automate.followup import StringFollowup
 from lib.automate.modules import Module
 
@@ -60,20 +59,10 @@ class Template(Module):
         self.sender = sender
         self.followup_type = None
 
-        # An example of how to check the input and ask a followup question to the user if it doesn't exist.
-        if not isinstance(when, datetime):
-            return self.prompt_date()
+        # Ask followup questions if some information is missing.
 
-        # An example of how to check if the input violates some constrain this modules has.
-        when_delta = (when - datetime.now()).total_seconds()  # convert to difference in seconds
-        if when_delta < 0.0:
-            raise TimeIsInPastError(
-                when.strftime("%Y-%m-%d %H:%M:%S"),
-                "The specified time of the Template is in the past and violates a constrain",
-            )
-
-        # Other things can be done here as well. One example is to find the email of a user using only the inputted first name.
-
+        # Find necessary information.
+        # Example: Find out the email of a contact in the contact book using only the inputted first name.
 
 
     def execute(self):
@@ -116,19 +105,4 @@ class Template(Module):
         _body = " ".join(body)
 
         return (to, time, _body)
-
-    def prompt_date(self):
-        """
-        An example of how to define a function for asking the user a followup question on the input.
-        """
-        def callback(followup):
-            try:
-                when = datetime.fromisoformat(followup.answer)
-            except Exception:
-                when = None
-            return self.prepare_processed(self.to, when, self.body, self.sender)
-
-        question = "\nCould not parse date from input.\nPlease enter date in YYYYMMDD HH:MM format"
-        followup = StringFollowup(question, callback)
-        return followup
 

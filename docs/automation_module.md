@@ -1,5 +1,8 @@
 # Implementing a new Automation Module
 
+All the automation modules needs to use an NLP model, thus the first step is to add a new automation module or to update a existing one. Then start implementing the automation module by first copying the automation module template `docs/automation_module_template.py` into `lib/automation/modules/`. And then update it with the functionality you want.
+
+
 ## Adding/updating a NLP model
 
 The files that needs to be updated are 
@@ -17,6 +20,33 @@ In `config/language_releases.yaml` a language release must be created. The easie
 `config/nlp_models.yaml` can be updated by running the install command in the CLI and choosing the new language release that you have added.
 
 ## Implementing a followup question
+
+
+
+Example:
+```
+def prompt_date(self):
+    """
+    An example of how to define a function for asking the user a followup question on the input.
+    """
+    def callback(followup):
+        try:
+            when = datetime.fromisoformat(followup.answer)
+        except Exception:
+            when = None
+        return self.prepare_processed(self.to, when, self.body, self.sender)
+
+    question = "\nCould not parse date from input.\nPlease enter date in YYYYMMDD HH:MM format"
+    followup = StringFollowup(question, callback)
+    return followup
+```
+Example how to call the followup question
+
+```
+# If a time is not found then ask a followup qustion for it.
+if not isinstance(when, datetime):
+    return self.prompt_date()
+```
 
 ## Required functions
 
@@ -38,7 +68,11 @@ This methods job is do all the preparations needed to run the `execute` method, 
 
 ### prepare\_processed
 
-A requirement of this method is that the NLP model has parsed the input into the following 4 parameter `to, when, body, sender` before calling this method. `to` is the list of contacts that user want to send a email to for example. `when` is the time, in the schedule it is a dict with the start and end time of an event. `body` can be anything but it is must often a part of the raw input. `sender` is information of the user like en email in the email example.
+A requirement of this method is that the NLP model has parsed the input into the following 4 parameter `to, when, body, sender` before calling this method.
+* `to` is the list of contacts that user want to send a email to for example.
+* `when` is the time, in the schedule it is a dict with the start and end time of an event.
+* `body` can be anything but it is must often a part of the raw input.
+* `sender` is information of the user like en email in the email example.
 
 The job of this method is to take the parsed input form the NLP model and process it so that the `execute` method can run. This can be thinks like finding en email related to a name or giving followup questions to the user about missing information.
 
@@ -55,5 +89,5 @@ Sent email to johndoe@email.com about "Development"
 
 ### nlp
 
-This methods job is to run the nlp model on the input and format the output into a usable format using the labels, entity's and tokens the NLP model gives.
+This methods job is to run the nlp model on the input and format the output into a usable format using the labels, entity's and tokens that the NLP model gives.
 
