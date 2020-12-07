@@ -88,7 +88,7 @@ class ContactsView(QtWidgets.QWidget):
         self.entries = dict()
         for name, contact in SETTINGS["contacts"].items():
             row += 1
-            entry = ContactEntryView(name, contact)
+            entry = ContactEntryView(self, name, contact)
             self.entries[name] = entry
             self.layout.addWidget(entry)
 
@@ -116,13 +116,43 @@ class ContactsView(QtWidgets.QWidget):
         SETTINGS["contacts"][name] = contact
         contact["email"] = dict()
         contact["email"]["address"] = email
-        entry = ContactEntryView(name, contact)
+        entry = ContactEntryView(self, name, contact)
         self.entries[name] = entry
         self.layout.insertWidget(2, entry)
         self.search_name.clear()
         for view in self.entries.values():
             view.show()
         self.no_contacts.hide()
+        self.update_contact_list()
+
+    def remove_contact(self, name):
+        if name in SETTINGS["contacts"]:
+            del SETTINGS["contacts"][name]
+        if name in self.entries:
+            self.entries[name].close()
+            del self.entries[name]
+
+    def rename_contact(self, old_name, new_name):
+        if old_name in SETTINGS["contacts"]:
+            if new_name in SETTINGS["contacts"]:
+                modal.ModalMessageWindow(
+                    self.main_window,
+                    f"Contact with name {new_name} is already stored in the this contact list.",
+                    "Failed to rename contact!",
+                    modal.MSG_ERROR)
+                return False
+                
+            contact = SETTINGS["contacts"][old_name]
+            del SETTINGS["contacts"][old_name]
+            SETTINGS["contacts"][new_name] = contact
+            return True
+        else:
+            print(f"contact `{old_name}` is not in contact list, this is likely a bug!")
+        return False
+
+    def update_contact_list(self):
+        update_settings("../config/contacts", SETTINGS["contacts"])
+        self.main_window.set_info_message("Contacts saved!")
     
     def create_new_contact(self):
         create_modal = CreateContactModal(self.main_window, self.search_name.text())
@@ -202,41 +232,109 @@ class CreateContactModal(modal.ModalWindow):
         
 
 class ContactEntryView(QtWidgets.QFrame):
-    def __init__(self, name, contact):
+    def __init__(self, contact_view, name, contact):
         super(ContactEntryView, self).__init__()
         layout = QtWidgets.QGridLayout()
+        self.contact_view = contact_view
 
-        self.restore_contact = contact;
+        self.contact = contact;
+        self.name = name;
 
-        self.name_label = QtWidgets.QLineEdit(name)
-        self.name_label.setObjectName("fontBold")
-        layout.addWidget(self.name_label, 0, 0)
+        self.name_edit = QtWidgets.QLineEdit(name)
+        self.name_edit.setObjectName("fontBold")
+        self.name_edit.installEventFilter(self)
+        layout.addWidget(self.name_edit, 0, 0)
 
-        self.email_address_label = QtWidgets.QLineEdit("")
-        self.email_address_label.setObjectName("fontFaint")
+        self.email_address_edit = QtWidgets.QLineEdit("")
+        self.email_address_edit.setObjectName("fontFaint")
         if contact["email"] and contact["email"]["address"]:
-            self.email_address_label.setText(contact["email"]["address"])
-            layout.addWidget(self.email_address_label, 1, 0)
-
-        self.delete_button = QtWidgets.QToolButton()
-        self.delete_button.setObjectName("iconButton")
-        self.delete_button.setText("\uf1f8")
+            self.email_address_edit.setText(contact["email"]["address"])
+        self.email_address_edit.installEventFilter(self)
+        layout.addWidget(self.email_address_edit, 1, 0)
 
         self.save_button = QtWidgets.QToolButton()
         self.save_button.setObjectName("iconButton")
         self.save_button.setText("\uf00c")
+        self.save_button.clicked.connect(self.save_contact)
+        layout.addWidget(self.save_button, 0, 1, 2, 1)
 
         self.restore_button = QtWidgets.QToolButton()
         self.restore_button.setObjectName("iconButton")
-        self.restore_button.setText("\uf1f8")
+        self.restore_button.setText("\uf00d")
+        self.restore_button.clicked.connect(self.restore_contact)
+        layout.addWidget(self.restore_button, 0, 2, 2, 1)
+
+        self.remove_button = QtWidgets.QToolButton()
+        self.remove_button.setObjectName("iconButton")
+        self.remove_button.setText("\uf1f8")
+        self.remove_button.clicked.connect(self.remove_contact)
+        layout.addWidget(self.remove_button, 0, 3, 2, 1)
+
+        self.save_button.hide()
+        self.restore_button.hide()
 
         self.setLayout(layout)
 
+    def eventFilter(self, obj, event):
+        if event.type() == QtCore.QEvent.KeyRelease:
+            if obj is self.name_edit or obj is self.email_address_edit:
+                if self.name_edit.hasFocus() or self.email_address_edit.hasFocus():
+                    new_name = self.name_edit.text()
+                    new_email_address = self.email_address_edit.text()
+                    email_address = self.contact["email"]["address"]
+                    if (not new_name == self.name) or (not new_email_address == email_address):
+                        self.save_button.show()
+                        self.restore_button.show()
+                    else:
+                        self.save_button.hide()
+                        self.restore_button.hide()
 
-    # def save_contact():
-        # SETTINGS["contacts"] self.restore_contact
+        if event.type() == QtCore.QEvent.KeyPress:
+            if obj is self.name_edit or obj is self.email_address_edit:
+                if event.key() == QtCore.Qt.Key_Return:
+                    if self.name_edit.hasFocus() or self.email_address_edit.hasFocus():
+                        self.save_contact()
+                        return True
+        return super().eventFilter(obj, event)
 
-        
+    def remove_contact(self):
+        del_modal = modal.ModalYesNoQuestionWindow(
+            self.contact_view.main_window,
+            f"Are your sure you want to delete `{self.name}` from your contacts?",
+            "Delete contact?")
+        del_modal.yes_callback = self.remove_contact_impl
+
+    def remove_contact_impl(self):
+        self.contact_view.remove_contact(self.name)
+        self.save_button.hide()
+        self.restore_button.hide()
+        self.contact_view.update_contact_list()
+
+    def save_contact(self):
+        is_dirty = False
+        new_name = self.name_edit.text()
+        if not new_name == self.name:
+            if self.contact_view.rename_contact(self.name, new_name):
+                self.contact = SETTINGS["contacts"][new_name]
+                self.name = new_name
+                is_dirty = True
+
+        new_email_address = self.email_address_edit.text()
+        if not new_email_address == self.contact["email"]["address"]:
+            self.contact["email"]["address"] = new_email_address
+            is_dirty = True
+
+        if is_dirty:
+            self.contact_view.update_contact_list()
+        self.save_button.hide()
+        self.restore_button.hide()
+
+    def restore_contact(self):
+        self.name_edit.setText(self.name)
+        self.email_address_edit.setText(self.contact["email"]["address"])
+        self.save_button.hide()
+        self.restore_button.hide()
+
 class NoContactsView(QtWidgets.QFrame):
     def __init__(self, contacts_view):
         super(NoContactsView, self).__init__()
