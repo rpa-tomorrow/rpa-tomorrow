@@ -18,6 +18,7 @@ from lib.selector.selector import ModuleSelector
 from lib.automate.followup import MultiFollowup, StringFollowup, BooleanFollowup
 from lib.settings import SETTINGS
 
+tasks = []
 
 class DesignView(QtWidgets.QWidget):
     def __init__(self, main_window, *args, **kwargs):
@@ -206,18 +207,11 @@ class DesignView(QtWidgets.QWidget):
         if query == "":
             return
 
+
         try:
-            for query_part in query_parts:
-                task = self.nlp.prepare(query_part)[0]
-                if task is None:
-                    modal.ModalMessageWindow(
-                        self.main_window,
-                        "Failed to understand what task you wanted to perform. Please check spelling mistakes "
-                        + "or simplify your sentence and try again!",
-                        "Error",
-                        modal.MSG_ERROR,
-                    )
-                    return
+            # tasks = self.nlp.prepare(query)
+            for task in self.nlp.prepare(query):
+                tasks.append(task)
         except Exception:
             traceback.print_exc()
             self.process_text_edit.restore_cursor_pos()
@@ -228,7 +222,17 @@ class DesignView(QtWidgets.QWidget):
 
         self.process_text_edit.set_cursor_pos(0)
         self.process_text_edit.clear()
+        clear_tasks(self.process_editor)
 
+def execute_tasks():
+    print("executing tasks...")
+    for task in tasks:
+        task.execute()
+
+def clear_tasks(process_editor):
+    print("clearing tasks...")
+    tasks.clear()
+    process_editor.remove_process()
 
 class ProcessEditorView(QtWidgets.QFrame):
     def __init__(self, design_view, model):

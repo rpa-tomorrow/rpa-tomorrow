@@ -1,6 +1,7 @@
 from PyQt5 import QtWidgets, QtGui, QtCore
 import sys
 
+from design_view import tasks, execute_tasks, clear_tasks
 
 class PlayView(QtWidgets.QWidget):
     def __init__(self, main_window, *args, **kwargs):
@@ -34,18 +35,26 @@ class ProcessView(QtWidgets.QFrame):
         self.run_btn.setFont(QtGui.QFont("RPATomorrowIconFont", 24))
         self.run_btn.setText("\uf04b")
         self.run_btn.setObjectName("runButton")
+        self.run_btn.clicked.connect(execute_tasks) 
+        self.run_btn.clicked.connect(clear_tasks)
 
-        self.proc1 = ProcessEntryView("\uf0e0", "Send email - John Doe", "Hello world 1")
-        self.proc2 = ProcessEntryView("\uf0f3", "Remind - John Doe", "Hello world 2")
-        self.proc3 = ProcessEntryView("\uf271", "Schedule - John Doe", "Hello world 3")
+        
+
+
+        # self.proc1 = ProcessEntryView("\uf0e0", "Send email - John Doe", "Hello world 1")
+        # self.proc2 = ProcessEntryView("\uf0f3", "Remind - John Doe", "Hello world 2")
+        # self.proc3 = ProcessEntryView("\uf271", "Schedule - John Doe", "Hello world 3")
 
         layout.addWidget(self.name, 0, 0)
         layout.addWidget(self.run_btn, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
-        layout.addWidget(self.proc1, 1, 0, 1, 2)
-        layout.addWidget(self.proc2, 2, 0, 1, 2)
-        layout.addWidget(self.proc3, 3, 0, 1, 2)
+        # layout.addWidget(self.proc1, 1, 0, 1, 2)
+        # layout.addWidget(self.proc2, 2, 0, 1, 2)
+        # layout.addWidget(self.proc3, 3, 0, 1, 2)
         layout.setColumnStretch(1, 1)
         self.setLayout(layout)
+
+
+
 
 
 class ProcessEntryView(QtWidgets.QFrame):
@@ -76,3 +85,8 @@ if __name__ == "__main__":
     window.set_active_view(3)
     exit_code = appctxt.app.exec_()
     sys.exit(exit_code)
+
+                                                                                                    
+
+def say_hello():                                                                                     
+    print("Button clicked, Hello!")
