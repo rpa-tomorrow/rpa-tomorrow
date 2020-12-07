@@ -21,6 +21,7 @@ class ModuleSelector:
     It preprocesses the input text from the user and then finds
     the most suitable modules for the sentences.
     """
+
     def __init__(self):
         # Checks for task root/keywords
         self.root_model = spacy.load(SETTINGS["nlp_models"]["basic"])

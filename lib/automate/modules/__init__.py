@@ -15,6 +15,7 @@ class Module:
     * All functions may raise any possible exceptions and should be handled
     by the caller.
     """
+
     verbs = []
     """list[string]: The verbs to associate with this module's functionality."""
     model_pool = None
