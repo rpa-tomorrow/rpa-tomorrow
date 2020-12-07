@@ -21,7 +21,7 @@ class Template(Module):
     A Template for creating a new automation module.
     """
 
-    # The variable 'verbs' is a list of verbs which is used to identify if the input shoud be
+    # The variable 'verbs' is a list of verbs which is used to identify if the input should be
     # interpreted by this module.
     # Example: ["remind", "reminder", "notify"]
     verbs = [] 
@@ -36,13 +36,13 @@ class Template(Module):
 
     def prepare(self, nlp_model_names, text, sender):
         """
-        Prepares to execute the task that this module is desing to do.
+        Prepares to execute the task that this module is design to do.
 
-        Preperations inclue loading and runing the nlp model, retriving the information
-        needed from the nlp output and the user to execute the task.
+        Preparations include loading and running the NLP model, retrieving the information
+        needed from the NLP output and the user to execute the task.
         """
         if self.nlp_model is None:
-            # Repalce "NLP_MODEL" with the name of the nlp models which this module shoud use.
+            # Replace "NLP_MODEL" with the name of the NLP models which this module should use.
             self.nlp_model = spacy.load(nlp_model_names["NLP_MODEL"])
         to, when, body = self.nlp(text)
         self.description = None
@@ -50,9 +50,9 @@ class Template(Module):
 
     def prepare_processed(self, to, when, body, sender):
         """
-        Extraces the wanted infromation form the NLP output and asks followup questions if somthing is missing.
+        Extracts the wanted information form the NLP output and asks followup questions if something is missing.
 
-        Note: All the values needed to execute the tasks need to be set as attributes here, so that they can be accesd in the execute function.
+        Note: All the values needed to execute the tasks need to be set as attributes here, so that they can be access in the execute function.
         """
         self.to = to
         self.when = when
@@ -60,7 +60,7 @@ class Template(Module):
         self.sender = sender
         self.followup_type = None
 
-        # An example of how to check the input and ask a followup question to the user if it dosen't exist.
+        # An example of how to check the input and ask a followup question to the user if it doesn't exist.
         if not isinstance(when, datetime):
             return self.prompt_date()
 
@@ -69,10 +69,10 @@ class Template(Module):
         if when_delta < 0.0:
             raise TimeIsInPastError(
                 when.strftime("%Y-%m-%d %H:%M:%S"),
-                "The specified time of the Template is in the past and violates a contrain",
+                "The specified time of the Template is in the past and violates a constrain",
             )
 
-        # Other things can be done here as well. One example is to find the email of a user using only the inputed first name.
+        # Other things can be done here as well. One example is to find the email of a user using only the inputted first name.
 
 
 
@@ -80,23 +80,23 @@ class Template(Module):
         """
         Executes the task that has been prepared in this module.
         """
-        # Do the task that the module is supose to do.
+        # Do the task that the module is suppose to do.
 
         # Return a message telling the user that the task is done.
         return f"\nTemplate module did ..."
 
     def nlp(self, text):
         """
-        Run the NLP module on the input. Group and return the nlp labels and enteties.
+        Run the NLP module on the input. Group and return the NLP labels and entities.
         """
-        # Runs the nlp model on the input.
+        # Runs the NLP model on the input.
         doc = self.nlp_model(text)
 
         to = []
         when = []
         body = []
 
-        # Group the lables into variables. 
+        # Group the labels into variables. 
         for token in doc:
             if token.dep_ == "TO":
                 to.append(token.text)
@@ -106,7 +106,7 @@ class Template(Module):
                 body.append(token.text)
             log.debug("%s %s", token.text, token.dep_)
 
-        # Get the time entity from the nlp model.
+        # Get the time entity from the NLP model.
         time = datetime.now()
         if len(when) == 0:
             time = time + timedelta(seconds=5)
