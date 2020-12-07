@@ -41,10 +41,10 @@ class ContactsView(QtWidgets.QWidget):
         self.search_name.installEventFilter(self)
         top_layout.addWidget(self.search_name)
 
-        self.add_contact = QtWidgets.QToolButton()
-        self.add_contact.setText("\uf234 Create new contact")
-        self.add_contact.clicked.connect(self.create_new_contact)
-        top_layout.addWidget(self.add_contact)
+        self.add_contact_button = QtWidgets.QToolButton()
+        self.add_contact_button.setText("\uf234 Create new contact")
+        self.add_contact_button.clicked.connect(self.create_new_contact)
+        top_layout.addWidget(self.add_contact_button)
 
         self.build_contact_list()
 
