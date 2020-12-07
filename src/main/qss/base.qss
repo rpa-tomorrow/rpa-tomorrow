@@ -445,3 +445,8 @@ QLineEdit#hMargin {
     margin-left: 8px;
     margin-right: 8px;
 }
+
+QLineEdit#searchContactName {
+    padding: 6px;
+    padding-bottom: 7px;
+}

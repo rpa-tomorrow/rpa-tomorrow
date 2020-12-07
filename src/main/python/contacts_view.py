@@ -51,6 +51,7 @@ class ContactsView(QtWidgets.QWidget):
         self.title = QtWidgets.QLabel("Contacts")
         self.title.setObjectName("viewTitle")
         self.title.setMinimumHeight(48)
+        self.layout.addWidget(self.title)
 
         scroll_area = QtWidgets.QScrollArea()
         scroll_area.setMaximumWidth(960)
@@ -62,11 +63,22 @@ class ContactsView(QtWidgets.QWidget):
         widget = QtWidgets.QWidget()
         widget.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
 
-        self.layout.addWidget(self.title)
+        top_widget = QtWidgets.QWidget()
+        top_layout = QtWidgets.QHBoxLayout()
+        top_layout.setContentsMargins(0, 0, 0, 0)
+        top_widget.setLayout(top_layout)
+        self.layout.addWidget(top_widget)
+
         self.search_name = QtWidgets.QLineEdit()
+        self.search_name.setObjectName("searchContactName")
         self.search_name.setPlaceholderText("Search for a name in your contact list...")
         self.search_name.installEventFilter(self)
-        self.layout.addWidget(self.search_name)
+        top_layout.addWidget(self.search_name)
+        
+        self.add_contact = QtWidgets.QToolButton()
+        self.add_contact.setText("\uf234 Create new contact")
+        self.add_contact.clicked.connect(self.create_new_contact)
+        top_layout.addWidget(self.add_contact)
 
         self.build_contact_list()
 
