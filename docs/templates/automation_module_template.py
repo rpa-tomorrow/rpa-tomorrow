@@ -1,13 +1,11 @@
 """
 Automation module template
 """
-import sys
 import lib.utils.tools.time_convert as tc
 import spacy
 import logging
 
 from datetime import datetime, timedelta
-from lib.automate.followup import StringFollowup
 from lib.automate.modules import Module
 
 
@@ -23,15 +21,14 @@ class Template(Module):
     # The variable 'verbs' is a list of verbs which is used to identify if the input should be
     # interpreted by this module.
     # Example: ["remind", "reminder", "notify"]
-    verbs = [] 
+    verbs = []
 
     def __init__(self, model_pool):
         """
         Creates an object of the module.
         """
-        super(Reminder, self).__init__(model_pool)
+        super(Template, self).__init__(model_pool)
         self.nlp_model = None
-
 
     def prepare(self, nlp_model_names, text, sender):
         """
@@ -51,7 +48,8 @@ class Template(Module):
         """
         Extracts the wanted information form the NLP output and asks followup questions if something is missing.
 
-        Note: All the values needed to execute the tasks need to be set as attributes here, so that they can be access in the execute function.
+        Note: All the values needed to execute the tasks need to be set as attributes here, so that they can be
+        access in the execute function.
         """
         self.to = to
         self.when = when
@@ -64,7 +62,6 @@ class Template(Module):
         # Find necessary information.
         # Example: Find out the email of a contact in the contact book using only the inputted first name.
 
-
     def execute(self):
         """
         Executes the task that has been prepared in this module.
@@ -72,7 +69,7 @@ class Template(Module):
         # Do the task that the module is suppose to do.
 
         # Return a message telling the user that the task is done.
-        return f"\nTemplate module did ..."
+        return "\nTemplate module did ..."
 
     def nlp(self, text):
         """
@@ -85,7 +82,7 @@ class Template(Module):
         when = []
         body = []
 
-        # Group the labels into variables. 
+        # Group the labels into variables.
         for token in doc:
             if token.dep_ == "TO":
                 to.append(token.text)
@@ -105,4 +102,3 @@ class Template(Module):
         _body = " ".join(body)
 
         return (to, time, _body)
-
