@@ -1,6 +1,6 @@
 # Implementing a new Automation Module
 
-All the automation modules needs to use an NLP model, thus the first step is to add a new automation module or to update a existing one. After that you can start implementing the new module by first copying the automation module template [`docs/templates/automation_module_template.py`](docs/templates/automation_module_template.py) into `lib/automation/modules/`, and then update it with the functionality you want.
+All the automation modules needs to use an NLP model, thus the first step is to add a new automation module or to update a existing one. After that you can start implementing the new module by first copying the automation module template [automation\_module\_template.py](docs/templates/automation_module_template.py) into `lib/automation/modules/`, and then update it with the functionality you want.
 
 ## Adding/updating a NLP model
 
