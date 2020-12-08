@@ -11,6 +11,7 @@ import process_models as proc_model  # noqa: E402
 from design_view import DesignView  # noqa: E402
 from file_view import FileView  # noqa: E402
 from play_view import PlayView  # noqa: E402
+from contacts_view import ContactsView  # noqa: E402
 from settings_view import SettingsView  # noqa: E402
 
 
@@ -18,6 +19,7 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setWindowTitle("RPA Tomorrow")
+        self.modal = None
 
         self.layout = QtWidgets.QGridLayout()
         self.layout.setContentsMargins(0, 0, 0, 0)
@@ -27,7 +29,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.bottom = BottomInfoBar()
         self.menu = SideMenuBar(self)
         self.content = ContentFrame(self)
-        self.modal = None
 
         self.layout.addWidget(self.menu, 0, 0, 2, 1)
         self.layout.addWidget(self.content, 0, 1)
@@ -68,6 +69,7 @@ class ContentFrame(QtWidgets.QFrame):
         self.save_view = FileView(main_window, self.design_view, self.main_window.model, True)
         self.load_view = FileView(main_window, self.design_view, self.main_window.model, False)
         self.play_view = PlayView(main_window, self.design_view.process_editor)
+        self.contacts_view = ContactsView(main_window)
         self.settings_view = SettingsView(main_window)
         self.info_view = QtWidgets.QFrame()
 
@@ -75,6 +77,7 @@ class ContentFrame(QtWidgets.QFrame):
         self.layout.addWidget(self.save_view)
         self.layout.addWidget(self.load_view)
         self.layout.addWidget(self.play_view)
+        self.layout.addWidget(self.contacts_view)
         self.layout.addWidget(self.settings_view)
         self.layout.addWidget(self.info_view)
         self.setLayout(self.layout)
@@ -118,8 +121,9 @@ class SideMenuBar(QtWidgets.QFrame):
         self.items.append(MenuBarButton(self, 1, "Save", "\uf0c7"))
         self.items.append(MenuBarButton(self, 2, "Load", "\uf115"))
         self.items.append(MenuBarButton(self, 3, "Run", "\uf04b"))
-        self.items.append(MenuBarButton(self, 4, "Settings", "\uf013"))
-        self.items.append(MenuBarButton(self, 5, "Info", "\uf05a"))
+        self.items.append(MenuBarButton(self, 4, "Contacts", "\uf007"))
+        self.items.append(MenuBarButton(self, 5, "Settings", "\uf013"))
+        self.items.append(MenuBarButton(self, 6, "Info", "\uf05a"))
 
         self.items[0].setChecked(True)
 
