@@ -16,7 +16,7 @@ config/language_releases.yaml
 config/nlp_models.yaml
 ```
 
-In `requirments.txt` a link to the releases NLP models must be added or updated.
+In `requirements.txt` a link to the releases NLP models must be added or updated.
 
 In `config/language_releases.yaml` a language release must be created. The easiest way is to copy latest release and update it with the new models.
 
@@ -71,12 +71,12 @@ This methods job is do all the preparations needed to run the `execute` method, 
 ### prepare\_processed
 
 A requirement of this method is that the NLP model has parsed the input into the following 4 parameter `to, when, body, sender` before calling this method.
-* `to` is the list of contacts that user want to send a email to for example.
+* `to` is the list of contacts that user want to send an email to for example.
 * `when` is the time, in the schedule it is a dict with the start and end time of an event.
 * `body` can be anything.
 * `sender` is information of the user, like email information in the email example.
 
-The job of this method is to take the parsed input form the NLP model and process it so that the `execute` method can run. This can be thinks like finding en email related to a name or giving followup questions to the user about missing information.
+The job of this method is to take the parsed input form the NLP model and process it so that the `execute` method can run. This can be things like finding an email related to a name or giving followup questions to the user about missing information.
 
 ### execute
 
