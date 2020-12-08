@@ -49,6 +49,11 @@ def cross_check_names(tagged, persons) -> list:
             value, score = fuzzy.extractOne(tag, persons)
             if score > MIN_SCORE and value not in ok:
                 ok.append(value)
-        except RuntimeError:
+        except Exception:
             continue
+
+    for tag in tagged:
+        if not any(tag in name for name in ok):
+            ok.append(tag)
+
     return ok
