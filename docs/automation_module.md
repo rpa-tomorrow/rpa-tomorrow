@@ -1,7 +1,6 @@
 # Implementing a new Automation Module
 
-All the automation modules needs to use an NLP model, thus the first step is to add a new automation module or to update a existing one. Then start implementing the automation module by first copying the automation module template `docs/automation_module_template.py` into `lib/automation/modules/`. And then update it with the functionality you want.
-
+All the automation modules needs to use an NLP model, thus the first step is to add a new automation module or to update a existing one. After that you can start implementing the new module by first copying the automation module template `docs/templates/automation_module_template.py` into `lib/automation/modules/`, and then update it with the functionality you want.
 
 ## Adding/updating a NLP model
 
@@ -21,13 +20,11 @@ In `config/language_releases.yaml` a language release must be created. The easie
 
 ## Implementing a followup question
 
-
-
 Example:
 ```
 def prompt_date(self):
     """
-    An example of how to define a function for asking the user a followup question on the input.
+    An example of how to define a method for asking the user a followup question on the input.
     """
     def callback(followup):
         try:
@@ -40,10 +37,11 @@ def prompt_date(self):
     followup = StringFollowup(question, callback)
     return followup
 ```
-Example how to call the followup question
+
+Example how to call the followup question from the method `prepare_processed`
 
 ```
-# If a time is not found then ask a followup qustion for it.
+# If a time is not found then ask a followup question for it.
 if not isinstance(when, datetime):
     return self.prompt_date()
 ```
@@ -64,15 +62,15 @@ Here is an example:
 
 ### prepare
 
-This methods job is do all the preparations needed to run the `execute` method, but this method should only be called once when running the module. Thus all the preparations that has to be done again when a followup question has been answered should be in the `prepare_processed` method. 
+This methods job is do all the preparations needed to run the `execute` method, but this method should only be called once for each execution of the module. Thus all the preparations that has to be done again when a followup question has been answered should be in the `prepare_processed` method. 
 
 ### prepare\_processed
 
 A requirement of this method is that the NLP model has parsed the input into the following 4 parameter `to, when, body, sender` before calling this method.
 * `to` is the list of contacts that user want to send a email to for example.
 * `when` is the time, in the schedule it is a dict with the start and end time of an event.
-* `body` can be anything but it is must often a part of the raw input.
-* `sender` is information of the user like en email in the email example.
+* `body` can be anything.
+* `sender` is information of the user, like email information in the email example.
 
 The job of this method is to take the parsed input form the NLP model and process it so that the `execute` method can run. This can be thinks like finding en email related to a name or giving followup questions to the user about missing information.
 
@@ -89,5 +87,5 @@ Sent email to johndoe@email.com about "Development"
 
 ### nlp
 
-This methods job is to run the nlp model on the input and format the output into a usable format using the labels, entity's and tokens that the NLP model gives.
+This methods job is to run the NLP model on the input and format the output into a usable format using the labels, entity's and tokens that the NLP model gives.
 
