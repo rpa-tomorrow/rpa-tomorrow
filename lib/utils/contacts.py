@@ -3,7 +3,7 @@ from fuzzywuzzy import process as fuzzy
 from lib.automate.followup import BooleanFollowup, MultiFollowup
 from lib.automate.google import Google, ContactBookInterruptedByUserError
 from lib.settings import SETTINGS, load_local_contacts
-from lib.utils.email import is_email
+from lib.utils.emails import is_email
 from lib import Error
 
 MIN_SCORE = 75  # the minimum score needed to consider the fuzzy match

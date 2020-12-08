@@ -11,6 +11,7 @@ from lib import Error
 from lib.settings import SETTINGS
 from datetime import datetime, timedelta
 from lib.utils.contacts import get_emails, prompt_contact_choice, NoContactFoundError
+from lib.utils.crypt import Crypt
 
 # Module logger
 log = logging.getLogger(__name__)
@@ -32,6 +33,7 @@ class Send(Module):
         return self.prepare_processed(to, when, body, sender)
 
     def prepare_processed(self, to, when, body, sender):
+        crypt = Crypt()
         self.to = to
         self.when = when
         self.body = body
@@ -43,7 +45,7 @@ class Send(Module):
         self.sender = sender
         self.settings = sender["email"]
         self.username = self.settings.get("username")
-        self.password = self.settings.get("password")
+        self.password = crypt.decrypt(self.settings.get("password")) if self.settings.get("password") else None
         self.subject = body.partition("\n")[0]
         self.content = body + f"\n\nRegards,\n{sender['name']}"
 

@@ -1,4 +1,4 @@
-from lib.utils.email import is_email
+from lib.utils.emails import is_email
 
 
 class TestIsEmail:

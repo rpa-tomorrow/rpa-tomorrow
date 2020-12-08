@@ -6,6 +6,8 @@ import pytest
 sys.path.append(".")
 sys.path.append("..")
 
+from lib.utils.crypt import Crypt  # Noqa: E402
+
 
 @pytest.fixture(scope="session", autouse=False)
 def monkeymodule():
@@ -34,11 +36,12 @@ def user_with_config():
     )
     before the Schedule object is created and yielded
     """
+    crypt = Crypt()
     user = {
         "email": {
             "address": "johndoe@email.com",
             "host": "localhost",
-            "password": "mypass",
+            "password": crypt.encrypt("mypass"),
             "port": None,
             "ssl": False,
             "username": "johndoe@email.com",
@@ -71,11 +74,12 @@ def user_with_config():
 @pytest.fixture(scope="session", autouse=False)
 def session_user_with_config():
     """ Fixture needed when mocking settings in session scoped fixtures """
+    crypt = Crypt()
     user = {
         "email": {
             "address": "johndoe@email.com",
             "host": "localhost",
-            "password": "mypass",
+            "password": crypt.encrypt("mypass"),
             "port": None,
             "ssl": False,
             "username": "johndoe@email.com",
