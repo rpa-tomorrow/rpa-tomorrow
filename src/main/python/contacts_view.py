@@ -123,6 +123,10 @@ class ContactsView(QtWidgets.QWidget):
             contact = SETTINGS["contacts"][old_name]
             del SETTINGS["contacts"][old_name]
             SETTINGS["contacts"][new_name] = contact
+            if old_name in self.entries:
+                entry = self.entries[old_name]
+                del self.entries[old_name]
+                self.entries[new_name] = entry
             return True
         else:
             print(f"contact `{old_name}` is not in contact list, this is likely a bug!")
