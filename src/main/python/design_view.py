@@ -109,6 +109,22 @@ class DesignView(QtWidgets.QWidget):
         self.process_text_edit.cancel_editing()
 
     def handle_response(self, query, task, followup):
+        def callback(followup, cancel=False): #  welcome to callback hell!
+            try:
+                if cancel:
+                    self.handle_response(query, task, None)
+                    return
+                    
+                followup = followup.callback()
+                self.handle_response(query, task, followup)
+            except Exception:
+                if self.main_window.modal:
+                    self.main_window.modal.close_window()
+                traceback.print_exc()
+                self.process_text_edit.restore_cursor_pos()
+                modal.ModalMessageWindow(
+                    self.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR)
+
         if followup:
             if self.main_window.modal:
                 self.main_window.modal.close_window()
@@ -123,7 +139,7 @@ class DesignView(QtWidgets.QWidget):
                 followup_modal = modal.ModalBooleanFollowupWindow(self.main_window, followup)
                 followup_modal.setFocus()
             if followup_modal:
-                followup_modal.exit_callback = lambda f: self.handle_response(query, task, f)
+                followup_modal.callback = callback
         else:
             self.create_process_block_from_task(query, task)
         return task

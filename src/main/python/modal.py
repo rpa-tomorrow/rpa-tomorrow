@@ -147,7 +147,7 @@ class ModalYesNoQuestionWindow(ModalMessageWindow):
 class ModalMultiFollowupWindow(ModalWindow):
     def __init__(self, parent, followup):
         self.followup = followup
-        self.exit_callback = None
+        self.callback = None
         super(ModalMultiFollowupWindow, self).__init__(parent)
 
     def build_layout(self):
@@ -203,23 +203,20 @@ class ModalMultiFollowupWindow(ModalWindow):
 
     def answer_update(self):
         self.followup.answer = self.choices.currentData()
-        followup = None
-        if self.followup.callback:
-            followup = self.followup.callback()
-        if self.exit_callback:
-            self.exit_callback(followup)
+        if self.callback:
+            self.callback(self.followup)
         self.close_window()
 
     def cancel_update(self):
-        if self.exit_callback:
-            self.exit_callback(None)
+        if self.callback:
+            self.callback(self.followup, True)
         self.close_window()
 
 
 class ModalStringFollowupWindow(ModalWindow):
     def __init__(self, parent, followup):
         self.followup = followup
-        self.exit_callback = None
+        self.callback = None
         super(ModalStringFollowupWindow, self).__init__(parent)
 
     def build_layout(self):
@@ -275,37 +272,30 @@ class ModalStringFollowupWindow(ModalWindow):
 
     def answer_update(self):
         self.followup.answer = self.answer_input.toPlainText()
-        followup = None
-        if self.followup.callback:
-            followup = self.followup.callback()
-        if self.exit_callback:
-            self.exit_callback(followup)
+        if self.callback:
+            self.callback(self.followup)
         self.close_window()
 
     def cancel_update(self):
-        if self.exit_callback:
-            self.exit_callback(None)
+        if self.callback:
+            self.callback(self.followup, True)
         self.close_window()
 
 
 class ModalBooleanFollowupWindow(ModalYesNoQuestionWindow):
     def __init__(self, parent, followup):
         self.followup = followup
-        self.exit_callback = None
+        self.callback = None
         super(ModalBooleanFollowupWindow, self).__init__(parent, followup.question, "Question")
 
     def answer_yes(self):
-        followup = None
-        if self.followup:
-            followup = self.followup.callback(True)
-        if self.exit_callback:
-            self.exit_callback(followup)
+        self.followup.answer = True
+        if self.callback:
+            self.callback(self.followup)
         self.close_window()
 
     def answer_no(self):
-        followup = None
-        if self.followup:
-            followup = self.followup.callback(False)
-        if self.exit_callback:
-            self.exit_callback(followup)
+        self.followup.answer = False
+        if self.callback:
+            self.callback(self.followup)
         self.close_window()
