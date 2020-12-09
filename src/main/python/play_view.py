@@ -20,9 +20,9 @@ class PlayView(QtWidgets.QWidget):
         self.example_process = ProcessView("Execute tasks: ")
         layout.addWidget(self.example_process)
 
-        self.process_text_edit = ProcessTextEditView(self, "")
-        self.process_text_edit.setMaximumHeight(180)
-        layout.addWidget(self.process_text_edit)
+        # self.process_text_edit = ProcessTextEditView(self, "")
+        # self.process_text_edit.setMaximumHeight(180)
+        # layout.addWidget(self.process_text_edit)
 
         layout.addStretch(1)
 
@@ -40,11 +40,19 @@ class ProcessView(QtWidgets.QFrame):
         self.run_btn.setText("\uf04b")
         self.run_btn.setObjectName("runButton")
         self.run_btn.clicked.connect(execute_tasks) 
-        self.run_btn.clicked.connect(clear_tasks)
 
         layout.addWidget(self.name, 0, 0)
         layout.addWidget(self.run_btn, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
         layout.setColumnStretch(1, 1)
+
+        self.process_text_edit = ProcessTextEditView(self, "")
+        self.process_text_edit.setMaximumHeight(180)
+        layout.addWidget(self.process_text_edit)
+
+        self.run_btn.clicked.connect(self.process_text_edit.cleartest)
+        self.run_btn.clicked.connect(self.process_text_edit.writetest)
+        test.clear()
+
         self.setLayout(layout)
 
 
@@ -64,26 +72,28 @@ class ProcessTextEditView(QtWidgets.QFrame):
         self.text_edit.installEventFilter(self)
 
         self.text_output = QtWidgets.QTextBrowser(self.text_edit)
-        self.writetest("Natural language processing ready!")
+        # self.writetest("Natural language processing ready!")
 
 
     def cleartest(self):
         self.text_output.clear() 
 
-    def writetest(self, input):
-        self.text_output.append(input) 
+    def writetest(self):
+        # self.text_output.append("men sug min kuk...") 
 
+        for t in test:
+            self.text_output.append(t) 
+
+test = []
 
 def execute_tasks():
     print("executing tasks...")
     for task in tasks:
         asd = task.execute()
-        ProcessTextEditView.writetest(asd)
+        test.append(asd)
         # print("task = ", asd)
 
-def clear_tasks():
-    print("clearing tasks...")
-    tasks.clear()
+
 
 
 class ProcessEntryView(QtWidgets.QFrame):
