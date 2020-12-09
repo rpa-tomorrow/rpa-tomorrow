@@ -206,7 +206,16 @@ class DesignView(QtWidgets.QWidget):
 
         try:
             for query_part in query_parts:
-                self.nlp.prepare(query_part)
+                task = self.nlp.prepare(query_part)[0]
+                if task is None:
+                    modal.ModalMessageWindow(
+                        self.main_window,
+                        "Failed to understand what task you wanted to perform. Please check spelling mistakes "
+                        + "or simplify your sentence and try again!",
+                        "Error",
+                        modal.MSG_ERROR,
+                    )
+                    return
         except Exception:
             traceback.print_exc()
             self.process_text_edit.restore_cursor_pos()
