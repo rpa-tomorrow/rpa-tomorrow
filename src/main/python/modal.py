@@ -26,21 +26,12 @@ class ModalWindow(QtWidgets.QWidget):
         center_layout.setRowStretch(0, 1)
         center_layout.setRowStretch(2, 1)
 
-        self.close_window_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Escape"), self.modal_frame)
-        self.close_window_shortcut.activated.connect(self.close_window)
-
         self.layout = self.build_layout()
         self.modal_frame.setLayout(self.layout)
 
         self.parent.modal = self
         self.setLayout(center_layout)
         self.show()
-
-    def mousePressEvent(self, event):
-        super(ModalWindow, self).mousePressEvent(event)
-        relpos = event.pos() - self.modal_frame.pos()
-        if not self.modal_frame.rect().contains(relpos):
-            self.close_window()
 
     def close_window(self):
         self.parent.modal = None
@@ -156,6 +147,7 @@ class ModalYesNoQuestionWindow(ModalMessageWindow):
 class ModalMultiFollowupWindow(ModalWindow):
     def __init__(self, parent, followup):
         self.followup = followup
+        self.exit_callback = None
         super(ModalMultiFollowupWindow, self).__init__(parent)
 
     def build_layout(self):
@@ -182,7 +174,7 @@ class ModalMultiFollowupWindow(ModalWindow):
         bottom_frame = QtWidgets.QFrame()
         bottom_frame.setObjectName("modalBottomFrame")
         bottom_frame.setLayout(self.bottom_layout)
-        
+
         layout.addWidget(label_icon, 0, 0)
         layout.addWidget(label_title, 0, 1, 1, 2)
         layout.addWidget(label_message, 1, 0, 1, 3)
@@ -202,7 +194,7 @@ class ModalMultiFollowupWindow(ModalWindow):
         update_button.setObjectName("primaryButton")
         cancel_button = QtWidgets.QToolButton()
         cancel_button.setText("Cancel")
-        cancel_button.clicked.connect(self.close_window)
+        cancel_button.clicked.connect(self.cancel_update)
 
         bottom_layout.addStretch(1)
         bottom_layout.addWidget(update_button)
@@ -211,16 +203,23 @@ class ModalMultiFollowupWindow(ModalWindow):
 
     def answer_update(self):
         self.followup.answer = self.choices.currentData()
+        followup = None
         if self.followup.callback:
-            self.followup.callback()
+            followup = self.followup.callback()
+        if self.exit_callback:
+            self.exit_callback(followup)
+        self.close_window()
+
+    def cancel_update(self):
+        if self.exit_callback:
+            self.exit_callback(None)
         self.close_window()
 
 
 class ModalStringFollowupWindow(ModalWindow):
     def __init__(self, parent, followup):
         self.followup = followup
-        self.update_callback = None
-        self.cancel_callback = None
+        self.exit_callback = None
         super(ModalStringFollowupWindow, self).__init__(parent)
 
     def build_layout(self):
@@ -245,13 +244,15 @@ class ModalStringFollowupWindow(ModalWindow):
         bottom_frame = QtWidgets.QFrame()
         bottom_frame.setObjectName("modalBottomFrame")
         bottom_frame.setLayout(self.bottom_layout)
-        
+
         layout.addWidget(label_icon, 0, 0)
         layout.addWidget(label_title, 0, 1, 1, 2)
         layout.addWidget(label_message, 1, 0, 1, 3)
         layout.addWidget(self.answer_input, 2, 0, 1, 3)
         layout.addWidget(bottom_frame, 3, 0, 1, 3)
         layout.setColumnStretch(1, 1)
+
+        self.answer_input.setFocus()
         return layout
 
     def build_bottom_layout(self):
@@ -265,7 +266,7 @@ class ModalStringFollowupWindow(ModalWindow):
         update_button.setObjectName("primaryButton")
         cancel_button = QtWidgets.QToolButton()
         cancel_button.setText("Cancel")
-        cancel_button.clicked.connect(self.close_window)
+        cancel_button.clicked.connect(self.cancel_update)
 
         bottom_layout.addStretch(1)
         bottom_layout.addWidget(update_button)
@@ -274,40 +275,37 @@ class ModalStringFollowupWindow(ModalWindow):
 
     def answer_update(self):
         self.followup.answer = self.answer_input.toPlainText()
+        followup = None
         if self.followup.callback:
-            self.followup.callback()
+            followup = self.followup.callback()
+        if self.exit_callback:
+            self.exit_callback(followup)
         self.close_window()
 
-# NOTE(alexander): DEV mode entry point only!!!
-if __name__ == "__main__":
-    from main import initialize_app
-    from lib.automate.followup import MultiFollowup, StringFollowup
-    from datetime import datetime
-    import sys
-    appctxt, window = initialize_app()
+    def cancel_update(self):
+        if self.exit_callback:
+            self.exit_callback(None)
+        self.close_window()
 
-    def callback(followup):
-        if followup.answer is not None:
-            event = followup.answer
-            print(event)
-        else:
-            print("\nCould not find an event")
 
-    if 1:
-        events = [{"start": str(datetime.now()), "summary": "Something hello world"},
-                  {"start": str(datetime.now()), "summary": "Another event"}]
-        followup_str = "Found multiple events: \n"
-        alternatives = []
-        for event in events:
-            start_time = event["start"]
-            start_time = datetime.fromisoformat(start_time)
-            formated_time = start_time.strftime("%H:%M, %A, %d. %B %Y")
-            alternatives.append((event, f"{event['summary']} at {formated_time}"))
+class ModalBooleanFollowupWindow(ModalYesNoQuestionWindow):
+    def __init__(self, parent, followup):
+        self.followup = followup
+        self.exit_callback = None
+        super(ModalBooleanFollowupWindow, self).__init__(parent, followup.question, "Question")
 
-        followup = MultiFollowup(followup_str, alternatives, callback, True)
-        ModalMultiFollowupWindow(window, followup)
-    else:
-        ModalStringFollowupWindow(window, StringFollowup("Found no message body. What message should be sent", callback))
-        
-    exit_code = appctxt.app.exec_()
-    sys.exit(exit_code)
+    def answer_yes(self):
+        followup = None
+        if self.followup:
+            followup = self.followup.callback(True)
+        if self.exit_callback:
+            self.exit_callback(followup)
+        self.close_window()
+
+    def answer_no(self):
+        followup = None
+        if self.followup:
+            followup = self.followup.callback(False)
+        if self.exit_callback:
+            self.exit_callback(followup)
+        self.close_window()

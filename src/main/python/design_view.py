@@ -104,25 +104,77 @@ class DesignView(QtWidgets.QWidget):
         self.update()
         self.main_window.set_info_message("Loaded " + self.model.absolute_path)
 
-    def handle_response(self, task, followup):
-        if followup:
-            if isinstance(followup, MultiFollowup):
-                modal.ModalMultiFollowupWindow(self.main_window, followup)
-            elif isinstance(followup, StringFollowup):
-                modal.ModalStringFollowupWindow(self.main_window, followup)
-            elif isinstance(followup, BooleanFollowup):
-                bool_modal = modal.ModalYesNoQuestionWindow(
-                    self.main_window,
-                    followup.question,
-                    "Question",
-                    modal.MSG_QUESTION)
-                bool_modal.yes_callback = lambda: followup.callback(True)
-                bool_modal.no_callback = lambda: followup.callback(False)
-        return task
-
     def cancel_actions(self):
         self.process_editor.deselect_all_processes()
         self.process_text_edit.cancel_editing()
+
+    def handle_response(self, query, task, followup):
+        if followup:
+            if self.main_window.modal:
+                self.main_window.modal.close_window()
+                folloup_modal = None  # noqa: F841 it is used to setup callbacks!
+            if isinstance(followup, MultiFollowup):
+                followup_modal = modal.ModalMultiFollowupWindow(self.main_window, followup)
+                followup_modal.choices.setFocus()
+            elif isinstance(followup, StringFollowup):
+                followup_modal = modal.ModalStringFollowupWindow(self.main_window, followup)
+                followup_modal.answer_input.setFocus()
+            elif isinstance(followup, BooleanFollowup):
+                followup_modal = modal.ModalBooleanFollowupWindow(self.main_window, followup)
+                followup_modal.setFocus()
+            if followup_modal:
+                followup_modal.exit_callback = lambda f: self.handle_response(query, task, f)
+        else:
+            self.create_process_block_from_task(query, task)
+        return task
+
+    def create_process_block_from_task(self, query, task, proc_view=None):
+        model = None
+        view = None
+        query = query.strip()
+        if isinstance(task, Send):
+            model = proc_models.SendModel()
+            model.recipients = ", ".join(task.to)
+            model.when = str(task.when)
+            model.body = str(task.body)
+        elif isinstance(task, Reminder):
+            model = proc_models.ReminderModel()
+            model.recipients = ", ".join(task.to)
+            model.when = str(task.when)
+            model.body = str(task.body)
+        elif isinstance(task, Schedule):
+            model = proc_models.ScheduleModel()
+            model.recipients = ", ".join(task.to)
+            model.when = str(task.when)
+            model.body = str(task.body)
+        else:
+            modal.ModalMessageWindow(
+                self.main_window,
+                "Failed to understand what task you wanted to perform. Please check spelling mistakes "
+                + "or simplify your sentence and try again!",
+                "Error",
+                modal.MSG_ERROR,
+            )
+            return
+        if model:
+            model.query = query
+        # FIXME(alexander): uses same views for all tasks!!!
+        view = SendEmailView(model)
+
+        if not proc_view:
+            proc_view = ProcessView(self.process_editor, view, model)
+            proc_view.show()
+            self.process_editor.append_process(proc_view, model)
+            proc_view = None
+        else:
+            proc_view.title.setText(model.name)
+            proc_view.layout.replaceWidget(proc_view.view, view)
+            proc_view.view.close()
+            proc_view.view = view
+            self.model.remove_process(proc_view.model)
+            self.model.append_process(model)
+            proc_view.model = model
+        self.update()
 
     def submit_input_text(self, proc_view=None):
         if not self.nlp:
@@ -130,77 +182,26 @@ class DesignView(QtWidgets.QWidget):
             self.nlp.automate.response_callback = self.handle_response
 
         self.process_text_edit.save_cursor_pos()
-
         query = self.process_text_edit.get_text()
         query_parts = query.split(".")
         if query == "":
             return
 
-        tasks = []
-
         try:
-            tasks = self.nlp.prepare(query)
+            for query_part in query_parts:
+                self.nlp.prepare(query_part)
         except Exception:
             traceback.print_exc()
             self.process_text_edit.restore_cursor_pos()
             modal.ModalMessageWindow(
-                self.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR)
+                self.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR
+            )
             return
-
-        for i, task in enumerate(tasks):
-            model = None
-            view = None
-            proc_query = ""
-            if len(query_parts) > i:
-                proc_query = query_parts[i].strip()
-            if isinstance(task, Send):
-                model = proc_models.SendModel()
-                model.recipients = ", ".join(task.to)
-                model.when = str(task.when)
-                model.body = str(task.body)
-            elif isinstance(task, Reminder):
-                model = proc_models.ReminderModel()
-                model.recipients = ", ".join(task.to)
-                model.when = str(task.when)
-                model.body = str(task.body)
-            elif isinstance(task, Schedule):
-                model = proc_models.ScheduleModel()
-                model.recipients = ", ".join(task.to)
-                model.when = str(task.when)
-                model.body = str(task.body)
-            else:
-                modal.ModalMessageWindow(
-                    self.main_window,
-                    "Failed to understand what task you wanted to perform. Please check spelling mistakes "
-                    + "or simplify your sentence and try again!",
-                    "Error",
-                    modal.MSG_ERROR,
-                )
-                return
-            if model:
-                model.query = proc_query
-            # FIXME(alexander): uses same views for all tasks!!!
-            view = SendEmailView(model)
-
-            if not proc_view:
-                proc_view = ProcessView(self.process_editor, view, model)
-                proc_view.show()
-                self.process_editor.append_process(proc_view, model)
-                proc_view = None
-            else:
-                proc_view.title.setText(model.name)
-                proc_view.layout.replaceWidget(proc_view.view, view)
-                proc_view.view.close()
-                proc_view.view = view
-                self.model.remove_process(proc_view.model)
-                self.model.append_process(model)
-                proc_view.model = model
-        self.update()
 
         self.process_text_edit.set_cursor_pos(0)
         self.process_text_edit.clear()
 
-        
+
 class ProcessEditorView(QtWidgets.QFrame):
     def __init__(self, design_view, model):
         super(ProcessEditorView, self).__init__()
