@@ -3,6 +3,8 @@ import sys
 
 from design_view import tasks
 
+responses = []
+
 class PlayView(QtWidgets.QWidget):
     def __init__(self, main_window, *args, **kwargs):
         super(PlayView, self).__init__(*args, **kwargs)
@@ -15,14 +17,15 @@ class PlayView(QtWidgets.QWidget):
         self.title = QtWidgets.QLabel("Play")
         self.title.setObjectName("viewTitle")
         self.title.setMaximumHeight(48)
+
+        self.process_text_edit = ProcessTextEditView(self, "")
+        self.process_text_edit.setMaximumHeight(180)
+
+        self.label = ProcessView("Execute tasks: ", self.process_text_edit)
+        
         layout.addWidget(self.title)
-
-        self.example_process = ProcessView("Execute tasks: ")
-        layout.addWidget(self.example_process)
-
-        # self.process_text_edit = ProcessTextEditView(self, "")
-        # self.process_text_edit.setMaximumHeight(180)
-        # layout.addWidget(self.process_text_edit)
+        layout.addWidget(self.label)
+        layout.addWidget(self.process_text_edit)
 
         layout.addStretch(1)
 
@@ -30,9 +33,10 @@ class PlayView(QtWidgets.QWidget):
 
 
 class ProcessView(QtWidgets.QFrame):
-    def __init__(self, name, *args, **kwargs):
+    def __init__(self, name, process_text_edit, *args, **kwargs):
         super(ProcessView, self).__init__(*args, **kwargs)
         layout = QtWidgets.QGridLayout()
+        self.process_text_edit = process_text_edit
 
         self.name = QtWidgets.QLabel(name)
         self.run_btn = QtWidgets.QToolButton()
@@ -45,14 +49,10 @@ class ProcessView(QtWidgets.QFrame):
         layout.addWidget(self.run_btn, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
         layout.setColumnStretch(1, 1)
 
-        self.process_text_edit = ProcessTextEditView(self, "")
-        self.process_text_edit.setMaximumHeight(180)
-        layout.addWidget(self.process_text_edit)
-
         self.run_btn.clicked.connect(self.process_text_edit.cleartest)
         self.run_btn.clicked.connect(self.process_text_edit.writetest)
-        test.clear()
 
+        responses.clear()
         self.setLayout(layout)
 
 
@@ -72,26 +72,19 @@ class ProcessTextEditView(QtWidgets.QFrame):
         self.text_edit.installEventFilter(self)
 
         self.text_output = QtWidgets.QTextBrowser(self.text_edit)
-        # self.writetest("Natural language processing ready!")
-
 
     def cleartest(self):
         self.text_output.clear() 
 
     def writetest(self):
-        # self.text_output.append("men sug min kuk...") 
+        for response in responses:
+            self.text_output.append(response) 
 
-        for t in test:
-            self.text_output.append(t) 
-
-test = []
 
 def execute_tasks():
-    print("executing tasks...")
     for task in tasks:
-        asd = task.execute()
-        test.append(asd)
-        # print("task = ", asd)
+        response = task.execute()
+        responses.append(response)
 
 
 
