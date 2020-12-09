@@ -19,15 +19,15 @@ class PlayView(QtWidgets.QWidget):
         self.title.setMaximumHeight(48)
 
         self.process_text_edit = ProcessTextEditView(self, "")
-        self.process_text_edit.setMaximumHeight(180)
 
         self.label = ProcessView("Execute tasks: ", self.process_text_edit)
+        self.label.setMaximumHeight(180)
         
         layout.addWidget(self.title)
         layout.addWidget(self.label)
         layout.addWidget(self.process_text_edit)
 
-        layout.addStretch(1)
+        layout.addStretch(0)
 
         self.setLayout(layout)
 
@@ -49,14 +49,14 @@ class ProcessView(QtWidgets.QFrame):
         layout.addWidget(self.run_btn, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
         layout.setColumnStretch(1, 1)
 
-        self.run_btn.clicked.connect(self.process_text_edit.cleartest)
-        self.run_btn.clicked.connect(self.process_text_edit.writetest)
+        self.run_btn.clicked.connect(self.process_text_edit.clear_text_output)
+        self.run_btn.clicked.connect(self.process_text_edit.write_text_output)
 
         responses.clear()
         self.setLayout(layout)
 
 
-class ProcessTextEditView(QtWidgets.QFrame):
+class ProcessTextEditView(QtWidgets.QTextEdit):
     def __init__(self, design_view, *args, **kwargs):
         super(ProcessTextEditView, self).__init__()
         self.design_view = design_view
@@ -65,18 +65,18 @@ class ProcessTextEditView(QtWidgets.QFrame):
         self.text_edit = QtWidgets.QTextEdit(*args, **kwargs)
         self.text_edit.setReadOnly(True)
 
-        layout.addWidget(self.text_edit, 0, 0, 1, 4)
-        layout.setColumnStretch(3, 1)
-        layout.setRowStretch(0, 1)
+        layout.addWidget(self.text_edit, 0, 0)
+        # layout.setColumnStretch(0, 1)
+        # layout.setRowStretch(0, 1)
         self.setLayout(layout)
         self.text_edit.installEventFilter(self)
 
         self.text_output = QtWidgets.QTextBrowser(self.text_edit)
 
-    def cleartest(self):
+    def clear_text_output(self):
         self.text_output.clear() 
 
-    def writetest(self):
+    def write_text_output(self):
         for response in responses:
             self.text_output.append(response) 
 
@@ -85,8 +85,6 @@ def execute_tasks():
     for task in tasks:
         response = task.execute()
         responses.append(response)
-
-
 
 
 class ProcessEntryView(QtWidgets.QFrame):
