@@ -109,12 +109,12 @@ class DesignView(QtWidgets.QWidget):
         self.process_text_edit.cancel_editing()
 
     def handle_response(self, query, task, followup):
-        def callback(followup, cancel=False): #  welcome to callback hell!
+        def callback(followup, cancel=False):  # welcome to callback hell!
             try:
                 if cancel:
                     self.handle_response(query, task, None)
                     return
-                    
+
                 followup = followup.callback()
                 self.handle_response(query, task, followup)
             except Exception:
@@ -123,7 +123,8 @@ class DesignView(QtWidgets.QWidget):
                 traceback.print_exc()
                 self.process_text_edit.restore_cursor_pos()
                 modal.ModalMessageWindow(
-                    self.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR)
+                    self.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR
+                )
 
         if followup:
             if self.main_window.modal:
