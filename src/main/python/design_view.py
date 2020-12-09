@@ -20,6 +20,7 @@ from lib.settings import SETTINGS
 
 tasks = []
 
+
 class DesignView(QtWidgets.QWidget):
     def __init__(self, main_window, *args, **kwargs):
         super(DesignView, self).__init__(*args, **kwargs)

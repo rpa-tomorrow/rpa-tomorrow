@@ -5,6 +5,7 @@ from design_view import tasks
 
 responses = []
 
+
 class PlayView(QtWidgets.QWidget):
     def __init__(self, main_window, *args, **kwargs):
         super(PlayView, self).__init__(*args, **kwargs)
@@ -22,7 +23,7 @@ class PlayView(QtWidgets.QWidget):
 
         self.label = ProcessView("Execute tasks: ", self.process_text_edit)
         self.label.setMaximumHeight(180)
-        
+
         layout.addWidget(self.title)
         layout.addWidget(self.label)
         layout.addWidget(self.process_text_edit)
@@ -43,7 +44,7 @@ class ProcessView(QtWidgets.QFrame):
         self.run_btn.setFont(QtGui.QFont("RPATomorrowIconFont", 24))
         self.run_btn.setText("\uf04b")
         self.run_btn.setObjectName("runButton")
-        self.run_btn.clicked.connect(execute_tasks) 
+        self.run_btn.clicked.connect(execute_tasks)
 
         layout.addWidget(self.name, 0, 0)
         layout.addWidget(self.run_btn, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
@@ -70,14 +71,14 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
         self.text_edit.installEventFilter(self)
 
         self.text_output = QtWidgets.QTextBrowser(self.text_edit)
-        layout.addWidget(self.text_output, 0,  0)
+        layout.addWidget(self.text_output, 0, 0)
 
     def clear_text_output(self):
-        self.text_output.clear() 
+        self.text_output.clear()
 
     def write_text_output(self):
         for response in responses:
-            self.text_output.append(response) 
+            self.text_output.append(response)
 
 
 def execute_tasks():
