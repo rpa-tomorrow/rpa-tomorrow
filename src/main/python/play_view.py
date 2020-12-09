@@ -66,12 +66,11 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
         self.text_edit.setReadOnly(True)
 
         layout.addWidget(self.text_edit, 0, 0)
-        # layout.setColumnStretch(0, 1)
-        # layout.setRowStretch(0, 1)
         self.setLayout(layout)
         self.text_edit.installEventFilter(self)
 
         self.text_output = QtWidgets.QTextBrowser(self.text_edit)
+        layout.addWidget(self.text_output, 0,  0)
 
     def clear_text_output(self):
         self.text_output.clear() 
