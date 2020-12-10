@@ -1,13 +1,20 @@
 english:
   - version: "0.0.1"
     modules:
-      - module: spacy
-        name: en_core_web_md
+      - module: spacy_sm
+        name: en_core_web_sm
         command:
           - -m
           - spacy
           - download
           - en_core_web_sm
+      - module: spacy_md
+        name: en_core_web_md
+        command:
+          - -m
+          - spacy
+          - download
+          - en_core_web_md
       - module: basic
         name: en_rpa_simple
         tar: 'https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple-0.0.1/en_rpa_simple-0.0.1.tar.gz'
@@ -16,7 +23,10 @@ english:
         tar: 'https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple_reminder-0.0.1/en_rpa_simple_reminder-0.0.1.tar.gz'
       - module: schedule
         name: en_rpa_simple_calendar
-        tar: 'https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple_calendar-0.0.3/en_rpa_simple_calendar-0.0.4.tar.gz'
+        tar: 'https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple_calendar-0.0.4/en_rpa_simple_calendar-0.0.4.tar.gz'
       - module: email
         name: en_rpa_simple_email
         tar: 'https://github.com/rpa-tomorrow/model-releases/releases/download/en_rpa_simple_email-0.0.1/en_rpa_simple_email-0.0.1.tar.gz'
+      - module: ner
+        name: xx_ent_wiki_sm
+        tar: 'https://github.com/explosion/spacy-models/releases/download/xx_ent_wiki_sm-2.3.0/xx_ent_wiki_sm-2.3.0.tar.gz'
