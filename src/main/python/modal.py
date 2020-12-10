@@ -26,21 +26,12 @@ class ModalWindow(QtWidgets.QWidget):
         center_layout.setRowStretch(0, 1)
         center_layout.setRowStretch(2, 1)
 
-        self.close_window_shortcut = QtWidgets.QShortcut(QtGui.QKeySequence("Escape"), self.modal_frame)
-        self.close_window_shortcut.activated.connect(self.close_window)
-
         self.layout = self.build_layout()
         self.modal_frame.setLayout(self.layout)
 
         self.parent.modal = self
         self.setLayout(center_layout)
         self.show()
-
-    def mousePressEvent(self, event):
-        super(ModalWindow, self).mousePressEvent(event)
-        relpos = event.pos() - self.modal_frame.pos()
-        if not self.modal_frame.rect().contains(relpos):
-            self.close_window()
 
     def close_window(self):
         self.parent.modal = None
@@ -132,6 +123,7 @@ class ModalYesNoQuestionWindow(ModalMessageWindow):
         yes_button = QtWidgets.QToolButton()
         yes_button.setText("Yes")
         yes_button.clicked.connect(self.answer_yes)
+        yes_button.setObjectName("primaryButton")
         no_button = QtWidgets.QToolButton()
         no_button.setText("No")
         no_button.clicked.connect(self.answer_no)
@@ -149,4 +141,161 @@ class ModalYesNoQuestionWindow(ModalMessageWindow):
     def answer_no(self):
         if self.no_callback:
             self.no_callback()
+        self.close_window()
+
+
+class ModalMultiFollowupWindow(ModalWindow):
+    def __init__(self, parent, followup):
+        self.followup = followup
+        self.callback = None
+        super(ModalMultiFollowupWindow, self).__init__(parent)
+
+    def build_layout(self):
+        layout = QtWidgets.QGridLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setVerticalSpacing(12)
+        layout.setHorizontalSpacing(0)
+
+        label_icon = QtWidgets.QLabel("\uf14b")
+        label_icon.setObjectName("modalIconBlue")
+        label_title = QtWidgets.QLabel("Fill in missing information")
+        label_title.setObjectName("modalTitle")
+
+        label_message = QtWidgets.QLabel(self.followup.question.strip())
+        label_message.setObjectName("modalMessage")
+        label_message.setWordWrap(True)
+
+        self.choices = QtWidgets.QComboBox()
+        self.choices.setObjectName("hMargin")
+        for (data, display_str) in self.followup.options:
+            self.choices.addItem(display_str, data)
+
+        self.bottom_layout = self.build_bottom_layout()
+        bottom_frame = QtWidgets.QFrame()
+        bottom_frame.setObjectName("modalBottomFrame")
+        bottom_frame.setLayout(self.bottom_layout)
+
+        layout.addWidget(label_icon, 0, 0)
+        layout.addWidget(label_title, 0, 1, 1, 2)
+        layout.addWidget(label_message, 1, 0, 1, 3)
+        layout.addWidget(self.choices, 2, 0, 1, 3)
+        layout.addWidget(bottom_frame, 3, 0, 1, 3)
+        layout.setColumnStretch(1, 1)
+        return layout
+
+    def build_bottom_layout(self):
+        bottom_layout = QtWidgets.QHBoxLayout()
+        bottom_layout.setContentsMargins(12, 12, 12, 12)
+        bottom_layout.setSpacing(12)
+
+        update_button = QtWidgets.QToolButton()
+        update_button.setText("Update")
+        update_button.clicked.connect(self.answer_update)
+        update_button.setObjectName("primaryButton")
+        cancel_button = QtWidgets.QToolButton()
+        cancel_button.setText("Cancel")
+        cancel_button.clicked.connect(self.cancel_update)
+
+        bottom_layout.addStretch(1)
+        bottom_layout.addWidget(update_button)
+        bottom_layout.addWidget(cancel_button)
+        return bottom_layout
+
+    def answer_update(self):
+        self.followup.answer = self.choices.currentData()
+        if self.callback:
+            self.callback(self.followup)
+        self.close_window()
+
+    def cancel_update(self):
+        if self.callback:
+            self.callback(self.followup, True)
+        self.close_window()
+
+
+class ModalStringFollowupWindow(ModalWindow):
+    def __init__(self, parent, followup):
+        self.followup = followup
+        self.callback = None
+        super(ModalStringFollowupWindow, self).__init__(parent)
+
+    def build_layout(self):
+        layout = QtWidgets.QGridLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setVerticalSpacing(12)
+        layout.setHorizontalSpacing(0)
+
+        label_icon = QtWidgets.QLabel("\uf14b")
+        label_icon.setObjectName("modalIconBlue")
+        label_title = QtWidgets.QLabel("Fill in missing information")
+        label_title.setObjectName("modalTitle")
+
+        label_message = QtWidgets.QLabel(self.followup.question.strip())
+        label_message.setObjectName("modalMessage")
+        label_message.setWordWrap(True)
+
+        self.answer_input = QtWidgets.QTextEdit(self.followup.answer)
+        self.answer_input.setObjectName("hMargin")
+
+        self.bottom_layout = self.build_bottom_layout()
+        bottom_frame = QtWidgets.QFrame()
+        bottom_frame.setObjectName("modalBottomFrame")
+        bottom_frame.setLayout(self.bottom_layout)
+
+        layout.addWidget(label_icon, 0, 0)
+        layout.addWidget(label_title, 0, 1, 1, 2)
+        layout.addWidget(label_message, 1, 0, 1, 3)
+        layout.addWidget(self.answer_input, 2, 0, 1, 3)
+        layout.addWidget(bottom_frame, 3, 0, 1, 3)
+        layout.setColumnStretch(1, 1)
+
+        self.answer_input.setFocus()
+        return layout
+
+    def build_bottom_layout(self):
+        bottom_layout = QtWidgets.QHBoxLayout()
+        bottom_layout.setContentsMargins(12, 12, 12, 12)
+        bottom_layout.setSpacing(12)
+
+        update_button = QtWidgets.QToolButton()
+        update_button.setText("Update")
+        update_button.clicked.connect(self.answer_update)
+        update_button.setObjectName("primaryButton")
+        cancel_button = QtWidgets.QToolButton()
+        cancel_button.setText("Cancel")
+        cancel_button.clicked.connect(self.cancel_update)
+
+        bottom_layout.addStretch(1)
+        bottom_layout.addWidget(update_button)
+        bottom_layout.addWidget(cancel_button)
+        return bottom_layout
+
+    def answer_update(self):
+        self.followup.answer = self.answer_input.toPlainText()
+        if self.callback:
+            self.callback(self.followup)
+        self.close_window()
+
+    def cancel_update(self):
+        if self.callback:
+            self.callback(self.followup, True)
+        self.close_window()
+
+
+class ModalBooleanFollowupWindow(ModalYesNoQuestionWindow):
+    def __init__(self, parent, followup):
+        self.followup = followup
+        self.callback = None
+        super(ModalBooleanFollowupWindow, self).__init__(parent, followup.question, "Question")
+
+    def answer_yes(self):
+        self.followup.answer = True
+        if self.callback:
+            self.callback(self.followup)
+        self.close_window()
+
+    def answer_no(self):
+        self.followup.answer = False
+        if self.callback:
+            self.callback(self.followup)
         self.close_window()
