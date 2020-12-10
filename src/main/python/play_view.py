@@ -26,14 +26,12 @@ class PlayView(QtWidgets.QWidget):
 
         layout.addWidget(self.title)
         layout.addWidget(self.label)
-        layout.addWidget(self.process_text_edit)
-
-        layout.addStretch(0)
+        layout.addWidget(self.process_text_edit, 1)
 
         self.setLayout(layout)
 
 
-class ProcessView(QtWidgets.QFrame):
+class ProcessView(QtWidgets.QWidget):
     def __init__(self, name, process_text_edit, *args, **kwargs):
         super(ProcessView, self).__init__(*args, **kwargs)
         layout = QtWidgets.QGridLayout()
@@ -41,7 +39,6 @@ class ProcessView(QtWidgets.QFrame):
 
         self.name = QtWidgets.QLabel(name)
         self.run_btn = QtWidgets.QToolButton()
-        self.run_btn.setFont(QtGui.QFont("RPATomorrowIconFont", 24))
         self.run_btn.setText("\uf04b")
         self.run_btn.setObjectName("runButton")
         self.run_btn.clicked.connect(execute_tasks)
