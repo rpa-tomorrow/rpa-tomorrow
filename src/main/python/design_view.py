@@ -18,8 +18,6 @@ from lib.selector.selector import ModuleSelector
 from lib.automate.followup import MultiFollowup, StringFollowup, BooleanFollowup
 from lib.settings import SETTINGS
 
-tasks = []
-
 
 class DesignView(QtWidgets.QWidget):
     def __init__(self, main_window, *args, **kwargs):
@@ -150,19 +148,22 @@ class DesignView(QtWidgets.QWidget):
     def create_process_block_from_task(self, query, task):
         model = None
         view = None
-        query = query.strip()
+        
         if isinstance(task, Send):
             model = proc_models.SendModel()
+            model.query = query
             model.recipients = ", ".join(task.to)
             model.when = str(task.when)
             model.body = str(task.body)
         elif isinstance(task, Reminder):
             model = proc_models.ReminderModel()
+            model.query = query
             model.recipients = ", ".join(task.to)
             model.when = str(task.when)
             model.body = str(task.body)
         elif isinstance(task, Schedule):
             model = proc_models.ScheduleModel()
+            model.query = query
             model.recipients = ", ".join(task.to)
             model.when = str(task.when)
             model.body = str(task.body)
@@ -175,8 +176,7 @@ class DesignView(QtWidgets.QWidget):
                 modal.MSG_ERROR,
             )
             return
-        if model:
-            model.query = query
+
         # FIXME(alexander): uses same views for all tasks!!!
         view = SendEmailView(model)
 
@@ -795,15 +795,15 @@ class SendEmailView(QtWidgets.QFrame):
         self.recipients.textChanged.connect(model.set_recipients)
 
         self.when = QtWidgets.QDateTimeEdit()
-        try:
-            dt = model.when
-            if isinstance(model.when, str):
-                dt = datetime.datetime.fromisoformat(model.when)
-            self.when.setDateTime(QtCore.QDateTime(dt))
-        except Exception:
-            dt = datetime.datetime.now()
-            self.when.setDateTime(QtCore.QDateTime(dt))
-            model.when = str(dt)
+
+        year = int(model.when[28:32])
+        month = int(model.when[34:36])
+        day = int(model.when[38:40])
+        hour = int(model.when[42:44].replace(',', ''))
+        minute = int(model.when[46:48].replace(',', ''))
+
+        dt = datetime.datetime(year, month, day, hour, minute)
+        self.when.setDateTime(QtCore.QDateTime(dt))
         self.when.dateTimeChanged.connect(self.set_when)
 
         self.body = QtWidgets.QTextEdit(model.body)

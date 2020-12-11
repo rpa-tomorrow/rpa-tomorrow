@@ -5,7 +5,7 @@ import sys
 import resources  # noqa: F401
 
 sys.path.append(".")
-from lib.settings import load_settings, SETTINGS  # noqa: E402
+from lib.settings import load_settings  # noqa: E402
 
 import process_models as proc_model  # noqa: E402
 from design_view import DesignView  # noqa: E402
@@ -26,7 +26,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.layout.setContentsMargins(0, 0, 0, 0)
 
         self.model = proc_model.Model("untitled")
-        self.sender = SETTINGS['user']
 
         self.bottom = BottomInfoBar()
         self.menu = SideMenuBar(self)
@@ -70,7 +69,7 @@ class ContentFrame(QtWidgets.QFrame):
         self.design_view = DesignView(main_window)
         self.save_view = FileView(main_window, self.design_view, self.main_window.model, True)
         self.load_view = FileView(main_window, self.design_view, self.main_window.model, False)
-        self.run_view = RunView(main_window, self.design_view.process_editor, self.main_window.model, self.sender)
+        self.run_view = RunView(main_window, self.design_view.process_editor, self.main_window.model)
         self.contacts_view = ContactsView(main_window)
         self.settings_view = SettingsView(main_window)
         self.info_view = QtWidgets.QFrame()

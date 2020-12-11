@@ -1,17 +1,17 @@
 from PyQt5 import QtWidgets, QtCore
 import sys
+import datetime
 
 from process_models import EntryPointModel
-from design_view import tasks
 from lib.automate.modules.reminder import Reminder
 from lib.automate.modules.schedule import Schedule
 from lib.automate.modules.send import Send
 from lib.settings import SETTINGS
 from lib.automate.pool import ModelPool
-from datetime import datetime, timedelta
+from lib.settings import SETTINGS  # noqa: E402
 
 class RunView(QtWidgets.QWidget):
-    def __init__(self, main_window, process_editor, model, sender, *args, **kwargs):
+    def __init__(self, main_window, process_editor, model, *args, **kwargs):
         super(RunView, self).__init__(*args, **kwargs)
         self.main_window = main_window
         self.model = model
@@ -24,7 +24,7 @@ class RunView(QtWidgets.QWidget):
         self.title.setObjectName("viewTitle")
         self.title.setMaximumHeight(48)
 
-        self.process_text_edit = ProcessTextEditView(self, self.model, sender)
+        self.process_text_edit = ProcessTextEditView(self, self.model)
 
         self.label = ProcessView("Execute tasks: ", self.process_text_edit)
         self.label.setMaximumHeight(180)
@@ -57,11 +57,10 @@ class ProcessView(QtWidgets.QWidget):
 
 
 class ProcessTextEditView(QtWidgets.QTextEdit):
-    def __init__(self, design_view, model, sender, *args, **kwargs):
+    def __init__(self, design_view, model, *args, **kwargs):
         super(ProcessTextEditView, self).__init__()
         self.design_view = design_view
         self.model = model
-        self.sender = sender
 
         layout = QtWidgets.QGridLayout()
 
@@ -81,29 +80,24 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
     def write_text_output(self):
         for proc in self.model.processes.values(): 
             if proc.classname != "EntryPointModel":
-                print("proc.classname = ", proc.classname)
                 if proc.classname == "ScheduleModel":
-                    print("query = ", proc.query)
-                    print("to = ", proc.recipients)
-                    print("when = ", proc.when)
-                    print("body = ", proc.body)
+                    start_hour = proc.when[42:44].replace(",", "0")
+                    start_minute = proc.when[46:48].replace(",", "0")
 
-                    # print("proc.when = ", proc.when) #2020-12-11 11:03:28.395766
-
-                    asdasd = proc.when[10:13] + "." + proc.when[14:16]
-                    asd = proc.when[10:13]
-                    print("asd = ", type(asd))
+                    end_hour = proc.when[101:103].replace(",", "0")
+                    end_minute = proc.when[105:107].replace(",", "0")
 
                     task = Schedule(ModelPool)
-                    timespan = task.timespan([asd], ["22"])
-                    task.prepare_processed([], timespan, proc.body, self.sender)
-                    # response = task.execute()
-                    # self.text_output.append(response)
+                    timespan = task.timespan([start_hour + "." + start_minute], [end_hour + "." + end_minute])
+                    task.prepare_processed([], timespan, proc.body, SETTINGS["user"])
+                    response = task.execute()
+                    self.text_output.append(response)
+
                 elif proc.classname == "ReminderModel":
                     print("proc.classname = ", proc.classname)
+
                 elif proc.classname == "SendModel":
                     print("proc.classname = ", proc.classname)
-
                 
 
 
