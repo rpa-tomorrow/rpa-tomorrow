@@ -93,16 +93,16 @@ class Calendar:
             return []
 
         # Parse Time
-        start_time = start.isoformat() + "Z"  # 'Z' indicates UTC time
-        end_time = end.isoformat() + "Z"
+        start_time = start.astimezone().isoformat()  # system timezone
+        end_time = end.astimezone().isoformat()  # system timezone
         to_items = [{"id": email} for email in attendees_email]
         freebusy = (
             self.service.freebusy()
             .query(body={"items": to_items, "timeMin": start_time, "timeMax": end_time})
             .execute()
         )
-        freebusy = map(lambda x: x[0], filter(lambda x: x[1]["busy"], freebusy["calendars"].items()))
-        return list(freebusy)
+        freebusy = list(map(lambda x: x[0], filter(lambda x: x[1]["busy"], freebusy["calendars"].items())))
+        return freebusy
 
     def get_events(self):
         """

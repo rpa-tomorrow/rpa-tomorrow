@@ -74,7 +74,7 @@ class Schedule(Module):
         )
 
         # Check if we are busy
-        me_busy = calendar.freebusy(self.when["start"], self.when["end"], ["primary"])
+        me_busy = self.calendar.freebusy(self.when["start"], self.when["end"], ["primary"])
         to_busy = calendar.freebusy(self.when["start"], self.when["end"], to)
         other = f"{', '.join(to_busy[:-1])} and {to_busy[-1]}" if len(to_busy) > 1 else "".join(to_busy)
         if me_busy and to_busy:
