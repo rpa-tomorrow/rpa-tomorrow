@@ -1,9 +1,9 @@
 # RPA Tomorrow - process tasks from natural text
 
 [![made-with-python](https://img.shields.io/badge/Made%20with-Python-1f425f.svg)](https://www.python.org/)
-[![GitHub release](https://img.shields.io/github/release/rpa-tomorrow/substorm-nlp.svg)](https://github.com/rpa-tomorrow/substorm-nlp/releases/)
-<a href="https://github.com/rpa-tomorrow/substorm-action/actions"><img alt="Actions Status" src="https://github.com/rpa-tomorrow/substorm-nlp/workflows/CI/badge.svg"></a>
-<a href="https://github.com/rpa-tomorrow/substorm-nlp/blob/master/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
+[![GitHub release](https://img.shields.io/github/release/rpa-tomorrow/rpa-tomorrow.svg)](https://github.com/rpa-tomorrow/rpa-tomorrow/releases/)
+<a href="https://github.com/rpa-tomorrow/rpa-tomorrow/actions"><img alt="Actions Status" src="https://github.com/rpa-tomorrow/rpa-tomorrow/workflows/CI/badge.svg"></a>
+<a href="https://github.com/rpa-tomorrow/rpa-tomorrow/blob/master/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
 <a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
 
 </p>
@@ -50,23 +50,23 @@ that will be used for deriving the key for encryption and decryption of the pass
 required for authentication against the SMTP server.
 
 To create and activate the project environment the included setup script can be used
-
+(Linux only)
 ```bash
-$ source substorm.sh
+$ source init_env.sh
 ```
 
 Otherwise you can do it manually
 
 ```bash
 # Create environment
-$ conda env create -f substorm-nlp.yml
+$ conda env create -f rpa-tomorrow.yml
 # Install RPA models
 $ pip install -r requirements.txt
 # Activate environment
-$ conda activate substorm-nlp
+$ conda activate rpa-tomorrow
 ```
 
-**NOTE!** If you're on Windows, replace all `substorm-nlp` with `substorm-nlp-win` above.
+**NOTE!** If you're on Windows, replace all `rpa-tomorrow` with `rpa-tomorrow-win` above.
 
 ### Advanced setup
 
