@@ -89,7 +89,8 @@ def prompt_contact_choice(name: str, candidates, module) -> str:
         def callback(followup):
             if followup.answer is not None:
                 module.to.remove(name)  # update to so recursive call continues resolving new attendees
-                module.to.append(candidates[0][1])  # add email of chosen attendee
+                if followup.answer is True:
+                    module.to.append(candidates[0][1])  # add email of chosen attendee
                 return module.prepare_processed(module.to, module.when, module.body, module.sender)
             else:
                 raise NoContactFoundError("No contact with name " + name + " was found")
