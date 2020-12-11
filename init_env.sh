@@ -7,7 +7,7 @@ then
     conda env create -f rpa-tomorrow.yml
 fi
 
-echo "activate conda RPA Tomorrow env..."
+echo "activate conda rpa-tomorrow env..."
 source ~/anaconda3/etc/profile.d/conda.sh 
 conda activate rpa-tomorrow 
 
