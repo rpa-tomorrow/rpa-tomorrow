@@ -1,5 +1,12 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource>
-    <file>fontawesome.ttf</file>
+  <file>fontawesome.ttf</file>
+  <file alias="blinningjr.png">../images/Blinningjr.png</file>
+  <file alias="hugowangler.png">../images/hugowangler.png</file>
+  <file alias="97gushan.png">../images/97gushan.png</file>
+  <file alias="aleman778.jpg">../images/Aleman778.jpg</file>
+  <file alias="widforss.jpg">../images/widforss.jpg</file>
+  <file alias="markhakansson.jpg">../images/markhakansson.jpg</file>
+  <file alias="viktorfrom.jpg">../images/markhakansson.jpg</file>
 </qresource>
 </RCC>

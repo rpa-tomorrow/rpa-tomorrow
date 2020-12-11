@@ -13,6 +13,7 @@ from file_view import FileView  # noqa: E402
 from play_view import PlayView  # noqa: E402
 from contacts_view import ContactsView  # noqa: E402
 from settings_view import SettingsView  # noqa: E402
+from info_view import InfoView  # noqa: E402
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -71,7 +72,7 @@ class ContentFrame(QtWidgets.QFrame):
         self.play_view = PlayView(main_window, self.design_view.process_editor)
         self.contacts_view = ContactsView(main_window)
         self.settings_view = SettingsView(main_window)
-        self.info_view = QtWidgets.QFrame()
+        self.info_view = InfoView(main_window)
 
         self.layout.addWidget(self.design_view)
         self.layout.addWidget(self.save_view)

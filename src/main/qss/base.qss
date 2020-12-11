@@ -445,3 +445,11 @@ QLineEdit#searchContactName {
     padding: 6px;
     padding-bottom: 7px;
 }
+
+*#roundedAvatar {
+    border-radius: 50%;
+    max-width: 48px;
+    max-height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+}
