@@ -1,15 +1,20 @@
 from PyQt5 import QtWidgets, QtCore
 import sys
 
+from process_models import EntryPointModel
 from design_view import tasks
+from lib.automate.modules.reminder import Reminder
+from lib.automate.modules.schedule import Schedule
+from lib.automate.modules.send import Send
+from lib.settings import SETTINGS
+from lib.automate.pool import ModelPool
+from datetime import datetime, timedelta
 
-responses = []
-
-
-class PlayView(QtWidgets.QWidget):
-    def __init__(self, main_window, *args, **kwargs):
-        super(PlayView, self).__init__(*args, **kwargs)
+class RunView(QtWidgets.QWidget):
+    def __init__(self, main_window, process_editor, model, sender, *args, **kwargs):
+        super(RunView, self).__init__(*args, **kwargs)
         self.main_window = main_window
+        self.model = model
         # self.threadpool = QThreadPool()
 
         layout = QtWidgets.QVBoxLayout()
@@ -19,7 +24,7 @@ class PlayView(QtWidgets.QWidget):
         self.title.setObjectName("viewTitle")
         self.title.setMaximumHeight(48)
 
-        self.process_text_edit = ProcessTextEditView(self, "")
+        self.process_text_edit = ProcessTextEditView(self, self.model, sender)
 
         self.label = ProcessView("Execute tasks: ", self.process_text_edit)
         self.label.setMaximumHeight(180)
@@ -41,47 +46,65 @@ class ProcessView(QtWidgets.QWidget):
         self.run_btn = QtWidgets.QToolButton()
         self.run_btn.setText("\uf04b")
         self.run_btn.setObjectName("runButton")
-        self.run_btn.clicked.connect(execute_tasks)
+        self.run_btn.clicked.connect(self.process_text_edit.clear_text_output)
+        self.run_btn.clicked.connect(self.process_text_edit.write_text_output)
 
         layout.addWidget(self.name, 0, 0)
         layout.addWidget(self.run_btn, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
         layout.setColumnStretch(1, 1)
 
-        self.run_btn.clicked.connect(self.process_text_edit.clear_text_output)
-        self.run_btn.clicked.connect(self.process_text_edit.write_text_output)
-
-        responses.clear()
         self.setLayout(layout)
 
 
 class ProcessTextEditView(QtWidgets.QTextEdit):
-    def __init__(self, design_view, *args, **kwargs):
+    def __init__(self, design_view, model, sender, *args, **kwargs):
         super(ProcessTextEditView, self).__init__()
         self.design_view = design_view
+        self.model = model
+        self.sender = sender
+
         layout = QtWidgets.QGridLayout()
 
         self.text_edit = QtWidgets.QTextEdit(*args, **kwargs)
         self.text_edit.setReadOnly(True)
-
-        layout.addWidget(self.text_edit, 0, 0)
         self.setLayout(layout)
         self.text_edit.installEventFilter(self)
 
         self.text_output = QtWidgets.QTextBrowser(self.text_edit)
+
+        layout.addWidget(self.text_edit, 0, 0)
         layout.addWidget(self.text_output, 0, 0)
 
     def clear_text_output(self):
         self.text_output.clear()
 
     def write_text_output(self):
-        for response in responses:
-            self.text_output.append(response)
+        for proc in self.model.processes.values(): 
+            if proc.classname != "EntryPointModel":
+                print("proc.classname = ", proc.classname)
+                if proc.classname == "ScheduleModel":
+                    print("query = ", proc.query)
+                    print("to = ", proc.recipients)
+                    print("when = ", proc.when)
+                    print("body = ", proc.body)
 
+                    # print("proc.when = ", proc.when) #2020-12-11 11:03:28.395766
 
-def execute_tasks():
-    for task in tasks:
-        response = task.execute()
-        responses.append(response)
+                    asdasd = proc.when[10:13] + "." + proc.when[14:16]
+                    asd = proc.when[10:13]
+                    print("asd = ", type(asd))
+
+                    task = Schedule(ModelPool)
+                    timespan = task.timespan([asd], ["22"])
+                    task.prepare_processed([], timespan, proc.body, self.sender)
+                    # response = task.execute()
+                    # self.text_output.append(response)
+                elif proc.classname == "ReminderModel":
+                    print("proc.classname = ", proc.classname)
+                elif proc.classname == "SendModel":
+                    print("proc.classname = ", proc.classname)
+
+                
 
 
 class ProcessEntryView(QtWidgets.QFrame):
