@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: |
           # $CONDA is an environment variable pointing to the root of the miniconda directory
-          $CONDA/bin/conda env update --file substorm-nlp.yml --name base
+          $CONDA/bin/conda env update --file rpa-tomorrow.yml --name base
       - name: Install models for tests
         run: |
           $CONDA/bin/python -m spacy download xx_ent_wiki_sm

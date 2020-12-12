@@ -1,4 +1,4 @@
-name: substorm-nlp-win
+name: rpa-tomorrow-win
 channels:
   - conda-forge
   - defaults

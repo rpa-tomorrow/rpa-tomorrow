@@ -15,7 +15,7 @@ https://www.googleapis.com/auth/contacts.other.readonly
 https://www.googleapis.com/auth/directory.readonly
 ```
 
-After that download the credentials and put it in `substorm-nlp/` directory, also name it `client_secret.json`.
+After that download the credentials and put it in the project root directory, also name it `client_secret.json`.
 
 Now the schedule module should work and any created meetings should show up in the calendar of the account you created the credentials for.
 
