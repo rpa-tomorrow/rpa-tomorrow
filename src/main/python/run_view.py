@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, QtCore
 import sys
-import datetime
+from datetime import datetime
 
 from process_models import EntryPointModel
 from lib.automate.modules.reminder import Reminder
@@ -46,7 +46,7 @@ class ProcessView(QtWidgets.QWidget):
         self.run_btn = QtWidgets.QToolButton()
         self.run_btn.setText("\uf04b")
         self.run_btn.setObjectName("runButton")
-        self.run_btn.clicked.connect(self.process_text_edit.clear_text_output)
+        # self.run_btn.clicked.connect(self.process_text_edit.clear_text_output)
         self.run_btn.clicked.connect(self.process_text_edit.write_text_output)
 
         layout.addWidget(self.name, 0, 0)
@@ -74,12 +74,13 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
         layout.addWidget(self.text_edit, 0, 0)
         layout.addWidget(self.text_output, 0, 0)
 
-    def clear_text_output(self):
-        self.text_output.clear()
+    # def clear_text_output(self):
+    #     self.text_output.clear()
 
     def write_text_output(self):
         for proc in self.model.processes.values(): 
             if proc.classname != "EntryPointModel":
+                # NOTE: proc.when is converted back and forth somewhere!
                 if proc.classname == "ScheduleModel":
                     start_hour = proc.when[42:44].replace(",", "0")
                     start_minute = proc.when[46:48].replace(",", "0")
@@ -94,11 +95,29 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
                     self.text_output.append(response)
 
                 elif proc.classname == "ReminderModel":
-                    print("proc.classname = ", proc.classname)
+                    if type(proc.when) == str:
+                        year = int(proc.when[0:4])
+                        month = int(proc.when[5:7])
+                        day = int(proc.when[8:10])
+                        hour = int(proc.when[11:13])
+                        minute = int(proc.when[14:16])
+                        second = int(proc.when[17:19])
+                        dt = datetime(year, month, day, hour, minute, second)
+
+                        task = Reminder(ModelPool)
+                        task.prepare_processed([], dt, proc.body, SETTINGS["user"])
+                        response = task.execute()
+                        self.text_output.append(response)
+                    else: 
+                        task = Reminder(ModelPool)
+                        task.prepare_processed([], proc.when, proc.body, SETTINGS["user"])
+                        response = task.execute()
+                        self.text_output.append(response)
 
                 elif proc.classname == "SendModel":
                     print("proc.classname = ", proc.classname)
                 
+        self.text_output.append("------------------------------------------------------------------------")
 
 
 class ProcessEntryView(QtWidgets.QFrame):

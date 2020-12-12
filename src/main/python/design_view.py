@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 
 import traceback
 import sys
-import datetime
+from datetime import datetime
 import copy
 import pyaudio
 import uuid
@@ -782,7 +782,6 @@ class ProcessView(QtWidgets.QFrame):
     def setup(self, layout):
         return
 
-
 class SendEmailView(QtWidgets.QFrame):
     def __init__(self, model):
         super(SendEmailView, self).__init__()
@@ -796,13 +795,38 @@ class SendEmailView(QtWidgets.QFrame):
 
         self.when = QtWidgets.QDateTimeEdit()
 
-        year = int(model.when[28:32])
-        month = int(model.when[34:36])
-        day = int(model.when[38:40])
-        hour = int(model.when[42:44].replace(',', ''))
-        minute = int(model.when[46:48].replace(',', ''))
 
-        dt = datetime.datetime(year, month, day, hour, minute)
+
+        # print("model.when = ", model.when)
+        
+        dt = datetime.now()
+
+        if model.classname == "ScheduleModel": 
+            year = int(model.when[28:32])
+            month = int(model.when[34:36])
+            day = int(model.when[38:40])
+            hour = int(model.when[42:44].replace(',', ''))
+            minute = int(model.when[46:48].replace(',', ''))
+            dt = datetime(year, month, day, hour, minute)
+
+        elif model.classname == "ReminderModel":
+            year = int(model.when[0:4])
+            month = int(model.when[5:7])
+            day = int(model.when[8:10])
+            hour = int(model.when[11:13])
+            minute = int(model.when[14:16])
+            second = int(model.when[17:19])
+            dt = datetime(year, month, day, hour, minute, second)
+
+            # print("year = ", year)
+            # print("month = ", month)
+            # print("day = ", day)
+            # print("hour = ", hour)
+            # print("minute = ", minute)
+            # print("second = ", second)
+
+            # print("reminder! ")
+
         self.when.setDateTime(QtCore.QDateTime(dt))
         self.when.dateTimeChanged.connect(self.set_when)
 
@@ -831,7 +855,7 @@ if __name__ == "__main__":
     view = window.content.design_view
 
     editor = view.process_editor
-    time_now = datetime.datetime.now()
+    time_now = datetime.now()
 
     model1 = proc_models.SendModel()
     model1.query = "Email John Doe Hello World"
