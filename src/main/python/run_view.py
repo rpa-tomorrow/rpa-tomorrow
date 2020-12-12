@@ -120,7 +120,6 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
                     self.text_output.append(response)
 
 
-
 class ProcessEntryView(QtWidgets.QFrame):
     def __init__(self, icon, heading, body):
         super(ProcessEntryView, self).__init__()

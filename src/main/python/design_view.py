@@ -816,7 +816,6 @@ class SendEmailView(QtWidgets.QFrame):
             minute = int(model.when[14:16])
             second = int(model.when[17:19])
             dt = datetime(year, month, day, hour, minute, second)
-            
 
         self.when.setDateTime(QtCore.QDateTime(dt))
         self.when.dateTimeChanged.connect(self.set_when)
