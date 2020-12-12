@@ -3,6 +3,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 import os
 import sys
 import resources  # noqa: F401
+from lib.settings import SETTINGS
 
 sys.path.append(".")
 from lib.settings import load_settings  # noqa: E402
@@ -13,7 +14,6 @@ from file_view import FileView  # noqa: E402
 from run_view import RunView  # noqa: E402
 from contacts_view import ContactsView  # noqa: E402
 from settings_view import SettingsView  # noqa: E402
-from lib.settings import SETTINGS
 
 
 class MainWindow(QtWidgets.QMainWindow):

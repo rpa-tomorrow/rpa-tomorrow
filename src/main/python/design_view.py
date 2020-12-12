@@ -148,7 +148,7 @@ class DesignView(QtWidgets.QWidget):
     def create_process_block_from_task(self, query, task):
         model = None
         view = None
-        
+
         if isinstance(task, Send):
             model = proc_models.SendModel()
             model.query = query
@@ -782,6 +782,7 @@ class ProcessView(QtWidgets.QFrame):
     def setup(self, layout):
         return
 
+
 class SendEmailView(QtWidgets.QFrame):
     def __init__(self, model):
         super(SendEmailView, self).__init__()
@@ -795,18 +796,16 @@ class SendEmailView(QtWidgets.QFrame):
 
         self.when = QtWidgets.QDateTimeEdit()
 
-
-
         # print("model.when = ", model.when)
-        
+
         dt = datetime.now()
 
-        if model.classname == "ScheduleModel": 
+        if model.classname == "ScheduleModel":
             year = int(model.when[28:32])
             month = int(model.when[34:36])
             day = int(model.when[38:40])
-            hour = int(model.when[42:44].replace(',', ''))
-            minute = int(model.when[46:48].replace(',', ''))
+            hour = int(model.when[42:44].replace(",", ""))
+            minute = int(model.when[46:48].replace(",", ""))
             dt = datetime(year, month, day, hour, minute)
 
         elif model.classname == "ReminderModel":

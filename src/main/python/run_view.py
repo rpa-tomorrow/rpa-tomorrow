@@ -2,13 +2,13 @@ from PyQt5 import QtWidgets, QtCore
 import sys
 from datetime import datetime
 
-from process_models import EntryPointModel
 from lib.automate.modules.reminder import Reminder
 from lib.automate.modules.schedule import Schedule
-from lib.automate.modules.send import Send
+
+# from lib.automate.modules.send import Send
 from lib.settings import SETTINGS
 from lib.automate.pool import ModelPool
-from lib.settings import SETTINGS  # noqa: E402
+
 
 class RunView(QtWidgets.QWidget):
     def __init__(self, main_window, process_editor, model, *args, **kwargs):
@@ -75,7 +75,7 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
 
     def write_text_output(self):
         self.text_output.append("Executing tasks...")
-        for proc in self.model.processes.values(): 
+        for proc in self.model.processes.values():
             if proc.classname != "EntryPointModel":
                 # NOTE: proc.when is converted back and forth somewhere!
                 if proc.classname == "ScheduleModel":
@@ -105,7 +105,7 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
                         task.prepare_processed([], dt, proc.body, SETTINGS["user"])
                         response = task.execute()
                         self.text_output.append(response)
-                    else: 
+                    else:
                         task = Reminder(ModelPool)
                         task.prepare_processed([], proc.when, proc.body, SETTINGS["user"])
                         response = task.execute()
@@ -113,7 +113,6 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
 
                 elif proc.classname == "SendModel":
                     print("proc.classname = ", proc.classname)
-                
 
 
 class ProcessEntryView(QtWidgets.QFrame):

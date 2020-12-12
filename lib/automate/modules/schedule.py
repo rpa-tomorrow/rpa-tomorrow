@@ -162,14 +162,14 @@ class Schedule(Module):
         _body = " ".join(body)
 
         return (to, timespan, _body)
-    
+
     def timespan(self, start, end):
         start_time = datetime.now()
         if len(start) == 0:
             start_time = start_time + timedelta(seconds=5)
         else:
             start_time = tc.parse_time(start)
-        
+
         end_time = 0
         if len(end) == 0:
             end_time = start_time + timedelta(minutes=self.get_meeting_duration())
@@ -177,7 +177,6 @@ class Schedule(Module):
             end_time = tc.parse_time(end)
 
         return {"start": start_time, "end": end_time}
-
 
     def get_meeting_duration(self) -> str:
         """
