@@ -46,7 +46,6 @@ class ProcessView(QtWidgets.QWidget):
         self.run_btn = QtWidgets.QToolButton()
         self.run_btn.setText("\uf04b")
         self.run_btn.setObjectName("runButton")
-        # self.run_btn.clicked.connect(self.process_text_edit.clear_text_output)
         self.run_btn.clicked.connect(self.process_text_edit.write_text_output)
 
         layout.addWidget(self.name, 0, 0)
@@ -74,10 +73,8 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
         layout.addWidget(self.text_edit, 0, 0)
         layout.addWidget(self.text_output, 0, 0)
 
-    # def clear_text_output(self):
-    #     self.text_output.clear()
-
     def write_text_output(self):
+        self.text_output.append("Executing tasks...")
         for proc in self.model.processes.values(): 
             if proc.classname != "EntryPointModel":
                 # NOTE: proc.when is converted back and forth somewhere!
@@ -117,7 +114,6 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
                 elif proc.classname == "SendModel":
                     print("proc.classname = ", proc.classname)
                 
-        self.text_output.append("------------------------------------------------------------------------")
 
 
 class ProcessEntryView(QtWidgets.QFrame):
