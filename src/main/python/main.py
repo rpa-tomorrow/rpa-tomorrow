@@ -3,10 +3,9 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 import os
 import sys
 import resources  # noqa: F401
-from lib.settings import SETTINGS
 
 sys.path.append(".")
-from lib.settings import load_settings  # noqa: E402
+from lib.settings import load_settings, SETTINGS  # noqa: E402
 
 import process_models as proc_model  # noqa: E402
 from design_view import DesignView  # noqa: E402

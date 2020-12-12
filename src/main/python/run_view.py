@@ -4,8 +4,7 @@ from datetime import datetime
 
 from lib.automate.modules.reminder import Reminder
 from lib.automate.modules.schedule import Schedule
-
-# from lib.automate.modules.send import Send
+from lib.automate.modules.send import Send
 from lib.settings import SETTINGS
 from lib.automate.pool import ModelPool
 
@@ -112,7 +111,14 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
                         self.text_output.append(response)
 
                 elif proc.classname == "SendModel":
-                    print("proc.classname = ", proc.classname)
+                    recipients = []
+                    recipients.append(proc.recipients)
+
+                    task = Send(ModelPool)
+                    task.prepare_processed(recipients, proc.when, proc.body, SETTINGS["user"])
+                    response = task.execute()
+                    self.text_output.append(response)
+
 
 
 class ProcessEntryView(QtWidgets.QFrame):
