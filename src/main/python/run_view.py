@@ -35,51 +35,70 @@ class RunView(QtWidgets.QWidget):
         self.setLayout(layout)
 
     def write_text_output(self):
+        self.text_output.clear()
         self.text_output.append("Executing tasks...")
+        next_proc = None
         for proc in self.model.processes.values():
-            if proc.classname != "EntryPointModel":
-                # NOTE: proc.when is converted back and forth somewhere!
-                if proc.classname == "ScheduleModel":
-                    start_hour = proc.when[42:44].replace(",", "0")
-                    start_minute = proc.when[46:48].replace(",", "0")
+            if proc.classname == "EntryPointModel":
+                next_proc_id = proc.out_next
+                if next_proc_id in self.model.processes:
+                    next_proc = self.model.processes[next_proc_id]
+                break
 
-                    end_hour = proc.when[101:103].replace(",", "0")
-                    end_minute = proc.when[105:107].replace(",", "0")
+        while next_proc:
+            proc = next_proc
+            # NOTE: proc.when is converted back and forth somewhere!
+            if proc.classname == "ScheduleModel":
+                start_hour = proc.when[42:44].replace(",", "0")
+                start_minute = proc.when[46:48].replace(",", "0")
 
-                    task = Schedule(ModelPool)
-                    timespan = task.timespan([start_hour + "." + start_minute], [end_hour + "." + end_minute])
-                    task.prepare_processed([], timespan, proc.body, SETTINGS["user"])
+                end_hour = proc.when[101:103].replace(",", "0")
+                end_minute = proc.when[105:107].replace(",", "0")
+
+                task = Schedule(ModelPool)
+                timespan = task.timespan([start_hour + "." + start_minute], [end_hour + "." + end_minute])
+                task.prepare_processed([], timespan, proc.body, SETTINGS["user"])
+                response = task.execute()
+                self.text_output.append(response)
+
+            elif proc.classname == "ReminderModel":
+                if type(proc.when) == str:
+                    year = int(proc.when[0:4])
+                    month = int(proc.when[5:7])
+                    day = int(proc.when[8:10])
+                    hour = int(proc.when[11:13])
+                    minute = int(proc.when[14:16])
+                    second = int(proc.when[17:19])
+                    dt = datetime(year, month, day, hour, minute, second)
+
+                    task = Reminder(ModelPool)
+                    task.prepare_processed([], dt, proc.body, SETTINGS["user"])
+                    response = task.execute()
+                    self.text_output.append(response)
+                else:
+                    task = Reminder(ModelPool)
+                    task.prepare_processed([], proc.when, proc.body, SETTINGS["user"])
                     response = task.execute()
                     self.text_output.append(response)
 
-                elif proc.classname == "ReminderModel":
-                    if type(proc.when) == str:
-                        year = int(proc.when[0:4])
-                        month = int(proc.when[5:7])
-                        day = int(proc.when[8:10])
-                        hour = int(proc.when[11:13])
-                        minute = int(proc.when[14:16])
-                        second = int(proc.when[17:19])
-                        dt = datetime(year, month, day, hour, minute, second)
+            elif proc.classname == "SendModel":
+                recipients = []
+                recipients.append(proc.recipients)
 
-                        task = Reminder(ModelPool)
-                        task.prepare_processed([], dt, proc.body, SETTINGS["user"])
-                        response = task.execute()
-                        self.text_output.append(response)
-                    else:
-                        task = Reminder(ModelPool)
-                        task.prepare_processed([], proc.when, proc.body, SETTINGS["user"])
-                        response = task.execute()
-                        self.text_output.append(response)
+                task = Send(ModelPool)
+                task.prepare_processed(recipients, proc.when, proc.body, SETTINGS["user"])
+                response = task.execute()
+                self.text_output.append(response)
 
-                elif proc.classname == "SendModel":
-                    recipients = []
-                    recipients.append(proc.recipients)
+            next_proc_id = proc.out_next
+            if next_proc_id in self.model.processes:
+                next_proc = self.model.processes[next_proc_id]
+            else:
+                break
 
-                    task = Send(ModelPool)
-                    task.prepare_processed(recipients, proc.when, proc.body, SETTINGS["user"])
-                    response = task.execute()
-                    self.text_output.append(response)
+            # NOTE: for safety avoid recusion, even though it should not be possible to create cycles.
+            if proc == next_proc:
+                break
 
 
 class ProcessView(QtWidgets.QWidget):
