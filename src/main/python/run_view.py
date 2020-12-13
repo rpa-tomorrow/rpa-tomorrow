@@ -23,7 +23,7 @@ class RunView(QtWidgets.QWidget):
         self.title.setObjectName("viewTitle")
         self.title.setMaximumHeight(48)
 
-        self.text_output = QtWidgets.QTextBrowser();
+        self.text_output = QtWidgets.QTextBrowser()
 
         self.label = ProcessView("Execute tasks: ", self)
         self.label.setMaximumHeight(180)
@@ -81,7 +81,7 @@ class RunView(QtWidgets.QWidget):
                     response = task.execute()
                     self.text_output.append(response)
 
-                    
+
 class ProcessView(QtWidgets.QWidget):
     def __init__(self, name, run_view, *args, **kwargs):
         super(ProcessView, self).__init__(*args, **kwargs)
@@ -99,6 +99,7 @@ class ProcessView(QtWidgets.QWidget):
         layout.setColumnStretch(1, 1)
 
         self.setLayout(layout)
+
 
 # NOTE(alexander): DEV mode entry point only!!!
 if __name__ == "__main__":
