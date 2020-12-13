@@ -52,8 +52,8 @@ class RunView(QtWidgets.QWidget):
                 start_hour = proc.when[42:44].replace(",", "0")
                 start_minute = proc.when[46:48].replace(",", "0")
 
-                end_hour = proc.when[101:103].replace(",", "0")
-                end_minute = proc.when[105:107].replace(",", "0")
+                end_hour = proc.when[100:102].replace(",", "0")
+                end_minute = proc.when[104:106].replace(",", "0")
 
                 task = Schedule(ModelPool)
                 timespan = task.timespan([start_hour + "." + start_minute], [end_hour + "." + end_minute])
