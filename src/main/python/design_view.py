@@ -2,7 +2,7 @@ from PyQt5 import QtWidgets, QtGui, QtCore
 
 import traceback
 import sys
-import datetime
+from datetime import datetime
 import copy
 import pyaudio
 import uuid
@@ -148,19 +148,22 @@ class DesignView(QtWidgets.QWidget):
     def create_process_block_from_task(self, query, task):
         model = None
         view = None
-        query = query.strip()
+
         if isinstance(task, Send):
             model = proc_models.SendModel()
+            model.query = query
             model.recipients = ", ".join(task.to)
             model.when = str(task.when)
             model.body = str(task.body)
         elif isinstance(task, Reminder):
             model = proc_models.ReminderModel()
+            model.query = query
             model.recipients = ", ".join(task.to)
             model.when = str(task.when)
             model.body = str(task.body)
         elif isinstance(task, Schedule):
             model = proc_models.ScheduleModel()
+            model.query = query
             model.recipients = ", ".join(task.to)
             model.when = str(task.when)
             model.body = str(task.body)
@@ -173,8 +176,7 @@ class DesignView(QtWidgets.QWidget):
                 modal.MSG_ERROR,
             )
             return
-        if model:
-            model.query = query
+
         # FIXME(alexander): uses same views for all tasks!!!
         view = SendEmailView(model)
 
@@ -202,22 +204,20 @@ class DesignView(QtWidgets.QWidget):
         self.proc_view = proc_view
         self.process_text_edit.save_cursor_pos()
         query = self.process_text_edit.get_text()
-        query_parts = query.split(".")
         if query == "":
             return
 
         try:
-            for query_part in query_parts:
-                task = self.nlp.prepare(query_part)[0]
-                if task is None:
-                    modal.ModalMessageWindow(
-                        self.main_window,
-                        "Failed to understand what task you wanted to perform. Please check spelling mistakes "
-                        + "or simplify your sentence and try again!",
-                        "Error",
-                        modal.MSG_ERROR,
-                    )
-                    return
+            task = self.nlp.prepare(query)
+            if task is None:
+                modal.ModalMessageWindow(
+                    self.main_window,
+                    "Failed to understand what task you wanted to perform. Please check spelling mistakes "
+                    + "or simplify your sentence and try again!",
+                    "Error",
+                    modal.MSG_ERROR,
+                )
+                return
         except Exception:
             traceback.print_exc()
             self.process_text_edit.restore_cursor_pos()
@@ -225,7 +225,6 @@ class DesignView(QtWidgets.QWidget):
                 self.main_window, str(sys.exc_info()[1]), "Oops! Something went wrong!", modal.MSG_ERROR
             )
             return
-
         self.process_text_edit.set_cursor_pos(0)
         self.process_text_edit.clear()
 
@@ -796,15 +795,27 @@ class SendEmailView(QtWidgets.QFrame):
         self.recipients.textChanged.connect(model.set_recipients)
 
         self.when = QtWidgets.QDateTimeEdit()
-        try:
-            dt = model.when
-            if isinstance(model.when, str):
-                dt = datetime.datetime.fromisoformat(model.when)
-            self.when.setDateTime(QtCore.QDateTime(dt))
-        except Exception:
-            dt = datetime.datetime.now()
-            self.when.setDateTime(QtCore.QDateTime(dt))
-            model.when = str(dt)
+
+        dt = datetime.now()
+
+        if model.classname == "ScheduleModel":
+            year = int(model.when[28:32])
+            month = int(model.when[34:36])
+            day = int(model.when[38:40])
+            hour = int(model.when[42:44].replace(",", ""))
+            minute = int(model.when[46:48].replace(",", ""))
+            dt = datetime(year, month, day, hour, minute)
+
+        elif model.classname == "ReminderModel":
+            year = int(model.when[0:4])
+            month = int(model.when[5:7])
+            day = int(model.when[8:10])
+            hour = int(model.when[11:13])
+            minute = int(model.when[14:16])
+            second = int(model.when[17:19])
+            dt = datetime(year, month, day, hour, minute, second)
+
+        self.when.setDateTime(QtCore.QDateTime(dt))
         self.when.dateTimeChanged.connect(self.set_when)
 
         self.body = QtWidgets.QTextEdit(model.body)
@@ -832,7 +843,7 @@ if __name__ == "__main__":
     view = window.content.design_view
 
     editor = view.process_editor
-    time_now = datetime.datetime.now()
+    time_now = datetime.now()
 
     model1 = proc_models.SendModel()
     model1.query = "Email John Doe Hello World"

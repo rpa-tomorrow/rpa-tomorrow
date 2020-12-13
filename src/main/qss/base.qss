@@ -229,6 +229,7 @@ QHeaderView::Section {
 
 QToolButton#runButton {
     color: #3fd166;
+    font-family: FontAwesome;
     margin-bottom: 2px;
 }
 

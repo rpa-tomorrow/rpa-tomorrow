@@ -10,7 +10,7 @@ from lib.settings import load_settings, SETTINGS  # noqa: E402
 import process_models as proc_model  # noqa: E402
 from design_view import DesignView  # noqa: E402
 from file_view import FileView  # noqa: E402
-from play_view import PlayView  # noqa: E402
+from run_view import RunView  # noqa: E402
 from contacts_view import ContactsView  # noqa: E402
 from settings_view import SettingsView  # noqa: E402
 
@@ -68,7 +68,7 @@ class ContentFrame(QtWidgets.QFrame):
         self.design_view = DesignView(main_window)
         self.save_view = FileView(main_window, self.design_view, self.main_window.model, True)
         self.load_view = FileView(main_window, self.design_view, self.main_window.model, False)
-        self.play_view = PlayView(main_window, self.design_view.process_editor)
+        self.run_view = RunView(main_window, self.design_view.process_editor, self.main_window.model)
         self.contacts_view = ContactsView(main_window)
         self.settings_view = SettingsView(main_window)
         self.info_view = QtWidgets.QFrame()
@@ -76,7 +76,7 @@ class ContentFrame(QtWidgets.QFrame):
         self.layout.addWidget(self.design_view)
         self.layout.addWidget(self.save_view)
         self.layout.addWidget(self.load_view)
-        self.layout.addWidget(self.play_view)
+        self.layout.addWidget(self.run_view)
         self.layout.addWidget(self.contacts_view)
         self.layout.addWidget(self.settings_view)
         self.layout.addWidget(self.info_view)

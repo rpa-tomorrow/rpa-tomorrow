@@ -1,5 +1,4 @@
 import yaml
-import datetime
 import uuid
 
 
@@ -111,7 +110,7 @@ class BasicModel(ProcessModel):  # NOTE(alexander): abstract model, should never
     def __init__(self):
         super(BasicModel, self).__init__()
         self.recipients = ""
-        self.when = datetime.datetime.now()
+        self.when = ""
         self.body = ""
 
     def save(self):

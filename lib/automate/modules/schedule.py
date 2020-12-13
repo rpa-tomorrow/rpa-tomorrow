@@ -157,6 +157,13 @@ class Schedule(Module):
         to = ner.cross_check_names(to, persons)
         log.debug("Recipients: %s", ",".join(to))
 
+        timespan = self.timespan(start, end)
+
+        _body = " ".join(body)
+
+        return (to, timespan, _body)
+
+    def timespan(self, start, end):
         start_time = datetime.now()
         if len(start) == 0:
             start_time = start_time + timedelta(seconds=5)
@@ -169,9 +176,7 @@ class Schedule(Module):
         else:
             end_time = tc.parse_time(end)
 
-        _body = " ".join(body)
-
-        return (to, {"start": start_time, "end": end_time}, _body)
+        return {"start": start_time, "end": end_time}
 
     def get_meeting_duration(self) -> str:
         """
