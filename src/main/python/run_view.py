@@ -23,54 +23,16 @@ class RunView(QtWidgets.QWidget):
         self.title.setObjectName("viewTitle")
         self.title.setMaximumHeight(48)
 
-        self.process_text_edit = ProcessTextEditView(self, self.model)
+        self.text_output = QtWidgets.QTextBrowser();
 
-        self.label = ProcessView("Execute tasks: ", self.process_text_edit)
+        self.label = ProcessView("Execute tasks: ", self)
         self.label.setMaximumHeight(180)
 
         layout.addWidget(self.title)
         layout.addWidget(self.label)
-        layout.addWidget(self.process_text_edit, 1)
+        layout.addWidget(self.text_output, 1)
 
         self.setLayout(layout)
-
-
-class ProcessView(QtWidgets.QWidget):
-    def __init__(self, name, process_text_edit, *args, **kwargs):
-        super(ProcessView, self).__init__(*args, **kwargs)
-        layout = QtWidgets.QGridLayout()
-        self.process_text_edit = process_text_edit
-
-        self.name = QtWidgets.QLabel(name)
-        self.run_btn = QtWidgets.QToolButton()
-        self.run_btn.setText("\uf04b")
-        self.run_btn.setObjectName("runButton")
-        self.run_btn.clicked.connect(self.process_text_edit.write_text_output)
-
-        layout.addWidget(self.name, 0, 0)
-        layout.addWidget(self.run_btn, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
-        layout.setColumnStretch(1, 1)
-
-        self.setLayout(layout)
-
-
-class ProcessTextEditView(QtWidgets.QTextEdit):
-    def __init__(self, design_view, model, *args, **kwargs):
-        super(ProcessTextEditView, self).__init__()
-        self.design_view = design_view
-        self.model = model
-
-        layout = QtWidgets.QGridLayout()
-
-        self.text_edit = QtWidgets.QTextEdit(*args, **kwargs)
-        self.text_edit.setReadOnly(True)
-        self.setLayout(layout)
-        self.text_edit.installEventFilter(self)
-
-        self.text_output = QtWidgets.QTextBrowser(self.text_edit)
-
-        layout.addWidget(self.text_edit, 0, 0)
-        layout.addWidget(self.text_output, 0, 0)
 
     def write_text_output(self):
         self.text_output.append("Executing tasks...")
@@ -119,26 +81,24 @@ class ProcessTextEditView(QtWidgets.QTextEdit):
                     response = task.execute()
                     self.text_output.append(response)
 
-
-class ProcessEntryView(QtWidgets.QFrame):
-    def __init__(self, icon, heading, body):
-        super(ProcessEntryView, self).__init__()
+                    
+class ProcessView(QtWidgets.QWidget):
+    def __init__(self, name, run_view, *args, **kwargs):
+        super(ProcessView, self).__init__(*args, **kwargs)
         layout = QtWidgets.QGridLayout()
+        self.run_view = run_view
 
-        icon = QtWidgets.QLabel(icon)
-        icon.setObjectName("processEntryIcon")
+        self.name = QtWidgets.QLabel(name)
+        self.run_btn = QtWidgets.QToolButton()
+        self.run_btn.setText("\uf04b")
+        self.run_btn.setObjectName("runButton")
+        self.run_btn.clicked.connect(self.run_view.write_text_output)
 
-        heading = QtWidgets.QLabel(heading)
-        heading.setObjectName("processEntryHeading")
-
-        layout.addWidget(icon, 0, 0, 2, 1, QtCore.Qt.AlignCenter)
-        layout.addWidget(heading, 0, 1)
-        layout.addWidget(QtWidgets.QLabel(body), 1, 1)
+        layout.addWidget(self.name, 0, 0)
+        layout.addWidget(self.run_btn, 0, 1, 1, 1, QtCore.Qt.AlignLeft)
         layout.setColumnStretch(1, 1)
 
         self.setLayout(layout)
-        self.setMaximumHeight(48)
-
 
 # NOTE(alexander): DEV mode entry point only!!!
 if __name__ == "__main__":
