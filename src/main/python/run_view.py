@@ -49,6 +49,9 @@ class RunView(QtWidgets.QWidget):
             proc = next_proc
             # NOTE: proc.when is converted back and forth somewhere!
             if proc.classname == "ScheduleModel":
+                recipients = []
+                recipients.append(proc.recipients)
+
                 start_hour = proc.when[42:44].replace(",", "0")
                 start_minute = proc.when[46:48].replace(",", "0")
 
@@ -57,7 +60,7 @@ class RunView(QtWidgets.QWidget):
 
                 task = Schedule(ModelPool)
                 timespan = task.timespan([start_hour + "." + start_minute], [end_hour + "." + end_minute])
-                task.prepare_processed([], timespan, proc.body, SETTINGS["user"])
+                task.prepare_processed(recipients, timespan, proc.body, SETTINGS["user"])
                 response = task.execute()
                 self.text_output.append(response)
 
