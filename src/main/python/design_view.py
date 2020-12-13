@@ -796,8 +796,6 @@ class SendEmailView(QtWidgets.QFrame):
 
         self.when = QtWidgets.QDateTimeEdit()
 
-        # print("model.when = ", model.when)
-
         dt = datetime.now()
 
         if model.classname == "ScheduleModel":

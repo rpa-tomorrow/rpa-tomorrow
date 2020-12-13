@@ -35,7 +35,6 @@ class Send(Module):
     def prepare_processed(self, to, when, body, sender):
         crypt = Crypt()
         self.to = to
-        print("to = ", to)
         self.when = when
         self.body = body
 
@@ -58,7 +57,6 @@ class Send(Module):
             return self.prompt_body()
 
         parsed_recipients = get_emails(self.to, sender)
-        print("parsed reciepients ", parsed_recipients)
         self.receiver = parsed_recipients["emails"]
 
         for (name, candidates) in parsed_recipients["uncertain"]:
