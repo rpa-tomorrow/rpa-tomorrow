@@ -179,7 +179,6 @@ class DesignView(QtWidgets.QWidget):
 
         # FIXME(alexander): uses same views for all tasks!!!
         view = SendEmailView(model)
-
         if not self.proc_view:
             self.proc_view = ProcessView(self.process_editor, view, model)
             self.proc_view.show()
