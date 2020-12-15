@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets, QtCore
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from lib.automate.modules.reminder import Reminder
 from lib.automate.modules.schedule import Schedule
@@ -60,6 +60,11 @@ class RunView(QtWidgets.QWidget):
 
                 task = Schedule(ModelPool)
                 timespan = task.timespan([start_hour + "." + start_minute], [end_hour + "." + end_minute])
+
+                # If the end time could not be parsed assume standard duration
+                if timespan["end"] is None:
+                    timespan["end"] = timespan["start"] + timedelta(minutes=SETTINGS["meeting"]["standard_duration"])
+
                 task.prepare_processed(recipients, timespan, proc.body, SETTINGS["user"])
                 response = task.execute()
                 self.text_output.append(response)
