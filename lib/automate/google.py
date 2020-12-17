@@ -27,10 +27,9 @@ class Google:
         time.
         """
         old_dir = os.getcwd()
-        os.chdir(os.path.dirname(os.path.abspath(__file__)) + "/../..")
         self.username = username
         creds = None
-        pickle_filename = f"pickle_jar/{username}_token.pickle"
+        pickle_filename = f"config/pickle_jar/{username}_token.pickle"
 
         if os.path.exists(pickle_filename):
             with open(pickle_filename, "rb") as token:
@@ -40,7 +39,7 @@ class Google:
             if creds and creds.expired and creds.refresh_token:
                 creds.refresh(Request())
             else:
-                flow = InstalledAppFlow.from_client_secrets_file("client_secret.json", SCOPES)
+                flow = InstalledAppFlow.from_client_secrets_file("config7client_secret.json", SCOPES)
                 creds = flow.run_local_server(port=0)
             # Save the credentials for the next run
             with open(pickle_filename, "wb") as token:

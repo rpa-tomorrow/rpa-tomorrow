@@ -1,5 +1,5 @@
 email:
-  address: johndoe@email.com
+  address: None
   host: localhost
   password: null
   port: 1025
@@ -7,4 +7,4 @@ email:
   username: None
 language: english
 language_version: 0.0.1
-name: John Doe
+name: None
