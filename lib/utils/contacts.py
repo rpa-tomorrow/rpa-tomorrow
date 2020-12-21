@@ -37,7 +37,11 @@ def get_emails(names, sender=None):
             emails.append(name)
             continue
 
-        matches = fuzzy.extractBests(name, SETTINGS["contacts"].keys(), score_cutoff=MIN_SCORE)
+        if SETTINGS["contacts"]:
+            matches = fuzzy.extractBests(name, SETTINGS["contacts"].keys(), score_cutoff=MIN_SCORE)
+        else:
+            matches = []
+
         # If the matches contains exact matches, discard the others
         exact_matches = list(filter(lambda match: match[1] == 100, matches))
         if len(exact_matches):

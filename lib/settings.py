@@ -35,7 +35,12 @@ def load_local_contacts():
     old_dir = os.getcwd()
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
     with open("../config/contacts.yaml", "r") as stream:
-        SETTINGS["contacts"] = yaml.safe_load(stream)
+        contacts = yaml.safe_load(stream)
+        if contacts:
+            SETTINGS["contacts"] = contacts
+        else:
+            SETTINGS["contacts"] = {}
+
     os.chdir(old_dir)
 
 
